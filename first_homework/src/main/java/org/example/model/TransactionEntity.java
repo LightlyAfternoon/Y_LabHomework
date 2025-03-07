@@ -11,7 +11,7 @@ public class TransactionEntity {
      */
     private BigDecimal sum;
     /**
-     * Field category meant for a category or a goal of money spent
+     * Field category is meant for a category or a goal of money spent
      */
     private TransactionCategoryEntity category;
     private Date date;

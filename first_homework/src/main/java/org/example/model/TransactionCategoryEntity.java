@@ -7,7 +7,7 @@ public class TransactionCategoryEntity {
     private final UUID uuid;
     private String name;
     /**
-     * Fields user and neededSum meant for users goals
+     * Fields user and neededSum are meant for users goals
      */
     private UserEntity user;
     private BigDecimal neededSum;
