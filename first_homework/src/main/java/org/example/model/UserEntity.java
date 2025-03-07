@@ -8,7 +8,7 @@ public class UserEntity {
     private String email;
     private String password;
     private UserRole role;
-    private Boolean isBlocked;
+    private boolean isBlocked;
 
     public UserEntity() {
         this.uuid = UUID.randomUUID();
@@ -62,5 +62,50 @@ public class UserEntity {
 
     public void setBlocked(Boolean blocked) {
         isBlocked = blocked;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof UserEntity)) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+
+        UserEntity user = (UserEntity) obj;
+
+        return this.name.equals(user.name) &&
+                this.email.equals(user.email) &&
+                this.password.equals(user.password) &&
+                this.role == user.role &&
+                this.isBlocked == user.isBlocked;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+
+        result = 31 * result + email.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + role.hashCode();
+        result = 31 * result + (isBlocked ? 1 : 0);
+
+        return result;
+    }
+
+    public UserEntity getCopy() {
+        UserEntity userEntityCopy = new UserEntity(this.uuid);
+
+        userEntityCopy.name = this.name;
+        userEntityCopy.email = this.email;
+        userEntityCopy.password = this.password;
+        userEntityCopy.role = this.role;
+        userEntityCopy.isBlocked = this.isBlocked;
+
+        return userEntityCopy;
     }
 }
