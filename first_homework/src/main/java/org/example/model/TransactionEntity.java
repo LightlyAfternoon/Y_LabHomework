@@ -20,12 +20,12 @@ public class TransactionEntity {
 
     public TransactionEntity(UserEntity user) {
         this.uuid = UUID.randomUUID();
-        this.user = user;
+        this.user = user.getCopy();
     }
 
     public TransactionEntity(UUID uuid, UserEntity user) {
         this.uuid = uuid;
-        this.user = user;
+        this.user = user.getCopy();
     }
 
     public UUID getUuid() {
@@ -41,11 +41,15 @@ public class TransactionEntity {
     }
 
     public TransactionCategoryEntity getCategory() {
-        return category;
+        return category.getCopy();
     }
 
     public void setCategory(TransactionCategoryEntity category) {
-        this.category = category;
+        if (category != null) {
+            this.category = category.getCopy();
+        } else {
+            this.category = null;
+        }
     }
 
     public Date getDate() {
@@ -65,6 +69,50 @@ public class TransactionEntity {
     }
 
     public UserEntity getUser() {
-        return user;
+        return user.getCopy();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TransactionEntity)) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+
+        TransactionEntity transaction = (TransactionEntity) obj;
+
+        return this.sum.compareTo(transaction.sum) == 0 &&
+                this.category.equals(transaction.category) &&
+                this.date.equals(transaction.date) &&
+                ((this.description == null && transaction.description == null) || (this.description != null && this.description.equals(transaction.description))) &&
+                this.user.equals(transaction.user);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = sum.hashCode();
+
+        result = 31 * result + category.hashCode();
+        result = 31 * result + date.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + user.hashCode();
+
+        return result;
+    }
+
+    public TransactionEntity getCopy() {
+        TransactionEntity transactionEntityCopy = new TransactionEntity(this.uuid, this.user);
+
+        transactionEntityCopy.sum = this.sum;
+        transactionEntityCopy.category = this.category;
+        transactionEntityCopy.date = this.date;
+        transactionEntityCopy.description = this.description;
+
+        return transactionEntityCopy;
     }
 }

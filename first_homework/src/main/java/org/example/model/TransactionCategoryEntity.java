@@ -22,12 +22,16 @@ public class TransactionCategoryEntity {
 
     public TransactionCategoryEntity(UserEntity user) {
         this.uuid = UUID.randomUUID();
-        this.user = user;
+        this.user = user.getCopy();
     }
 
     public TransactionCategoryEntity(UUID uuid, UserEntity user) {
         this.uuid = uuid;
-        this.user = user;
+        if (user != null) {
+            this.user = user.getCopy();
+        } else {
+            this.user = null;
+        }
     }
 
     public UUID getUuid() {
@@ -43,7 +47,7 @@ public class TransactionCategoryEntity {
     }
 
     public UserEntity getUser() {
-        return user;
+        return user.getCopy();
     }
 
     public BigDecimal getNeededSum() {
@@ -52,5 +56,43 @@ public class TransactionCategoryEntity {
 
     public void setNeededSum(BigDecimal neededSum) {
         this.neededSum = neededSum;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TransactionCategoryEntity)) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+
+        TransactionCategoryEntity transactionCategory = (TransactionCategoryEntity) obj;
+
+        return this.name.equals(transactionCategory.name) &&
+                ((this.user == null && transactionCategory.user == null) || (this.user != null && this.user.equals(transactionCategory.user))) &&
+                ((this.neededSum == null && transactionCategory.neededSum == null) || (this.neededSum != null && this.neededSum.compareTo(transactionCategory.neededSum) == 0));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (neededSum != null ? neededSum.hashCode() : 0);
+
+        return result;
+    }
+
+    public TransactionCategoryEntity getCopy() {
+        TransactionCategoryEntity transactionCategoryEntityCopy = new TransactionCategoryEntity(this.uuid, this.user);
+
+        transactionCategoryEntityCopy.name = this.name;
+        transactionCategoryEntityCopy.neededSum = this.neededSum;
+
+        return transactionCategoryEntityCopy;
     }
 }

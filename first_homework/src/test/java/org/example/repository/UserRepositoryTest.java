@@ -31,7 +31,7 @@ class UserRepositoryTest {
 
         userEntity = userRepository.add(userEntity);
 
-        UserEntity userEntity2 = new UserEntity(null);
+        UserEntity userEntity2 = new UserEntity();
 
         userEntity2.setName("t");
         userEntity2.setEmail("t");
@@ -48,7 +48,7 @@ class UserRepositoryTest {
 
         Assertions.assertNotEquals(userEntity, userEntity2);
 
-        UserEntity userEntity3 = new UserEntity(null);
+        UserEntity userEntity3 = new UserEntity();
 
         userEntity3.setName("t2");
         userEntity3.setEmail("t");
@@ -63,7 +63,7 @@ class UserRepositoryTest {
 
     @Test
     void findByIdTest() {
-        UserEntity userEntity = new UserEntity(null);
+        UserEntity userEntity = new UserEntity();
 
         userEntity.setName("t");
         userEntity.setEmail("t");
@@ -84,7 +84,7 @@ class UserRepositoryTest {
 
     @Test
     void findAllTest() {
-        UserEntity userEntity = new UserEntity(null);
+        UserEntity userEntity = new UserEntity();
 
         userEntity.setName("t");
         userEntity.setEmail("t");
@@ -92,7 +92,7 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        UserEntity userEntity2 = new UserEntity(null);
+        UserEntity userEntity2 = new UserEntity();
 
         userEntity2.setName("t2");
         userEntity2.setEmail("t2");
@@ -100,7 +100,7 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(true);
 
-        UserEntity userEntity3 = new UserEntity(null);
+        UserEntity userEntity3 = new UserEntity();
 
         userEntity3.setName("t3");
         userEntity3.setEmail("t3");
@@ -118,7 +118,7 @@ class UserRepositoryTest {
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
-        UserEntity userEntity4 = new UserEntity(null);
+        UserEntity userEntity4 = new UserEntity();
 
         userEntity4.setName("t4");
         userEntity4.setEmail("t4");
@@ -168,7 +168,7 @@ class UserRepositoryTest {
 
     @Test
     void deleteTest() {
-        UserEntity userEntity = new UserEntity(null);
+        UserEntity userEntity = new UserEntity();
 
         userEntity.setName("t");
         userEntity.setEmail("t");
@@ -176,7 +176,7 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        UserEntity userEntity2 = new UserEntity(null);
+        UserEntity userEntity2 = new UserEntity();
 
         userEntity2.setName("t2");
         userEntity2.setEmail("t2");
@@ -184,7 +184,7 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(true);
 
-        UserEntity userEntity3 = new UserEntity(null);
+        UserEntity userEntity3 = new UserEntity();
 
         userEntity3.setName("t3");
         userEntity3.setEmail("t3");
@@ -226,7 +226,7 @@ class UserRepositoryTest {
 
         Assertions.assertEquals(userRepository.findUserWithEmailAndPassword("te", "tp"), userEntity);
 
-        UserEntity userEntity2 = new UserEntity(null);
+        UserEntity userEntity2 = new UserEntity();
 
         userEntity2.setName("t2");
         userEntity2.setEmail("te2");
