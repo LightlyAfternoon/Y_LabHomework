@@ -9,7 +9,7 @@ public class UserRepository implements Repository<UserEntity> {
 
     @Override
     public UserEntity add(UserEntity entity) {
-        if (!emailExists(entity.getEmail()) &&! userEntities.contains(entity)) {
+        if (!emailExists(entity.getEmail()) && !userEntities.contains(entity)) {
             UserEntity newUser = new UserEntity();
 
             newUser.setName(entity.getName());
