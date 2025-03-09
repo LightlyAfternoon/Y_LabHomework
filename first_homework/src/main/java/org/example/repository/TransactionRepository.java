@@ -53,7 +53,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public void update(TransactionEntity entity) {
         for (TransactionEntity transaction : transactionEntities) {
-            if (transaction.getUuid().equals(entity.getUuid()) && !transactionEntities.contains(entity)) {
+            if (transaction.getUuid().equals(entity.getUuid())) {
                 transaction.setSum(entity.getSum());
                 transaction.setCategory(entity.getCategory());
                 transaction.setDate(entity.getDate());

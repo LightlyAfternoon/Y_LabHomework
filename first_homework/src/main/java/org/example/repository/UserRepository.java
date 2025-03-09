@@ -51,7 +51,7 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public void update(UserEntity entity) {
         for (UserEntity user : userEntities) {
-            if (user.getUuid().equals(entity.getUuid()) && !userEntities.contains(entity)) {
+            if (user.getUuid().equals(entity.getUuid())) {
                 user.setName(entity.getName());
                 user.setEmail(entity.getEmail());
                 user.setPassword(entity.getPassword());
