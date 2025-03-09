@@ -2,8 +2,10 @@ package org.example.repository;
 
 import org.example.CurrentUser;
 import org.example.model.MonthlyBudgetEntity;
+import org.example.model.UserEntity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +37,15 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     public MonthlyBudgetEntity findById(UUID uuid) {
         for (MonthlyBudgetEntity budget : monthlyBudgetEntities) {
             if (budget.getUuid().equals(uuid)) {
+                return budget.getCopy();
+            }
+        }
+
+        return null;
+    }
+    public MonthlyBudgetEntity findByDateAndUser(Date date, UserEntity user) {
+        for (MonthlyBudgetEntity budget : monthlyBudgetEntities) {
+            if (budget.getDate().equals(date) && budget.getUser().equals(user)) {
                 return budget.getCopy();
             }
         }

@@ -41,8 +41,7 @@ class UserRepositoryTest {
 
         userEntity2 = userRepository.add(userEntity2);
 
-        Assertions.assertEquals(userEntity, userEntity2);
-        Assertions.assertEquals(userEntity.getUuid(), userEntity2.getUuid());
+        Assertions.assertNull(userEntity2);
 
         userEntity.setRole(UserRole.ADMIN);
 

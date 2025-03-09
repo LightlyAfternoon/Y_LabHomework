@@ -2,6 +2,8 @@ package org.example.model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 public class MonthlyBudgetEntity {
@@ -10,22 +12,41 @@ public class MonthlyBudgetEntity {
     private final Date date;
     private BigDecimal sum;
 
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+
     public MonthlyBudgetEntity(UserEntity user) {
         this.uuid = UUID.randomUUID();
         this.user = user.getCopy();
-        this.date = new Date(System.currentTimeMillis());
+
+        Date newDate = new Date(System.currentTimeMillis());
+
+        try {
+            this.date = new Date(simpleDateFormat.parse(String.valueOf(newDate)).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MonthlyBudgetEntity(UserEntity user, Date date) {
         this.uuid = UUID.randomUUID();
         this.user = user.getCopy();
-        this.date = date;
+
+        try {
+            this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MonthlyBudgetEntity(UUID uuid, UserEntity user, Date date) {
         this.uuid = uuid;
         this.user = user.getCopy();
-        this.date = date;
+
+        try {
+            this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public UUID getUuid() {

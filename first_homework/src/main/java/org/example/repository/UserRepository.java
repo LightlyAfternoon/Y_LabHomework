@@ -22,10 +22,11 @@ public class UserRepository implements Repository<UserEntity> {
 
             return newUser.getCopy();
         }
-
-        for (UserEntity user : userEntities) {
-            if (user.equals(entity)) {
-                return user;
+        if (!emailExists(entity.getEmail())) {
+            for (UserEntity user : userEntities) {
+                if (user.equals(entity)) {
+                    return user;
+                }
             }
         }
 

@@ -63,6 +63,16 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         return null;
     }
 
+    public TransactionCategoryEntity findByName(String name) {
+        for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
+            if (transactionCategory.getName().equals(name)) {
+                return transactionCategory.getCopy();
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public List<TransactionCategoryEntity> findAll() {
         return List.copyOf(transactionCategoryEntities);
