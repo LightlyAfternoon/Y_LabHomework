@@ -9,7 +9,7 @@ public class UserRepository implements Repository<UserEntity> {
 
     @Override
     public UserEntity add(UserEntity entity) {
-        if (!userEntities.contains(entity)) {
+        if (!emailExists(entity.getEmail()) &&! userEntities.contains(entity)) {
             UserEntity newUser = new UserEntity();
 
             newUser.setName(entity.getName());
@@ -64,5 +64,25 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public boolean delete(UserEntity entity) {
         return userEntities.remove(entity);
+    }
+
+    private boolean emailExists(String email) {
+        for (UserEntity user : userEntities) {
+            if (user.getEmail().equals(email)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public UserEntity findUserWithEmailAndPassword(String email, String password) {
+        for (UserEntity user : userEntities) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+                return user;
+            }
+        }
+
+        return null;
     }
 }

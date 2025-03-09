@@ -47,6 +47,18 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.ADMIN);
 
         Assertions.assertNotEquals(userEntity, userEntity2);
+
+        UserEntity userEntity3 = new UserEntity(null);
+
+        userEntity3.setName("t2");
+        userEntity3.setEmail("t");
+        userEntity3.setPassword("t2");
+        userEntity3.setRole(UserRole.USER);
+        userEntity3.setBlocked(true);
+
+        userEntity3 = userRepository.add(userEntity3);
+
+        Assertions.assertNull(userEntity3);
     }
 
     @Test
@@ -198,5 +210,36 @@ class UserRepositoryTest {
         userEntities = List.of(userEntity2, userEntity3);
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
+    }
+
+    @Test
+    void findUserWithEmailAndPasswordTest() {
+        UserEntity userEntity = new UserEntity();
+
+        userEntity.setName("t");
+        userEntity.setEmail("te");
+        userEntity.setPassword("tp");
+        userEntity.setRole(UserRole.USER);
+        userEntity.setBlocked(false);
+
+        userRepository.add(userEntity);
+
+        Assertions.assertEquals(userRepository.findUserWithEmailAndPassword("te", "tp"), userEntity);
+
+        UserEntity userEntity2 = new UserEntity(null);
+
+        userEntity2.setName("t2");
+        userEntity2.setEmail("te2");
+        userEntity2.setPassword("tp2");
+        userEntity2.setRole(UserRole.USER);
+        userEntity2.setBlocked(false);
+
+        userRepository.add(userEntity2);
+
+        Assertions.assertEquals(userRepository.findUserWithEmailAndPassword("te2", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("te", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("te2", "tp"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("tE2", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("tE2", "tP2"), userEntity2);
     }
 }
