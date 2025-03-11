@@ -14,6 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -216,5 +218,150 @@ class CommandClassTest {
         }
 
         Assertions.assertEquals(output.toString(), CommandClass.getTransactions());
+    }
+
+    @Test
+    void filterTransactionsTest() {
+        TransactionRepository transactionRepository = new TransactionRepository();
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+
+        category.setName("tt");
+
+        new TransactionCategoryRepository().add(category);
+
+
+        Date date = new Date(System.currentTimeMillis());
+        Date date2 = new Date(System.currentTimeMillis() + 86_400_000);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            date = new Date(simpleDateFormat.parse(date.toString()).getTime());
+            date2 = new Date(simpleDateFormat.parse(date2.toString()).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        String filter = date + "\ntt\nPos";
+        InputStream in = new ByteArrayInputStream(filter.getBytes());
+        System.setIn(in);
+
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity.setSum(BigDecimal.valueOf(10.10));
+        transactionEntity.setCategory(category);
+        transactionEntity.setDate(date);
+        transactionEntity.setDescription("t");
+
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity2.setSum(BigDecimal.valueOf(20.0));
+        transactionEntity2.setCategory(category);
+        transactionEntity2.setDate(date2);
+        transactionEntity2.setDescription("t2");
+
+        UserEntity user2 = new UserEntity();
+
+        user2.setName("t2");
+        user2.setEmail("t2");
+        user2.setPassword("t2");
+        user2.setBlocked(false);
+
+        TransactionEntity transactionEntity3 = new TransactionEntity(user2);
+
+        transactionEntity3.setSum(BigDecimal.valueOf(30.3));
+        transactionEntity3.setCategory(category);
+        transactionEntity3.setDate(date);
+        transactionEntity3.setDescription("t3");
+
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity4.setSum(BigDecimal.valueOf(-10.10));
+        transactionEntity4.setCategory(null);
+        transactionEntity4.setDate(date2);
+        transactionEntity4.setDescription(null);
+
+        transactionEntity = transactionRepository.add(transactionEntity);
+        transactionEntity2 = transactionRepository.add(transactionEntity2);
+        transactionEntity3 = transactionRepository.add(transactionEntity3);
+        transactionEntity4 = transactionRepository.add(transactionEntity4);
+
+        List<TransactionEntity> transactionEntities = List.of(transactionEntity);
+
+        String outputReturned = CommandClass.filterTransactions();
+
+        StringBuilder output = new StringBuilder();
+
+        for (TransactionEntity entity : transactionEntities) {
+            output.append(entity).append("\n");
+        }
+
+        Assertions.assertEquals(output.toString(), outputReturned);
+
+        filter = date2 + "\n \n ";
+        in = new ByteArrayInputStream(filter.getBytes());
+        System.setIn(in);
+
+        transactionEntities = List.of(transactionEntity2, transactionEntity4);
+
+        outputReturned = CommandClass.filterTransactions();
+
+        output = new StringBuilder();
+
+        for (TransactionEntity entity : transactionEntities) {
+            output.append(entity).append("\n");
+        }
+
+        Assertions.assertEquals(output.toString(), outputReturned);
+    }
+
+    @Test
+    void editTransactionTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        String transaction = "10,2\ntt\n\ns";
+        InputStream in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        TransactionEntity transactionEntity = CommandClass.addTransaction();
+        UUID uuid = transactionEntity.getUuid();
+
+        transaction = uuid + "\n12,2\n \n ";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Assertions.assertTrue(CommandClass.editTransaction());
+
+        transaction = UUID.randomUUID() + "\n12,2\n \n ";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Assertions.assertFalse(CommandClass.editTransaction());
+    }
+
+    @Test
+    void deleteTransactionTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        String transaction = "10,2\ntt\n\ns";
+        InputStream in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        TransactionEntity transactionEntity = CommandClass.addTransaction();
+        UUID uuid = transactionEntity.getUuid();
+
+        transaction = uuid.toString();
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Assertions.assertTrue(CommandClass.deleteTransaction());
+
+        transaction = UUID.randomUUID().toString();
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Assertions.assertFalse(CommandClass.deleteTransaction());
     }
 }

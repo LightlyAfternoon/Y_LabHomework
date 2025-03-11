@@ -129,7 +129,7 @@ public class App
             }
 
             if (command.equals("/filter_transactions")) {
-                CommandClass.filterTransactions();
+                System.out.println(CommandClass.filterTransactions());
 
                 transactionsMenu();
             } else if (command.equals("/edit_transaction")) {

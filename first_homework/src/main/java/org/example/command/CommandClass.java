@@ -201,7 +201,7 @@ public class CommandClass {
         return output.toString();
     }
 
-    public static void filterTransactions() {
+    public static String filterTransactions() {
         System.out.println("Введите дату в формате 2000-12-21 или оставьте поле пустым:");
 
         scanner = new Scanner(System.in);
@@ -220,19 +220,22 @@ public class CommandClass {
         for (TransactionCategoryEntity category : new TransactionCategoryRepository().findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
             System.out.println("\n" + category.getName() + "\n");
         }
-        scanner.nextLine();
         String categoryName = scanner.nextLine();
         TransactionCategoryEntity category = new TransactionCategoryRepository().findByName(categoryName);
 
         System.out.println("Введите Pos для фильтрации доходов, Neg для фильтрации расходов или оставьте поле пустым:");
         String type = scanner.nextLine();
 
+        StringBuilder output = new StringBuilder();
+
         for (TransactionEntity transaction : new TransactionRepository().findAllWithDateAndCategoryAndTypeAndUser(date, category, type, CurrentUser.currentUser)) {
-            System.out.println(transaction.toString() + "\n");
+            output.append(transaction.toString()).append("\n");
         }
+
+        return output.toString();
     }
 
-    public static void editTransaction() {
+    public static boolean editTransaction() {
         System.out.println("Введите uuid транзакции, которую необходимо изменить:");
 
         scanner = new Scanner(System.in);
@@ -243,14 +246,12 @@ public class CommandClass {
             TransactionRepository transactionRepository = new TransactionRepository();
 
             System.out.println("Введите новую сумму (положительное число для дохода, отрицательное - для расхода):");
-            scanner.nextLine();
             BigDecimal sum = scanner.nextBigDecimal();
 
             System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
             for (TransactionCategoryEntity category : new TransactionCategoryRepository().findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
                 System.out.println("\n" + category.getName() + "\n");
             }
-            scanner.nextLine();
             String categoryName = scanner.nextLine();
             TransactionCategoryEntity category = new TransactionCategoryRepository().findByName(categoryName);
 
@@ -280,12 +281,16 @@ public class CommandClass {
             transaction.setDescription(description);
 
             transactionRepository.update(transaction);
+
+            return true;
         } else {
             System.out.println("Транзакция с указанным uuid не найдена");
+
+            return false;
         }
     }
 
-    public static void deleteTransaction() {
+    public static boolean deleteTransaction() {
         System.out.println("Введите uuid транзакции, которую необходимо удалить");
 
         TransactionRepository transactionRepository = new TransactionRepository();
@@ -293,11 +298,11 @@ public class CommandClass {
         TransactionEntity transaction = transactionRepository.findById(UUID.fromString(scanner.nextLine()));
 
         if (transaction != null) {
-            transactionRepository.delete(transaction);
-
             System.out.println("Транзакция удалена");
         } else {
             System.out.println("Транзакция с указанным uuid не найдена");
         }
+
+        return transactionRepository.delete(transaction);
     }
 }
