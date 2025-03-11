@@ -47,7 +47,11 @@ public class TransactionCategoryEntity {
     }
 
     public UserEntity getUser() {
-        return user.getCopy();
+        if (user != null) {
+            return user.getCopy();
+        } else {
+            return null;
+        }
     }
 
     public BigDecimal getNeededSum() {

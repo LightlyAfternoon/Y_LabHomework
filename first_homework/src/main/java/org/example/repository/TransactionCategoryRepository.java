@@ -2,13 +2,14 @@ package org.example.repository;
 
 import org.example.CurrentUser;
 import org.example.model.TransactionCategoryEntity;
+import org.example.model.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class TransactionCategoryRepository implements Repository<TransactionCategoryEntity> {
-    List<TransactionCategoryEntity> transactionCategoryEntities = new ArrayList<>();
+    private static final List<TransactionCategoryEntity> transactionCategoryEntities = new ArrayList<>();
 
     @Override
     public TransactionCategoryEntity add(TransactionCategoryEntity entity) {
@@ -76,6 +77,18 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public List<TransactionCategoryEntity> findAll() {
         return List.copyOf(transactionCategoryEntities);
+    }
+
+    public List<TransactionCategoryEntity> findCommonCategoriesOrGoalsWithUser(UserEntity user) {
+        List<TransactionCategoryEntity> categories = new ArrayList<>();
+
+        for (TransactionCategoryEntity category : transactionCategoryEntities){
+            if (category.getUser() == null || category.getUser().getUuid().equals(user.getUuid())) {
+                categories.add(category);
+            }
+        }
+
+        return categories;
     }
 
     @Override

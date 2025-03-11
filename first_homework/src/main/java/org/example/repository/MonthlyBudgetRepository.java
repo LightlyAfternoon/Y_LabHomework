@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> {
-    List<MonthlyBudgetEntity> monthlyBudgetEntities = new ArrayList<>();
+    private static final List<MonthlyBudgetEntity> monthlyBudgetEntities = new ArrayList<>();
 
     @Override
     public MonthlyBudgetEntity add(MonthlyBudgetEntity entity) {

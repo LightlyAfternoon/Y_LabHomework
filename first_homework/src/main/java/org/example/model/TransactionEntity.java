@@ -41,7 +41,11 @@ public class TransactionEntity {
     }
 
     public TransactionCategoryEntity getCategory() {
-        return category.getCopy();
+        if (category != null) {
+            return category.getCopy();
+        } else {
+            return null;
+        }
     }
 
     public void setCategory(TransactionCategoryEntity category) {
@@ -87,7 +91,7 @@ public class TransactionEntity {
         TransactionEntity transaction = (TransactionEntity) obj;
 
         return this.sum.compareTo(transaction.sum) == 0 &&
-                this.category.equals(transaction.category) &&
+                ((this.category == null && transaction.category == null) || (this.category != null && this.category.equals(transaction.category))) &&
                 this.date.equals(transaction.date) &&
                 ((this.description == null && transaction.description == null) || (this.description != null && this.description.equals(transaction.description))) &&
                 this.user.equals(transaction.user);
@@ -97,7 +101,7 @@ public class TransactionEntity {
     public int hashCode() {
         int result = sum.hashCode();
 
-        result = 31 * result + category.hashCode();
+        result = 31 * result + (category != null ? category.hashCode() : 0);
         result = 31 * result + date.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + user.hashCode();
@@ -114,5 +118,10 @@ public class TransactionEntity {
         transactionEntityCopy.description = this.description;
 
         return transactionEntityCopy;
+    }
+
+    @Override
+    public String toString() {
+        return this.getDate() + " " + this.getSum() + " " + (this.getCategory() != null? this.getCategory().getName() : "none") + " " + this.getUuid() + " " + (this.getDescription() != null? this.getDescription() : "");
     }
 }
