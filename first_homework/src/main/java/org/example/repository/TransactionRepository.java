@@ -1,6 +1,5 @@
 package org.example.repository;
 
-import org.example.CurrentUser;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.TransactionEntity;
 import org.example.model.UserEntity;

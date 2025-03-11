@@ -108,4 +108,9 @@ public class UserEntity {
 
         return userEntityCopy;
     }
+
+    @Override
+    public String toString() {
+        return this.getUuid() + " " + this.getName() + " " + this.getEmail() + " " + this.getRole();
+    }
 }

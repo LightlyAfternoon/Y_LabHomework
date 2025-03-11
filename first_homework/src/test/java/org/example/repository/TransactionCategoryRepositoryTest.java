@@ -195,9 +195,9 @@ class TransactionCategoryRepositoryTest {
         List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3, categoryEntity4);
 
         categoryRepository.add(categoryEntity);
-        categoryRepository.add(categoryEntity2);
+        categoryRepository.addGoal(categoryEntity2);
         categoryRepository.add(categoryEntity3);
-        categoryRepository.add(categoryEntity4);
+        categoryRepository.addGoal(categoryEntity4);
 
         List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
 
