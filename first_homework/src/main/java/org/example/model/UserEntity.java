@@ -111,6 +111,6 @@ public class UserEntity {
 
     @Override
     public String toString() {
-        return this.getUuid() + " " + this.getName() + " " + this.getEmail() + " " + this.getRole();
+        return "uuid: " + this.getUuid() + " Имя: " + this.getName() + " Email: " + this.getEmail() + " Роль: " + this.getRole();
     }
 }

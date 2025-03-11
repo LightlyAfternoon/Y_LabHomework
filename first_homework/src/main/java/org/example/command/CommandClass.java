@@ -305,4 +305,14 @@ public class CommandClass {
 
         return transactionRepository.delete(transaction);
     }
+
+    public static String getAllUserGoals() {
+        StringBuilder output = new StringBuilder();
+
+        for (TransactionCategoryEntity goal : new TransactionCategoryRepository().findAllUserGoals(CurrentUser.currentUser)) {
+            output.append(goal).append("\n");
+        }
+
+        return output.toString();
+    }
 }

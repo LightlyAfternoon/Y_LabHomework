@@ -1,5 +1,8 @@
 package org.example.model;
 
+import org.example.CurrentUser;
+import org.example.repository.TransactionRepository;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -106,6 +109,14 @@ public class TransactionCategoryEntity {
 
     @Override
     public String toString() {
-        return this.getName() + " " + (this.getNeededSum() != null? this.getNeededSum() : "") + " " + this.getUuid();
+        BigDecimal totalSum = BigDecimal.valueOf(0);
+
+        for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+            if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
+                totalSum = totalSum.add(transaction.getSum());
+            }
+        }
+
+        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " uuid: " + this.getUuid();
     }
 }

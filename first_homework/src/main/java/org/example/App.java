@@ -108,6 +108,10 @@ public class App
                 transactionsMenu();
 
                 return;
+            } else if (command.equals("/show_goals")) {
+                System.out.println(CommandClass.getAllUserGoals());
+
+
             } else if (command.equals("/exit")) {
                 return;
             } else {

@@ -122,6 +122,6 @@ public class TransactionEntity {
 
     @Override
     public String toString() {
-        return this.getDate() + " " + this.getSum() + " " + (this.getCategory() != null? this.getCategory().getName() : "none") + " " + this.getUuid() + " " + (this.getDescription() != null? this.getDescription() : "");
+        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " uuid: " + this.getUuid() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
     }
 }

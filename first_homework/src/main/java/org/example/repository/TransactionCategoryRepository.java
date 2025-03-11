@@ -91,6 +91,18 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         return categories;
     }
 
+    public List<TransactionCategoryEntity> findAllUserGoals(UserEntity user) {
+        List<TransactionCategoryEntity> categories = new ArrayList<>();
+
+        for (TransactionCategoryEntity category : transactionCategoryEntities){
+            if (category.getUser().getUuid().equals(user.getUuid())) {
+                categories.add(category);
+            }
+        }
+
+        return categories;
+    }
+
     @Override
     public void update(TransactionCategoryEntity entity) {
         for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
