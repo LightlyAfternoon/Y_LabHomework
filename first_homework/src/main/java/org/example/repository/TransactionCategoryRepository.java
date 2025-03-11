@@ -14,9 +14,10 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public TransactionCategoryEntity add(TransactionCategoryEntity entity) {
         if (!transactionCategoryEntities.contains(entity)) {
-            TransactionCategoryEntity newTransactionCategoryEntity = new TransactionCategoryEntity();
+            TransactionCategoryEntity newTransactionCategoryEntity = new TransactionCategoryEntity(entity.getUser());
 
             newTransactionCategoryEntity.setName(entity.getName());
+            newTransactionCategoryEntity.setNeededSum(entity.getNeededSum());
 
             transactionCategoryEntities.add(newTransactionCategoryEntity);
 

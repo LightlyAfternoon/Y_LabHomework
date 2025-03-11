@@ -22,7 +22,11 @@ public class TransactionCategoryEntity {
 
     public TransactionCategoryEntity(UserEntity user) {
         this.uuid = UUID.randomUUID();
-        this.user = user.getCopy();
+        if (user != null) {
+            this.user = user.getCopy();
+        } else {
+            this.user = null;
+        }
     }
 
     public TransactionCategoryEntity(UUID uuid, UserEntity user) {
@@ -98,5 +102,10 @@ public class TransactionCategoryEntity {
         transactionCategoryEntityCopy.neededSum = this.neededSum;
 
         return transactionCategoryEntityCopy;
+    }
+
+    @Override
+    public String toString() {
+        return this.getName() + " " + (this.getNeededSum() != null? this.getNeededSum() : "") + " " + this.getUuid();
     }
 }

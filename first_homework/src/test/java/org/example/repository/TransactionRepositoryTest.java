@@ -155,6 +155,147 @@ class TransactionRepositoryTest {
     }
 
     @Test
+    void findAllWithUserTest() {
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        Date date = new Date(System.currentTimeMillis());
+
+        transactionEntity.setSum(BigDecimal.valueOf(10.10));
+        transactionEntity.setCategory(category);
+        transactionEntity.setDate(date);
+        transactionEntity.setDescription("t");
+
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity2.setSum(BigDecimal.valueOf(20.0));
+        transactionEntity2.setCategory(category);
+        transactionEntity2.setDate(date);
+        transactionEntity2.setDescription("t2");
+
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity3.setSum(BigDecimal.valueOf(30.3));
+        transactionEntity3.setCategory(category);
+        transactionEntity3.setDate(date);
+        transactionEntity3.setDescription("t3");
+
+        List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3);
+
+        transactionRepository.add(transactionEntity);
+        transactionRepository.add(transactionEntity2);
+        transactionRepository.add(transactionEntity3);
+
+        List<TransactionEntity> transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+
+        date = new Date(System.currentTimeMillis());
+        transactionEntity4.setSum(BigDecimal.valueOf(10.10));
+        transactionEntity4.setCategory(category);
+        transactionEntity4.setDate(date);
+        transactionEntity4.setDescription("t4");
+
+        transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3, transactionEntity4);
+        transactionRepository.add(transactionEntity4);
+        transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+
+        UserEntity user = new UserEntity();
+
+        user.setName("t2");
+        user.setEmail("t2");
+        user.setPassword("t2");
+        user.setBlocked(false);
+
+        transactionRepository.delete(transactionEntity);
+
+        transactionEntity = new TransactionEntity(user);
+
+        transactionEntity.setSum(BigDecimal.valueOf(10.10));
+        transactionEntity.setCategory(category);
+        transactionEntity.setDate(date);
+        transactionEntity.setDescription("t");
+
+        transactionRepository.add(transactionEntity);
+
+        transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+
+        Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
+    }
+
+    @Test
+    void findAllWithDateAndCategoryAndTypeAndUserTest() {
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        Date date = new Date(System.currentTimeMillis());
+
+        transactionEntity.setSum(BigDecimal.valueOf(10.10));
+        transactionEntity.setCategory(category);
+        transactionEntity.setDate(date);
+        transactionEntity.setDescription("t");
+
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+        Date date2 = new Date(System.currentTimeMillis() + 86_400_000);
+
+        transactionEntity2.setSum(BigDecimal.valueOf(20.0));
+        transactionEntity2.setCategory(category);
+        transactionEntity2.setDate(date2);
+        transactionEntity2.setDescription("t2");
+
+        UserEntity user = new UserEntity();
+
+        user.setName("t2");
+        user.setEmail("t2");
+        user.setPassword("t2");
+        user.setBlocked(false);
+
+        TransactionEntity transactionEntity3 = new TransactionEntity(user);
+
+        transactionEntity3.setSum(BigDecimal.valueOf(30.3));
+        transactionEntity3.setCategory(category);
+        transactionEntity3.setDate(date);
+        transactionEntity3.setDescription("t3");
+
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity4.setSum(BigDecimal.valueOf(-10.10));
+        transactionEntity4.setCategory(null);
+        transactionEntity4.setDate(date2);
+        transactionEntity4.setDescription(null);
+
+        List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity4);
+
+        transactionRepository.add(transactionEntity);
+        transactionRepository.add(transactionEntity2);
+        transactionRepository.add(transactionEntity3);
+        transactionRepository.add(transactionEntity4);
+
+        List<TransactionEntity> transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, null, null, CurrentUser.currentUser);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+
+        transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3, transactionEntity4);
+
+        Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
+
+        transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(date, null, null, CurrentUser.currentUser);
+        transactionEntities = List.of(transactionEntity);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+
+        transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, category, null, CurrentUser.currentUser);
+        transactionEntities = List.of(transactionEntity, transactionEntity2);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+
+        transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, null, "Pos", user);
+        transactionEntities = List.of(transactionEntity3);
+
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+    }
+
+    @Test
     void updateTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
         Date date = new Date(System.currentTimeMillis());

@@ -17,7 +17,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public TransactionEntity add(TransactionEntity entity) {
         if (!transactionEntities.contains(entity)) {
-            TransactionEntity newTransaction = new TransactionEntity(CurrentUser.currentUser);
+            TransactionEntity newTransaction = new TransactionEntity(entity.getUser());
 
             newTransaction.setSum(entity.getSum());
             newTransaction.setCategory(entity.getCategory());
@@ -25,7 +25,6 @@ public class TransactionRepository implements Repository<TransactionEntity> {
             newTransaction.setDescription(entity.getDescription());
 
             transactionEntities.add(newTransaction);
-            System.out.println(transactionEntities.size());
 
             return newTransaction.getCopy();
         }
@@ -91,7 +90,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
 
         if (category != null) {
             for (TransactionEntity transaction : transactions) {
-                if (transaction.getCategory().equals(category)) {
+                if (transaction.getCategory() != null && transaction.getCategory().equals(category)) {
                     filteredTransactions.add(transaction);
                 }
             }

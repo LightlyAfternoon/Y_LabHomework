@@ -114,6 +114,27 @@ class TransactionCategoryRepositoryTest {
     }
 
     @Test
+    void findByNameTest() {
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
+
+        categoryEntity.setName("t");
+
+        categoryRepository.add(categoryEntity);
+
+        Assertions.assertEquals(categoryRepository.findByName("t"), categoryEntity);
+
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
+
+        categoryEntity2.setName("t0");
+
+        categoryRepository.add(categoryEntity2);
+
+        Assertions.assertNotEquals(categoryRepository.findByName("t"), categoryEntity2);
+        Assertions.assertEquals(categoryRepository.findByName("t0"), categoryEntity2);
+        Assertions.assertNull(categoryRepository.findByName("t2"));
+    }
+
+    @Test
     void findAllTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
 
@@ -150,6 +171,37 @@ class TransactionCategoryRepositoryTest {
         categoryEntity.setName("t0");
 
         Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);
+    }
+
+    @Test
+    void findCommonCategoriesOrGoalsWithUserTest() {
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
+
+        categoryEntity.setName("t");
+
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
+
+        categoryEntity2.setName("t2");
+        categoryEntity2.setNeededSum(BigDecimal.valueOf(20.0));
+
+        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity();
+
+        categoryEntity3.setName("t3");
+
+        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(CurrentUser.currentUser);
+
+        categoryEntity4.setName("t4");
+
+        List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3, categoryEntity4);
+
+        categoryRepository.add(categoryEntity);
+        categoryRepository.add(categoryEntity2);
+        categoryRepository.add(categoryEntity3);
+        categoryRepository.add(categoryEntity4);
+
+        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
+
+        Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
     @Test

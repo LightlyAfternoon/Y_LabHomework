@@ -82,6 +82,30 @@ class MonthlyBudgetRepositoryTest {
     }
 
     @Test
+    void findByDateAndUserTest() {
+        Date date = Date.valueOf("2000-01-01");
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+
+        Date date2 = Date.valueOf("2000-02-01");
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser, date2);
+
+        monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
+
+        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+
+        Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date, CurrentUser.currentUser), monthlyBudgetEntity);
+
+        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.5));
+
+        monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
+
+        Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity2);
+        Assertions.assertNotEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity);
+
+        Assertions.assertNull(monthlyBudgetRepository.findByDateAndUser(Date.valueOf("2001-01-01"), CurrentUser.currentUser));
+    }
+
+    @Test
     void findAllTest() {
         Date date = new Date(System.currentTimeMillis());
         MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
