@@ -332,15 +332,15 @@ public class CommandClass {
         }
 
         if (monthlyBudgetEntity != null) {
-            BigDecimal totalSpendedSum = BigDecimal.valueOf(0);
+            BigDecimal totalSpentSum = BigDecimal.valueOf(0);
 
             for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
                 if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0) {
-                    totalSpendedSum = totalSpendedSum.add(transactionEntity.getSum());
+                    totalSpentSum = totalSpentSum.add(transactionEntity.getSum());
                 }
             }
 
-            if (totalSpendedSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
+            if (totalSpentSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
                 System.out.println("!Вы превысили свой месячный бюджет!");
             }
         }
