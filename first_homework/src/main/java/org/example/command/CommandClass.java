@@ -342,8 +342,14 @@ public class CommandClass {
 
             if (totalSpentSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
                 System.out.println("!Вы превысили свой месячный бюджет!");
+
+                sendNotificationEmail(CurrentUser.currentUser);
             }
         }
+    }
+
+    private static void sendNotificationEmail(UserEntity user) {
+        System.out.println("Уведомление будет отправлено на почту " + user.getEmail());
     }
 
     public static BigDecimal getCurrentBalance() {

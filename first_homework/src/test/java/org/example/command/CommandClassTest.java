@@ -315,6 +315,12 @@ class CommandClassTest {
 
     @Test
     void editTransactionTest() {
+        MonthlyBudgetEntity budget = new MonthlyBudgetEntity(CurrentUser.currentUser);
+
+        budget.setSum(BigDecimal.valueOf(12));
+
+        new MonthlyBudgetRepository().add(budget);
+
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
         new TransactionCategoryRepository().add(category);
