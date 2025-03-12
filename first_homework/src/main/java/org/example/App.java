@@ -4,6 +4,9 @@ import org.example.command.CommandClass;
 import org.example.model.*;
 import org.example.repository.UserRepository;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 public class App 
@@ -69,6 +72,8 @@ public class App
                     "/delete_account - удалить аккаунт\n" +
                     "/show_transactions - вывести все транзакции\n" +
                     "/show_goals - вывести все цели\n" +
+                    "/balance - вывести текущий баланс\n" +
+                    "/balance_for_period - вывести доход и расход за период\n" +
                     "/exit - выйти из приложения\n");
 
             if (scanner.hasNext()) {
@@ -110,8 +115,18 @@ public class App
                 return;
             } else if (command.equals("/show_goals")) {
                 System.out.println(CommandClass.getAllUserGoals());
+            } else if (command.equals("/balance")) {
+                System.out.println("Текущий баланс: " + CommandClass.getCurrentBalance());
+            } else if (command.equals("/balance_for_period")) {
+                System.out.println("Введите начальную дату в формате 2000-12-21:");
+                scanner = new Scanner(System.in);
+                Date from = getDate();
 
+                System.out.println("Введите конечную дату в формате 2000-12-21:");
+                Date to = getDate();
 
+                System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
+                System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
             } else if (command.equals("/exit")) {
                 return;
             } else {
@@ -186,5 +201,18 @@ public class App
                 System.out.println("Команда не распознана\n");
             }
         }
+    }
+
+    private static Date getDate() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String text = scanner.nextLine();
+        Date date;
+        try {
+            date = new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return date;
     }
 }

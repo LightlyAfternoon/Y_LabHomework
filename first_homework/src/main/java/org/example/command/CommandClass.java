@@ -173,7 +173,11 @@ public class CommandClass {
         transaction.setDate(date);
         transaction.setDescription(description);
 
-        return transactionRepository.add(transaction);
+        transaction = transactionRepository.add(transaction);
+
+        checkIfSpendMoreThanBudget(transactionRepository);
+
+        return transaction;
     }
 
     public static boolean deleteAccount() {
@@ -282,6 +286,8 @@ public class CommandClass {
 
             transactionRepository.update(transaction);
 
+            checkIfSpendMoreThanBudget(transactionRepository);
+
             return true;
         } else {
             System.out.println("Транзакция с указанным uuid не найдена");
@@ -314,5 +320,65 @@ public class CommandClass {
         }
 
         return output.toString();
+    }
+
+    private static void checkIfSpendMoreThanBudget(TransactionRepository transactionRepository) {
+        SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
+        try {
+            monthlyBudgetEntity = new MonthlyBudgetRepository().findByDateAndUser(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())), monthlyBudgetEntity.getUser());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (monthlyBudgetEntity != null) {
+            BigDecimal totalSpendedSum = BigDecimal.valueOf(0);
+
+            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+                if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0) {
+                    totalSpendedSum = totalSpendedSum.add(transactionEntity.getSum());
+                }
+            }
+
+            if (totalSpendedSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
+                System.out.println("!Вы превысили свой месячный бюджет!");
+            }
+        }
+    }
+
+    public static BigDecimal getCurrentBalance() {
+        BigDecimal totalSum = BigDecimal.valueOf(0);
+
+        for (TransactionEntity transactionEntity : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+            totalSum = totalSum.add(transactionEntity.getSum());
+        }
+
+        return totalSum;
+    }
+
+    public static BigDecimal getIncomeForPeriod(Date from, Date to) {
+        BigDecimal totalSum = BigDecimal.valueOf(0);
+
+        for (TransactionEntity transactionEntity : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+            if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
+                totalSum = totalSum.add(transactionEntity.getSum());
+            }
+        }
+
+        return totalSum;
+    }
+
+    public static BigDecimal getExpenseForPeriod(Date from, Date to) {
+        BigDecimal totalSum = BigDecimal.valueOf(0);
+
+        for (TransactionEntity transactionEntity : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+            if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) < 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
+                totalSum = totalSum.add(transactionEntity.getSum());
+            }
+        }
+
+        totalSum = totalSum.subtract(totalSum.add(totalSum));
+
+        return totalSum;
     }
 }

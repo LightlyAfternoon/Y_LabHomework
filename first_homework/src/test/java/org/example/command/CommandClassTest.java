@@ -17,6 +17,7 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 
 class CommandClassTest {
@@ -229,7 +230,6 @@ class CommandClassTest {
 
         new TransactionCategoryRepository().add(category);
 
-
         Date date = new Date(System.currentTimeMillis());
         Date date2 = new Date(System.currentTimeMillis() + 86_400_000);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -363,5 +363,139 @@ class CommandClassTest {
         System.setIn(in);
 
         Assertions.assertFalse(CommandClass.deleteTransaction());
+    }
+
+    @Test
+    void getAllUserGoals() {
+        String goal = "t\n10,2";
+        InputStream in = new ByteArrayInputStream(goal.getBytes());
+        System.setIn(in);
+
+        TransactionCategoryEntity category = CommandClass.addGoal();
+
+        goal = "t2\n312,5";
+        in = new ByteArrayInputStream(goal.getBytes());
+        System.setIn(in);
+
+        TransactionCategoryEntity category2 = CommandClass.addGoal();
+
+        List<TransactionCategoryEntity> categoryEntities = List.of(category, category2);
+
+        String outputReturned = CommandClass.getAllUserGoals();
+
+        StringBuilder output = new StringBuilder();
+
+        for (TransactionCategoryEntity entity : categoryEntities) {
+            output.append(entity).append("\n");
+        }
+
+        Assertions.assertEquals(output.toString(), outputReturned);
+    }
+
+    @Test
+    void getCurrentBalanceTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        String transaction = "10,2\ntt\n2021-02-10\ns";
+        InputStream in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        transaction = "32,5\ns\n\n ";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        Assertions.assertEquals(BigDecimal.valueOf(42.7), CommandClass.getCurrentBalance());
+    }
+
+    @Test
+    void getIncomeForPeriodTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        String transaction = "10,2\ntt\n2021-02-10\ns";
+        InputStream in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        transaction = "-32,5\ns\n\n ";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        transaction = "2000-12-21\n2025-12-10";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Scanner scanner = new Scanner(System.in);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String text = scanner.nextLine();
+        Date from;
+        try {
+            from = new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        text = scanner.nextLine();
+        Date to;
+        try {
+            to = new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Assertions.assertEquals(BigDecimal.valueOf(10.2), CommandClass.getIncomeForPeriod(from, to));
+    }
+
+    @Test
+    void getExpenseForPeriodTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        String transaction = "10,2\ntt\n2021-02-10\ns";
+        InputStream in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        transaction = "-32,5\ns\n\n ";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        CommandClass.addTransaction();
+
+        transaction = "2000-12-21\n2025-12-10";
+        in = new ByteArrayInputStream(transaction.getBytes());
+        System.setIn(in);
+
+        Scanner scanner = new Scanner(System.in);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String text = scanner.nextLine();
+        Date from;
+        try {
+            from = new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        text = scanner.nextLine();
+        Date to;
+        try {
+            to = new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Assertions.assertEquals(BigDecimal.valueOf(32.5), CommandClass.getExpenseForPeriod(from, to));
     }
 }
