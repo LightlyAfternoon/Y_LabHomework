@@ -39,23 +39,24 @@ public class App
                 command = scanner.next();
             }
 
-            if (command.equals("/login")) {
-                UserRole role = CommandClass.getLoggedInUserRole();
-                if (role == UserRole.USER){
-                    menuForUser();
+            switch (command) {
+                case "/login" -> {
+                    UserRole role = CommandClass.getLoggedInUserRole();
+                    if (role == UserRole.USER) {
+                        menuForUser();
 
-                    return;
-                } else if (role == UserRole.ADMIN) {
-                    menuForAdmin();
+                        return;
+                    } else if (role == UserRole.ADMIN) {
+                        menuForAdmin();
 
+                        return;
+                    }
+                }
+                case "/register" -> System.out.println(CommandClass.register());
+                case "/exit" -> {
                     return;
                 }
-            } else if (command.equals("/register")) {
-                System.out.println(CommandClass.register());
-            } else if (command.equals("/exit")) {
-                return;
-            } else {
-                System.out.println("Команда не распознана\n");
+                default -> System.out.println("Команда не распознана\n");
             }
         }
     }
@@ -80,57 +81,58 @@ public class App
                 command = scanner.next();
             }
 
-            if (command.equals("/budget")) {
-                MonthlyBudgetEntity monthlyBudgetEntity = CommandClass.addBudget();
+            switch (command) {
+                case "/budget" -> {
+                    MonthlyBudgetEntity monthlyBudgetEntity = CommandClass.addBudget();
 
-                System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
-            } else if (command.equals("/goal")) {
-                CommandClass.addGoal();
-            } else if (command.equals("/add_transaction")) {
-                CommandClass.addTransaction();
-            } else if (command.equals("/delete_account")) {
-                System.out.println("Для подтверждения введите команду /confirm\n" +
-                        "Для возвращения в меню введите команду /menu:");
-
-                if (scanner.hasNext()) {
-                    command = scanner.next();
+                    System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
                 }
+                case "/goal" -> CommandClass.addGoal();
+                case "/add_transaction" -> CommandClass.addTransaction();
+                case "/delete_account" -> {
+                    System.out.println("Для подтверждения введите команду /confirm\n" +
+                            "Для возвращения в меню введите команду /menu:");
 
-                if (command.equals("/confirm")) {
-                    CommandClass.deleteAccount();
+                    if (scanner.hasNext()) {
+                        command = scanner.next();
+                    }
+
+                    if (command.equals("/confirm")) {
+                        CommandClass.deleteAccount();
+
+                        return;
+                    } else if (command.equals("/menu")) {
+                        menuForUser();
+
+                        return;
+                    } else {
+                        System.out.println("Команда не распознана\n");
+                    }
+                }
+                case "/show_transactions" -> {
+                    System.out.println(CommandClass.getTransactions());
+
+                    transactionsMenu();
 
                     return;
-                } else if (command.equals("/menu")) {
-                    menuForUser();
-
-                    return;
-                } else {
-                    System.out.println("Команда не распознана\n");
                 }
-            } else if (command.equals("/show_transactions")) {
-                System.out.println(CommandClass.getTransactions());
+                case "/show_goals" -> System.out.println(CommandClass.getAllUserGoals());
+                case "/balance" -> System.out.println("Текущий баланс: " + CommandClass.getCurrentBalance());
+                case "/balance_for_period" -> {
+                    System.out.println("Введите начальную дату в формате 2000-12-21:");
+                    scanner = new Scanner(System.in);
+                    Date from = getDate();
 
-                transactionsMenu();
+                    System.out.println("Введите конечную дату в формате 2000-12-21:");
+                    Date to = getDate();
 
-                return;
-            } else if (command.equals("/show_goals")) {
-                System.out.println(CommandClass.getAllUserGoals());
-            } else if (command.equals("/balance")) {
-                System.out.println("Текущий баланс: " + CommandClass.getCurrentBalance());
-            } else if (command.equals("/balance_for_period")) {
-                System.out.println("Введите начальную дату в формате 2000-12-21:");
-                scanner = new Scanner(System.in);
-                Date from = getDate();
-
-                System.out.println("Введите конечную дату в формате 2000-12-21:");
-                Date to = getDate();
-
-                System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
-                System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
-            } else if (command.equals("/exit")) {
-                return;
-            } else {
-                System.out.println("Команда не распознана\n");
+                    System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
+                    System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
+                }
+                case "/exit" -> {
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
             }
         }
     }
@@ -147,15 +149,16 @@ public class App
                 command = scanner.next();
             }
 
-            if (command.equals("/filter_transactions")) {
-                System.out.println(CommandClass.filterTransactions());
+            switch (command) {
+                case "/filter_transactions" -> {
+                    System.out.println(CommandClass.filterTransactions());
 
-                transactionsMenu();
-            } else if (command.equals("/edit_transaction")) {
-                CommandClass.editTransaction();
-            } else if (command.equals("/delete_transaction")) {
-                System.out.println("Для подтверждения введите команду /confirm\n" +
-                        "Для возвращения в меню введите команду /menu:");
+                    transactionsMenu();
+                }
+                case "/edit_transaction" -> CommandClass.editTransaction();
+                case "/delete_transaction" -> {
+                    System.out.println("Для подтверждения введите команду /confirm\n" +
+                            "Для возвращения в меню введите команду /menu:");
 
                     if (scanner.hasNext()) {
                         command = scanner.next();
@@ -170,12 +173,13 @@ public class App
                     } else {
                         System.out.println("Команда не распознана\n");
                     }
-            } else if (command.equals("/menu")) {
-                menuForUser();
+                }
+                case "/menu" -> {
+                    menuForUser();
 
-                return;
-            } else {
-                System.out.println("Команда не распознана\n");
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
             }
         }
     }
@@ -193,12 +197,12 @@ public class App
                 command = scanner.next();
             }
 
-            if (command.equals("/users")) {
-                System.out.println(CommandClass.getAllUsers());
-            } else if (command.equals("/exit")) {
-                return;
-            } else {
-                System.out.println("Команда не распознана\n");
+            switch (command) {
+                case "/users" -> System.out.println(CommandClass.getAllUsers());
+                case "/exit" -> {
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
             }
         }
     }
