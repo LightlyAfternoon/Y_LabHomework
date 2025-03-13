@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -386,5 +387,21 @@ public class CommandClass {
         totalSum = totalSum.subtract(totalSum.add(totalSum));
 
         return totalSum;
+    }
+
+    public static String getCategoryExpenses() {
+        TransactionCategoryRepository transactionCategoryRepository = new TransactionCategoryRepository();
+        TransactionRepository transactionRepository = new TransactionRepository();
+        BigDecimal totalSum = BigDecimal.valueOf(0);
+        StringBuilder output = new StringBuilder();
+
+        for (TransactionCategoryEntity category : transactionCategoryRepository.findAll()) {
+            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, category, "Neg", CurrentUser.currentUser)) {
+                totalSum = totalSum.subtract(transaction.getSum());
+            }
+            output.append(category.getName()).append(": ").append(totalSum).append("\n");
+        }
+
+        return output.toString();
     }
 }

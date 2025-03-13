@@ -75,6 +75,7 @@ public class App
                     "/show_goals - вывести все цели\n" +
                     "/balance - вывести текущий баланс\n" +
                     "/balance_for_period - вывести доход и расход за период\n" +
+                    "/category_expenses - вывести расходы по категориям\n" +
                     "/exit - выйти из приложения\n");
 
             if (scanner.hasNext()) {
@@ -129,6 +130,7 @@ public class App
                     System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
                     System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
                 }
+                case "/category_expenses" -> System.out.println(CommandClass.getCategoryExpenses());
                 case "/exit" -> {
                     return;
                 }

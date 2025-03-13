@@ -504,4 +504,51 @@ class CommandClassTest {
 
         Assertions.assertEquals(BigDecimal.valueOf(32.5), CommandClass.getExpenseForPeriod(from, to));
     }
+
+    @Test
+    void getCategoryExpensesTest() {
+        TransactionCategoryEntity category = new TransactionCategoryEntity();
+        category.setName("tt");
+        new TransactionCategoryRepository().add(category);
+
+        TransactionRepository transactionRepository = new TransactionRepository();
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        Date date = new Date(System.currentTimeMillis());
+
+        transactionEntity.setSum(BigDecimal.valueOf(-10.10));
+        transactionEntity.setCategory(category);
+        transactionEntity.setDate(date);
+        transactionEntity.setDescription("t");
+
+        transactionRepository.add(transactionEntity);
+
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity2.setSum(BigDecimal.valueOf(-20.6));
+        transactionEntity2.setCategory(category);
+        transactionEntity2.setDate(date);
+        transactionEntity2.setDescription("t2");
+
+        transactionRepository.add(transactionEntity2);
+
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity3.setSum(BigDecimal.valueOf(4));
+        transactionEntity3.setCategory(category);
+        transactionEntity3.setDate(date);
+        transactionEntity3.setDescription("t3");
+
+        transactionRepository.add(transactionEntity3);
+
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+
+        transactionEntity4.setSum(BigDecimal.valueOf(-20.6));
+        transactionEntity4.setCategory(null);
+        transactionEntity4.setDate(date);
+        transactionEntity4.setDescription("t4");
+
+        transactionRepository.add(transactionEntity4);
+
+        Assertions.assertEquals(category.getName() + ": 30.7\n", CommandClass.getCategoryExpenses());
+    }
 }
