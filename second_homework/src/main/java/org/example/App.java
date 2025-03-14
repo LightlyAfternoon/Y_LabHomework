@@ -11,14 +11,12 @@ import java.util.Scanner;
 
 public class App 
 {
-    static Scanner scanner = new Scanner(System.in);
-    static String command = "";
-
     /**
      * Login menu - users start point
      */
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
         UserEntity admin = new UserEntity();
 
         admin.setName("Admin");
@@ -65,6 +63,9 @@ public class App
      * Users menu after login
      */
     static void menuForUser() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
                     "/budget - установить месячный бюджет\n" +
@@ -122,10 +123,10 @@ public class App
                 case "/balance_for_period" -> {
                     System.out.println("Введите начальную дату в формате 2000-12-21:");
                     scanner = new Scanner(System.in);
-                    Date from = getDate();
+                    Date from = getDate(scanner);
 
                     System.out.println("Введите конечную дату в формате 2000-12-21:");
-                    Date to = getDate();
+                    Date to = getDate(scanner);
 
                     System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
                     System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
@@ -140,6 +141,9 @@ public class App
     }
 
     private static void transactionsMenu() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
                     "/filter_transactions - отфильтровать список транзакций\n" +
@@ -190,6 +194,9 @@ public class App
      * Admins menu after login
      */
     static void menuForAdmin() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
                     "/users - вывести список всех пользователей приложения\n" +
@@ -209,7 +216,7 @@ public class App
         }
     }
 
-    private static Date getDate() {
+    private static Date getDate(Scanner scanner) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String text = scanner.nextLine();
         Date date;
