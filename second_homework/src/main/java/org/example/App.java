@@ -219,13 +219,11 @@ public class App
     private static Date getDate(Scanner scanner) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String text = scanner.nextLine();
-        Date date;
+
         try {
-            date = new Date(simpleDateFormat.parse(text).getTime());
+            return new Date(simpleDateFormat.parse(text).getTime());
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
-        return date;
     }
 }
