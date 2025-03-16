@@ -53,7 +53,7 @@ class UserRepositoryTest {
         userEntity.setBlocked(false);
 
         try {
-            userRepository.add(userEntity);
+            userEntity = userRepository.add(userEntity);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +121,7 @@ class UserRepositoryTest {
         }
 
         try {
-            Assertions.assertNull(userRepository.findById(10));
+            Assertions.assertNull(userRepository.findById(50));
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }

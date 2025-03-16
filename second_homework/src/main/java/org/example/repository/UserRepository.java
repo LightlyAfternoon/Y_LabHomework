@@ -15,27 +15,27 @@ import java.util.List;
 public class UserRepository implements Repository<UserEntity> {
     @Override
     public UserEntity add(UserEntity entity) throws SQLException, LiquibaseException {
-        try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
-                     "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
-                     "password = '"+entity.getPassword()+"' and role_id = "+(entity.getRole() == UserRole.ADMIN ? 1 : 2)+" and is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                UserEntity user = new UserEntity(resultSet.getInt(1));
-
-                user.setName(resultSet.getString(2));
-                user.setEmail(resultSet.getString(3));
-                user.setPassword(resultSet.getString(4));
-                user.setBlocked(resultSet.getBoolean(5));
-                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
-
-                return user;
-            }
-        }
-
         if (!emailExists(entity.getEmail())) {
+            try (Connection connection = ConnectionClass.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
+                         "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
+                         "password = '"+entity.getPassword()+"' and role_id = "+(entity.getRole() == UserRole.ADMIN ? 1 : 2)+" and is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"'")) {
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    UserEntity user = new UserEntity(resultSet.getInt(1));
+
+                    user.setName(resultSet.getString(2));
+                    user.setEmail(resultSet.getString(3));
+                    user.setPassword(resultSet.getString(4));
+                    user.setBlocked(resultSet.getBoolean(5));
+                    user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+
+                    return user;
+                }
+            }
+
             UserEntity newUser = new UserEntity();
 
             newUser.setName(entity.getName());
@@ -46,7 +46,7 @@ public class UserRepository implements Repository<UserEntity> {
 
             try (Connection connection = ConnectionClass.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement("insert into \"user\"(name, email, password, role_id, is_blocked) values (" +
-                         "'"+entity.getName()+"', '"+entity.getEmail()+"', '"+entity.getPassword()+"', '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', bit("+(entity.getBlocked() ? 1 : 0)+"))")) {
+                         "'"+entity.getName()+"', '"+entity.getEmail()+"', '"+entity.getPassword()+"', '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', B'"+(entity.getBlocked() ? 1 : 0)+"')")) {
 
                 preparedStatement.executeUpdate();
             }
@@ -54,7 +54,7 @@ public class UserRepository implements Repository<UserEntity> {
             try (Connection connection = ConnectionClass.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
                          "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
-                         "password = '"+entity.getPassword()+"' and role_id = '" + (entity.getRole() == UserRole.ADMIN ? 1 : 2) + "' and is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
+                         "password = '"+entity.getPassword()+"' and role_id = '" + (entity.getRole() == UserRole.ADMIN ? 1 : 2) + "' and is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"'")) {
 
                 ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -126,8 +126,8 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public void update(UserEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("update \"user\" where id = ? " +
-                     "set name = '"+entity.getName()+"', email = '"+entity.getEmail()+"', password = '"+entity.getPassword()+"', role_id = '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("update \"user\" " +
+                     "set name = '"+entity.getName()+"', email = '"+entity.getEmail()+"', password = '"+entity.getPassword()+"', role_id = '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"' where id = ?")) {
             preparedStatement.setInt(1, entity.getId());
 
             preparedStatement.executeUpdate();

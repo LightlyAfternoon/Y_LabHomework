@@ -30,7 +30,7 @@
             <column name="password" type="character varying(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_blocked" type="bit">
+            <column name="is_blocked" type="bit(1)">
                 <constraints nullable="false"/>
             </column>
             <column name="role_id" type="integer">
