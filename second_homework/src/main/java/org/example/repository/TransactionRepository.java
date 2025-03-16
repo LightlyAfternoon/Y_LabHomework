@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class TransactionRepository implements Repository<TransactionEntity> {
     private static final List<TransactionEntity> transactionEntities = new ArrayList<>();
@@ -38,9 +37,9 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     }
 
     @Override
-    public TransactionEntity findById(UUID uuid) {
+    public TransactionEntity findById(int id) {
         for (TransactionEntity transaction : transactionEntities) {
-            if (transaction.getUuid().equals(uuid)) {
+            if (transaction.getId() == id) {
                 return transaction.getCopy();
             }
         }
@@ -115,7 +114,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public void update(TransactionEntity entity) {
         for (TransactionEntity transaction : transactionEntities) {
-            if (transaction.getUuid().equals(entity.getUuid())) {
+            if (transaction.getId() == entity.getId()) {
                 transaction.setSum(entity.getSum());
                 transaction.setCategory(entity.getCategory());
                 transaction.setDate(entity.getDate());

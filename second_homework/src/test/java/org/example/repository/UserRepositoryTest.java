@@ -1,21 +1,44 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
+import org.example.db.ConnectionClass;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 class UserRepositoryTest {
     UserRepository userRepository = new UserRepository();
+    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
+
+    @BeforeAll
+    static void beforeAll() {
+        container.start();
+        try {
+            ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        container.stop();
+    }
 
     @BeforeEach
     void setUp() {
-        for (UserEntity user : userRepository.findAll()) {
-            userRepository.delete(user);
+        try {
+            for (UserEntity user : userRepository.findAll()) {
+                userRepository.delete(user);
+            }
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -29,7 +52,11 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        userEntity = userRepository.add(userEntity);
+        try {
+            userRepository.add(userEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         UserEntity userEntity2 = new UserEntity();
 
@@ -39,13 +66,12 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
-        userEntity2 = userRepository.add(userEntity2);
-
+        try {
+            userEntity2 = userRepository.add(userEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
         Assertions.assertNull(userEntity2);
-
-        userEntity.setRole(UserRole.ADMIN);
-
-        Assertions.assertNotEquals(userEntity, userEntity2);
 
         UserEntity userEntity3 = new UserEntity();
 
@@ -55,7 +81,11 @@ class UserRepositoryTest {
         userEntity3.setRole(UserRole.USER);
         userEntity3.setBlocked(true);
 
-        userEntity3 = userRepository.add(userEntity3);
+        try {
+            userEntity3 = userRepository.add(userEntity3);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertNull(userEntity3);
     }
@@ -70,15 +100,31 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        userEntity = userRepository.add(userEntity);
+        try {
+            userEntity = userRepository.add(userEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
-        Assertions.assertEquals(userRepository.findById(userEntity.getUuid()), userEntity);
+        try {
+            Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         userEntity.setRole(UserRole.ADMIN);
 
-        Assertions.assertNotEquals(userRepository.findById(userEntity.getUuid()), userEntity);
+        try {
+            Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
-        Assertions.assertNull(userRepository.findById(UUID.randomUUID()));
+        try {
+            Assertions.assertNull(userRepository.findById(10));
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -109,11 +155,16 @@ class UserRepositoryTest {
 
         List<UserEntity> userEntities = List.of(userEntity, userEntity2, userEntity3);
 
-        userRepository.add(userEntity);
-        userRepository.add(userEntity2);
-        userRepository.add(userEntity3);
+        List<UserEntity> userEntitiesReturned;
+        try {
+            userRepository.add(userEntity);
+            userRepository.add(userEntity2);
+            userRepository.add(userEntity3);
 
-        List<UserEntity> userEntitiesReturned = userRepository.findAll();
+            userEntitiesReturned = userRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
@@ -126,8 +177,13 @@ class UserRepositoryTest {
         userEntity4.setBlocked(false);
 
         userEntities = List.of(userEntity, userEntity2, userEntity3, userEntity4);
-        userRepository.add(userEntity4);
-        userEntitiesReturned = userRepository.findAll();
+        try {
+            userRepository.add(userEntity4);
+
+            userEntitiesReturned = userRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
@@ -146,9 +202,13 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        userEntity = userRepository.add(userEntity);
+        try {
+            userEntity = userRepository.add(userEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
-        UserEntity userEntity2 = new UserEntity(userEntity.getUuid());
+        UserEntity userEntity2 = new UserEntity(userEntity.getId());
 
         userEntity2.setName("t2");
         userEntity2.setEmail("t2");
@@ -156,13 +216,22 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
-        userRepository.update(userEntity2);
+        try {
+            userRepository.update(userEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
-        Assertions.assertEquals(userRepository.findById(userEntity.getUuid()), userEntity2);
+        try {
+            Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity2);
 
-        userEntity2.setRole(UserRole.ADMIN);
+            userEntity2.setRole(UserRole.ADMIN);
 
-        Assertions.assertNotEquals(userRepository.findById(userEntity.getUuid()), userEntity2);
+            Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Test
@@ -193,16 +262,25 @@ class UserRepositoryTest {
 
         List<UserEntity> userEntities = List.of(userEntity, userEntity2, userEntity3);
 
-        userEntity = userRepository.add(userEntity);
-        userRepository.add(userEntity2);
-        userRepository.add(userEntity3);
+        try {
+            userEntity = userRepository.add(userEntity);
+            userRepository.add(userEntity2);
+            userRepository.add(userEntity3);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
-        List<UserEntity> userEntitiesReturned = userRepository.findAll();
+        List<UserEntity> userEntitiesReturned;
+        try {
+            userEntitiesReturned = userRepository.findAll();
 
-        Assertions.assertEquals(userEntities, userEntitiesReturned);
+            Assertions.assertEquals(userEntities, userEntitiesReturned);
 
-        userRepository.delete(userEntity);
-        userEntitiesReturned = userRepository.findAll();
+            userRepository.delete(userEntity);
+            userEntitiesReturned = userRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertNotEquals(userEntities, userEntitiesReturned);
 
@@ -212,7 +290,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findUserWithEmailAndPasswordTest() {
+    void findUserWithEmailAndPasswordTest() throws SQLException, LiquibaseException {
         UserEntity userEntity = new UserEntity();
 
         userEntity.setName("t");

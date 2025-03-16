@@ -6,7 +6,6 @@ import org.example.model.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class TransactionCategoryRepository implements Repository<TransactionCategoryEntity> {
     private static final List<TransactionCategoryEntity> transactionCategoryEntities = new ArrayList<>();
@@ -54,9 +53,9 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     }
 
     @Override
-    public TransactionCategoryEntity findById(UUID uuid) {
+    public TransactionCategoryEntity findById(int id) {
         for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            if (transactionCategory.getUuid().equals(uuid)) {
+            if (transactionCategory.getId() == id) {
                 return transactionCategory.getCopy();
             }
         }
@@ -83,7 +82,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         List<TransactionCategoryEntity> categories = new ArrayList<>();
 
         for (TransactionCategoryEntity category : transactionCategoryEntities){
-            if (category.getUser() == null || category.getUser().getUuid().equals(user.getUuid())) {
+            if (category.getUser() == null || category.getUser().getId() == user.getId()) {
                 categories.add(category);
             }
         }
@@ -95,7 +94,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         List<TransactionCategoryEntity> categories = new ArrayList<>();
 
         for (TransactionCategoryEntity category : transactionCategoryEntities){
-            if (category.getUser().getUuid().equals(user.getUuid())) {
+            if (category.getUser().getId() == user.getId()) {
                 categories.add(category);
             }
         }
@@ -106,7 +105,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public void update(TransactionCategoryEntity entity) {
         for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            if (transactionCategory.getUuid().equals(entity.getUuid())) {
+            if (transactionCategory.getId() == entity.getId()) {
                 transactionCategory.setName(entity.getName());
                 transactionCategory.setNeededSum(entity.getNeededSum());
             }

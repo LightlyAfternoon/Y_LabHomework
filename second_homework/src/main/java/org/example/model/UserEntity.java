@@ -1,9 +1,8 @@
 package org.example.model;
 
-import java.util.UUID;
 
 public class UserEntity {
-    private final UUID uuid;
+    private int id;
     private String name;
     private String email;
     private String password;
@@ -11,17 +10,16 @@ public class UserEntity {
     private boolean isBlocked;
 
     public UserEntity() {
-        this.uuid = UUID.randomUUID();
         this.role = UserRole.USER;
     }
 
-    public UserEntity(UUID uuid) {
-        this.uuid = uuid;
+    public UserEntity(int id) {
+        this.id = id;
         this.role = UserRole.USER;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -56,11 +54,11 @@ public class UserEntity {
         this.role = role;
     }
 
-    public Boolean getBlocked() {
+    public boolean getBlocked() {
         return isBlocked;
     }
 
-    public void setBlocked(Boolean blocked) {
+    public void setBlocked(boolean blocked) {
         isBlocked = blocked;
     }
 
@@ -98,7 +96,7 @@ public class UserEntity {
     }
 
     public UserEntity getCopy() {
-        UserEntity userEntityCopy = new UserEntity(this.uuid);
+        UserEntity userEntityCopy = new UserEntity(this.id);
 
         userEntityCopy.name = this.name;
         userEntityCopy.email = this.email;
@@ -111,6 +109,6 @@ public class UserEntity {
 
     @Override
     public String toString() {
-        return "uuid: " + this.getUuid() + " Имя: " + this.getName() + " Email: " + this.getEmail() + " Роль: " + this.getRole();
+        return "id: " + this.getId() + " Имя: " + this.getName() + " Email: " + this.getEmail() + " Роль: " + this.getRole();
     }
 }

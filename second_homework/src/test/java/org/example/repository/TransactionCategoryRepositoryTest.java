@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 class TransactionCategoryRepositoryTest {
     UserEntity userEntity;
@@ -48,7 +47,7 @@ class TransactionCategoryRepositoryTest {
         categoryEntity2 = categoryRepository.add(categoryEntity2);
 
         Assertions.assertEquals(categoryEntity, categoryEntity2);
-        Assertions.assertEquals(categoryEntity.getUuid(), categoryEntity2.getUuid());
+        Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
 
         categoryEntity.setName("t0");
 
@@ -80,7 +79,7 @@ class TransactionCategoryRepositoryTest {
         categoryEntity2 = categoryRepository.addGoal(categoryEntity2);
 
         Assertions.assertEquals(categoryEntity, categoryEntity2);
-        Assertions.assertEquals(categoryEntity.getUuid(), categoryEntity2.getUuid());
+        Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
 
         categoryEntity.setName("t0");
 
@@ -104,13 +103,13 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity = categoryRepository.add(categoryEntity);
 
-        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getUuid()), categoryEntity);
+        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
 
         categoryEntity.setName("t0");
 
-        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getUuid()), categoryEntity);
+        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
 
-        Assertions.assertNull(categoryRepository.findById(UUID.randomUUID()));
+        Assertions.assertNull(categoryRepository.findById(10));
     }
 
     @Test
@@ -212,17 +211,17 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity = categoryRepository.add(categoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getUuid());
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
 
         categoryEntity2.setName("t2");
 
         categoryRepository.update(categoryEntity2);
 
-        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getUuid()), categoryEntity2);
+        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
 
         categoryEntity2.setName("t0");
 
-        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getUuid()), categoryEntity2);
+        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
     }
 
     @Test
@@ -231,7 +230,7 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getUuid());
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
 
         categoryEntity2.setName("t2");
 

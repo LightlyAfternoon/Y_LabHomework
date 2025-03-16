@@ -1,17 +1,41 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
+import org.example.db.ConnectionClass;
 import org.example.model.UserEntity;
+import org.example.model.UserRole;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class UserRepository implements Repository<UserEntity> {
-    private static final List<UserEntity> userEntities = new ArrayList<>();
-
     @Override
-    public UserEntity add(UserEntity entity) {
-        if (!emailExists(entity.getEmail()) && !userEntities.contains(entity)) {
+    public UserEntity add(UserEntity entity) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
+                     "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
+                     "password = '"+entity.getPassword()+"' and role_id = "+(entity.getRole() == UserRole.ADMIN ? 1 : 2)+" and is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                UserEntity user = new UserEntity(resultSet.getInt(1));
+
+                user.setName(resultSet.getString(2));
+                user.setEmail(resultSet.getString(3));
+                user.setPassword(resultSet.getString(4));
+                user.setBlocked(resultSet.getBoolean(5));
+                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+
+                return user;
+            }
+        }
+
+        if (!emailExists(entity.getEmail())) {
             UserEntity newUser = new UserEntity();
 
             newUser.setName(entity.getName());
@@ -20,15 +44,55 @@ public class UserRepository implements Repository<UserEntity> {
             newUser.setRole(entity.getRole());
             newUser.setBlocked(entity.getBlocked());
 
-            userEntities.add(newUser);
+            try (Connection connection = ConnectionClass.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement("insert into \"user\"(name, email, password, role_id, is_blocked) values (" +
+                         "'"+entity.getName()+"', '"+entity.getEmail()+"', '"+entity.getPassword()+"', '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', bit("+(entity.getBlocked() ? 1 : 0)+"))")) {
+
+                preparedStatement.executeUpdate();
+            }
+
+            try (Connection connection = ConnectionClass.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
+                         "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
+                         "password = '"+entity.getPassword()+"' and role_id = '" + (entity.getRole() == UserRole.ADMIN ? 1 : 2) + "' and is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    newUser = new UserEntity(resultSet.getInt(1));
+
+                    newUser.setName(entity.getName());
+                    newUser.setEmail(entity.getEmail());
+                    newUser.setPassword(entity.getPassword());
+                    newUser.setRole(entity.getRole());
+                    newUser.setBlocked(entity.getBlocked());
+                }
+            }
 
             return newUser.getCopy();
         }
-        if (!emailExists(entity.getEmail())) {
-            for (UserEntity user : userEntities) {
-                if (user.equals(entity)) {
-                    return user;
-                }
+
+        return null;
+    }
+
+    @Override
+    public UserEntity findById(int id) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where id = ?")) {
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                UserEntity user = new UserEntity(resultSet.getInt(1));
+
+                user.setName(resultSet.getString(2));
+                user.setEmail(resultSet.getString(3));
+                user.setPassword(resultSet.getString(4));
+                user.setBlocked(resultSet.getBoolean(5));
+                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+
+                return user;
             }
         }
 
@@ -36,42 +100,47 @@ public class UserRepository implements Repository<UserEntity> {
     }
 
     @Override
-    public UserEntity findById(UUID uuid) {
-        for (UserEntity user : userEntities) {
-            if (user.getUuid().equals(uuid)) {
-                return user.getCopy();
+    public List<UserEntity> findAll() throws SQLException, LiquibaseException {
+        List<UserEntity> userEntities = new ArrayList<>();
+
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\"")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                UserEntity user = new UserEntity(resultSet.getInt(1));
+
+                user.setName(resultSet.getString(2));
+                user.setEmail(resultSet.getString(3));
+                user.setPassword(resultSet.getString(4));
+                user.setBlocked(resultSet.getBoolean(5));
+                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+
+                userEntities.add(user);
             }
         }
 
-        return null;
+        return userEntities;
     }
 
     @Override
-    public List<UserEntity> findAll() {
-        return List.copyOf(userEntities);
-    }
+    public void update(UserEntity entity) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("update \"user\" where id = ? " +
+                     "set name = '"+entity.getName()+"', email = '"+entity.getEmail()+"', password = '"+entity.getPassword()+"', role_id = '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', is_blocked = bit("+(entity.getBlocked() ? 1 : 0)+")")) {
+            preparedStatement.setInt(1, entity.getId());
 
-    @Override
-    public void update(UserEntity entity) {
-        for (UserEntity user : userEntities) {
-            if (user.getUuid().equals(entity.getUuid())) {
-                user.setName(entity.getName());
-                user.setEmail(entity.getEmail());
-                user.setPassword(entity.getPassword());
-                user.setRole(entity.getRole());
-                user.setBlocked(entity.getBlocked());
-            }
+            preparedStatement.executeUpdate();
         }
     }
 
     @Override
-    public boolean delete(UserEntity entity) {
-        return userEntities.remove(entity);
-    }
+    public boolean delete(UserEntity entity) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("delete from \"user\" where id = ?")) {
+            preparedStatement.setInt(1, entity.getId());
 
-    private boolean emailExists(String email) {
-        for (UserEntity user : userEntities) {
-            if (user.getEmail().equals(email)) {
+            if (preparedStatement.executeUpdate() > 0) {
                 return true;
             }
         }
@@ -79,9 +148,34 @@ public class UserRepository implements Repository<UserEntity> {
         return false;
     }
 
-    public UserEntity findUserWithEmailAndPassword(String email, String password) {
-        for (UserEntity user : userEntities) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+    private boolean emailExists(String email) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where email = ?")) {
+            preparedStatement.setString(1, email);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            return resultSet.next();
+        }
+    }
+
+    public UserEntity findUserWithEmailAndPassword(String email, String password) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where email = ? and password = ?")) {
+            preparedStatement.setString(1, email);
+            preparedStatement.setString(2, password);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                UserEntity user = new UserEntity(resultSet.getInt(1));
+
+                user.setName(resultSet.getString(2));
+                user.setEmail(resultSet.getString(3));
+                user.setPassword(resultSet.getString(4));
+                user.setBlocked(resultSet.getBoolean(5));
+                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+
                 return user;
             }
         }

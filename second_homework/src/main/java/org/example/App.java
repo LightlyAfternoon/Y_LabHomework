@@ -1,10 +1,13 @@
 package org.example;
 
+import liquibase.exception.LiquibaseException;
 import org.example.command.CommandClass;
+import org.example.db.ConnectionClass;
 import org.example.model.*;
 import org.example.repository.UserRepository;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
@@ -17,15 +20,6 @@ public class App
     public static void main( String[] args ) {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        UserEntity admin = new UserEntity();
-
-        admin.setName("Admin");
-        admin.setEmail("Admin");
-        admin.setPassword("1");
-        admin.setRole(UserRole.ADMIN);
-        admin.setBlocked(false);
-
-        new UserRepository().add(admin);
 
         while (true) {
             System.out.println("Здравствуйте! Хотите зарегистрироваться или войти в аккаунт? \n" +
@@ -39,7 +33,13 @@ public class App
 
             switch (command) {
                 case "/login" -> {
-                    UserRole role = CommandClass.getLoggedInUserRole();
+                    UserRole role;
+                    try {
+                        role = CommandClass.getLoggedInUserRole();
+                    } catch (SQLException | LiquibaseException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     if (role == UserRole.USER) {
                         menuForUser();
 

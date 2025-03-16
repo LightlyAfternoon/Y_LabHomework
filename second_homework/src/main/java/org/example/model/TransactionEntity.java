@@ -2,10 +2,9 @@ package org.example.model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.UUID;
 
 public class TransactionEntity {
-    private final UUID uuid;
+    private int id;
     /**
      * Field sum can be positive number as money arriving or negative number as money spending
      */
@@ -19,17 +18,16 @@ public class TransactionEntity {
     private final UserEntity user;
 
     public TransactionEntity(UserEntity user) {
-        this.uuid = UUID.randomUUID();
         this.user = user.getCopy();
     }
 
-    public TransactionEntity(UUID uuid, UserEntity user) {
-        this.uuid = uuid;
+    public TransactionEntity(int id, UserEntity user) {
+        this.id = id;
         this.user = user.getCopy();
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public int getId() {
+        return id;
     }
 
     public BigDecimal getSum() {
@@ -110,7 +108,7 @@ public class TransactionEntity {
     }
 
     public TransactionEntity getCopy() {
-        TransactionEntity transactionEntityCopy = new TransactionEntity(this.uuid, this.user);
+        TransactionEntity transactionEntityCopy = new TransactionEntity(this.id, this.user);
 
         transactionEntityCopy.sum = this.sum;
         transactionEntityCopy.category = this.category;
@@ -122,6 +120,6 @@ public class TransactionEntity {
 
     @Override
     public String toString() {
-        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " uuid: " + this.getUuid() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
+        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " uuid: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
     }
 }

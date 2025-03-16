@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
-import java.util.UUID;
 
 class MonthlyBudgetRepositoryTest {
     UserEntity userEntity;
@@ -48,7 +47,7 @@ class MonthlyBudgetRepositoryTest {
         monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
 
         Assertions.assertEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
-        Assertions.assertEquals(monthlyBudgetEntity.getUuid(), monthlyBudgetEntity2.getUuid());
+        Assertions.assertEquals(monthlyBudgetEntity.getId(), monthlyBudgetEntity2.getId());
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(20.0));
 
@@ -72,13 +71,13 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getUuid()), monthlyBudgetEntity);
+        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(1.5));
 
-        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getUuid()), monthlyBudgetEntity);
+        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
 
-        Assertions.assertNull(monthlyBudgetRepository.findById(UUID.randomUUID()));
+        Assertions.assertNull(monthlyBudgetRepository.findById(10));
     }
 
     @Test
@@ -154,17 +153,17 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getUuid(), CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
 
         monthlyBudgetRepository.update(monthlyBudgetEntity2);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getUuid()), monthlyBudgetEntity2);
+        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(2.2));
 
-        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getUuid()), monthlyBudgetEntity2);
+        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
     }
 
     @Test
@@ -174,7 +173,7 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getUuid(), CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
 

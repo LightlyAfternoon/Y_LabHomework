@@ -4,10 +4,9 @@ import org.example.CurrentUser;
 import org.example.repository.TransactionRepository;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public class TransactionCategoryEntity {
-    private final UUID uuid;
+    private int id;
     private String name;
     /**
      * Fields user and neededSum are meant for users goals
@@ -15,16 +14,13 @@ public class TransactionCategoryEntity {
     private UserEntity user;
     private BigDecimal neededSum;
 
-    public TransactionCategoryEntity() {
-        this.uuid = UUID.randomUUID();
-    }
+    public TransactionCategoryEntity() {}
 
-    public TransactionCategoryEntity(UUID uuid) {
-        this.uuid = uuid;
+    public TransactionCategoryEntity(int id) {
+        this.id = id;
     }
 
     public TransactionCategoryEntity(UserEntity user) {
-        this.uuid = UUID.randomUUID();
         if (user != null) {
             this.user = user.getCopy();
         } else {
@@ -32,8 +28,8 @@ public class TransactionCategoryEntity {
         }
     }
 
-    public TransactionCategoryEntity(UUID uuid, UserEntity user) {
-        this.uuid = uuid;
+    public TransactionCategoryEntity(int id, UserEntity user) {
+        this.id = id;
         if (user != null) {
             this.user = user.getCopy();
         } else {
@@ -41,8 +37,8 @@ public class TransactionCategoryEntity {
         }
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -99,7 +95,7 @@ public class TransactionCategoryEntity {
     }
 
     public TransactionCategoryEntity getCopy() {
-        TransactionCategoryEntity transactionCategoryEntityCopy = new TransactionCategoryEntity(this.uuid, this.user);
+        TransactionCategoryEntity transactionCategoryEntityCopy = new TransactionCategoryEntity(this.id, this.user);
 
         transactionCategoryEntityCopy.name = this.name;
         transactionCategoryEntityCopy.neededSum = this.neededSum;
@@ -117,6 +113,6 @@ public class TransactionCategoryEntity {
             }
         }
 
-        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " uuid: " + this.getUuid();
+        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " uuid: " + this.getId();
     }
 }

@@ -7,7 +7,6 @@ import org.example.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> {
     private static final List<MonthlyBudgetEntity> monthlyBudgetEntities = new ArrayList<>();
@@ -34,9 +33,9 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     }
 
     @Override
-    public MonthlyBudgetEntity findById(UUID uuid) {
+    public MonthlyBudgetEntity findById(int id) {
         for (MonthlyBudgetEntity budget : monthlyBudgetEntities) {
-            if (budget.getUuid().equals(uuid)) {
+            if (budget.getId() == id) {
                 return budget.getCopy();
             }
         }
@@ -61,7 +60,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     @Override
     public void update(MonthlyBudgetEntity entity) {
         for (MonthlyBudgetEntity budget : monthlyBudgetEntities) {
-            if (budget.getUuid().equals(entity.getUuid())) {
+            if (budget.getId() == entity.getId()) {
                 budget.setSum(entity.getSum());
             }
         }

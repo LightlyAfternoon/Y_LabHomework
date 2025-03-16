@@ -4,10 +4,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.UUID;
 
 public class MonthlyBudgetEntity {
-    private final UUID uuid;
+    private int id;
     private final UserEntity user;
     private final Date date;
     private BigDecimal sum;
@@ -15,7 +14,6 @@ public class MonthlyBudgetEntity {
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
 
     public MonthlyBudgetEntity(UserEntity user) {
-        this.uuid = UUID.randomUUID();
         this.user = user.getCopy();
 
         Date newDate = new Date(System.currentTimeMillis());
@@ -28,7 +26,6 @@ public class MonthlyBudgetEntity {
     }
 
     public MonthlyBudgetEntity(UserEntity user, Date date) {
-        this.uuid = UUID.randomUUID();
         this.user = user.getCopy();
 
         try {
@@ -38,8 +35,8 @@ public class MonthlyBudgetEntity {
         }
     }
 
-    public MonthlyBudgetEntity(UUID uuid, UserEntity user, Date date) {
-        this.uuid = uuid;
+    public MonthlyBudgetEntity(int id, UserEntity user, Date date) {
+        this.id = id;
         this.user = user.getCopy();
 
         try {
@@ -49,8 +46,8 @@ public class MonthlyBudgetEntity {
         }
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public int getId() {
+        return id;
     }
 
     public UserEntity getUser() {
@@ -99,7 +96,7 @@ public class MonthlyBudgetEntity {
     }
 
     public MonthlyBudgetEntity getCopy() {
-        MonthlyBudgetEntity monthlyBudgetEntityCopy = new MonthlyBudgetEntity(this.uuid, this.user, this.date);
+        MonthlyBudgetEntity monthlyBudgetEntityCopy = new MonthlyBudgetEntity(this.id, this.user, this.date);
 
         monthlyBudgetEntityCopy.sum = this.sum;
 

@@ -1,5 +1,6 @@
 package org.example.command;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.model.*;
 import org.example.repository.MonthlyBudgetRepository;
@@ -9,6 +10,7 @@ import org.example.repository.UserRepository;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
@@ -20,7 +22,7 @@ public class CommandClass {
 
     private CommandClass() {}
 
-    public static UserRole getLoggedInUserRole() {
+    public static UserRole getLoggedInUserRole() throws SQLException, LiquibaseException {
         scanner = new Scanner(System.in);
 
         System.out.println("Введите почту:");
@@ -48,8 +50,12 @@ public class CommandClass {
     public static String getAllUsers() {
         StringBuilder output = new StringBuilder();
 
-        for (UserEntity user : new UserRepository().findAll()){
-            output.append(user).append("\n");
+        try {
+            for (UserEntity user : new UserRepository().findAll()){
+                output.append(user).append("\n");
+            }
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
         }
 
         return output.toString();
@@ -75,7 +81,11 @@ public class CommandClass {
         user.setPassword(password);
         user.setBlocked(false);
 
-        user = userRepository.add(user);
+        try {
+            user = userRepository.add(user);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         if (user != null) {
             return "Вы успешно зарегистрировались\n";
@@ -184,7 +194,12 @@ public class CommandClass {
         UserEntity user = CurrentUser.currentUser;
         CurrentUser.currentUser = null;
 
-        boolean isDeleted = new UserRepository().delete(user);
+        boolean isDeleted = false;
+        try {
+            isDeleted = new UserRepository().delete(user);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         if (isDeleted) {
             System.out.println("Аккаунт удалён");
@@ -240,11 +255,11 @@ public class CommandClass {
     }
 
     public static boolean editTransaction() {
-        System.out.println("Введите uuid транзакции, которую необходимо изменить:");
+        System.out.println("Введите id транзакции, которую необходимо изменить:");
 
         scanner = new Scanner(System.in);
-        String uuid = scanner.nextLine();
-        TransactionEntity transaction = new TransactionRepository().findById(UUID.fromString(uuid));
+        String id = scanner.nextLine();
+        TransactionEntity transaction = new TransactionRepository().findById(Integer.parseInt(id));
 
         if (transaction != null) {
             TransactionRepository transactionRepository = new TransactionRepository();
@@ -290,23 +305,23 @@ public class CommandClass {
 
             return true;
         } else {
-            System.out.println("Транзакция с указанным uuid не найдена");
+            System.out.println("Транзакция с указанным id не найдена");
 
             return false;
         }
     }
 
     public static boolean deleteTransaction() {
-        System.out.println("Введите uuid транзакции, которую необходимо удалить");
+        System.out.println("Введите id транзакции, которую необходимо удалить");
 
         TransactionRepository transactionRepository = new TransactionRepository();
         scanner = new Scanner(System.in);
-        TransactionEntity transaction = transactionRepository.findById(UUID.fromString(scanner.nextLine()));
+        TransactionEntity transaction = transactionRepository.findById(Integer.parseInt(scanner.nextLine()));
 
         if (transaction != null) {
             System.out.println("Транзакция удалена");
         } else {
-            System.out.println("Транзакция с указанным uuid не найдена");
+            System.out.println("Транзакция с указанным id не найдена");
         }
 
         return transactionRepository.delete(transaction);

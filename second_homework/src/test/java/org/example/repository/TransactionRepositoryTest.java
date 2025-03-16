@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
-import java.util.UUID;
 
 class TransactionRepositoryTest {
     UserEntity userEntity;
@@ -62,7 +61,7 @@ class TransactionRepositoryTest {
         transactionEntity2 = transactionRepository.add(transactionEntity2);
 
         Assertions.assertEquals(transactionEntity, transactionEntity2);
-        Assertions.assertEquals(transactionEntity.getUuid(), transactionEntity2.getUuid());
+        Assertions.assertEquals(transactionEntity.getId(), transactionEntity2.getId());
 
         transactionEntity.setSum(BigDecimal.valueOf(20.0));
 
@@ -92,13 +91,13 @@ class TransactionRepositoryTest {
 
         transactionEntity = transactionRepository.add(transactionEntity);
 
-        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getUuid()), transactionEntity);
+        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
 
         transactionEntity.setSum(BigDecimal.valueOf(1.5));
 
-        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getUuid()), transactionEntity);
+        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
 
-        Assertions.assertNull(transactionRepository.findById(UUID.randomUUID()));
+        Assertions.assertNull(transactionRepository.findById(10));
     }
 
     @Test
@@ -307,7 +306,7 @@ class TransactionRepositoryTest {
 
         transactionEntity = transactionRepository.add(transactionEntity);
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getUuid(), CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser);
 
         date = new Date(System.currentTimeMillis());
         transactionEntity2.setSum(BigDecimal.valueOf(1.23));
@@ -317,11 +316,11 @@ class TransactionRepositoryTest {
 
         transactionRepository.update(transactionEntity2);
 
-        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getUuid()), transactionEntity2);
+        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
 
         transactionEntity2.setSum(BigDecimal.valueOf(2.2));
 
-        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getUuid()), transactionEntity2);
+        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
     }
 
     @Test
@@ -334,7 +333,7 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getUuid(), CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser);
 
         date = new Date(System.currentTimeMillis());
         transactionEntity2.setSum(BigDecimal.valueOf(1.23));
