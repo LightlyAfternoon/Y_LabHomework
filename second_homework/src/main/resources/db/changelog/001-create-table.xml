@@ -66,11 +66,11 @@
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="character varying(50)"/>
-            <column name="user_id" type="integer">
-                <constraints foreignKeyName="transaction_user_id_fkey" references="user(id)" nullable="false"/>
-            </column>
             <column name="category_id" type="integer">
                 <constraints foreignKeyName="transaction_category_id_fkey" references="transaction_category(id)"/>
+            </column>
+            <column name="user_id" type="integer">
+                <constraints foreignKeyName="transaction_user_id_fkey" references="user(id)" nullable="false"/>
             </column>
         </createTable>
     </changeSet>

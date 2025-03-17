@@ -1,18 +1,20 @@
 package org.example.model;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.repository.TransactionRepository;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 
 public class TransactionCategoryEntity {
     private int id;
     private String name;
+    private BigDecimal neededSum;
     /**
      * Fields user and neededSum are meant for users goals
      */
     private UserEntity user;
-    private BigDecimal neededSum;
 
     public TransactionCategoryEntity() {}
 
@@ -107,12 +109,16 @@ public class TransactionCategoryEntity {
     public String toString() {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
-        for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
-            if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
-                totalSum = totalSum.add(transaction.getSum());
+        try {
+            for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+                if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
+                    totalSum = totalSum.add(transaction.getSum());
+                }
             }
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
         }
 
-        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " uuid: " + this.getId();
+        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " id: " + this.getId();
     }
 }

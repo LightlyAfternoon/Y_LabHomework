@@ -1,9 +1,16 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
+import org.example.db.ConnectionClass;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.UserEntity;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,41 +18,60 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     private static final List<TransactionCategoryEntity> transactionCategoryEntities = new ArrayList<>();
 
     @Override
-    public TransactionCategoryEntity add(TransactionCategoryEntity entity) {
-        if (!transactionCategoryEntities.contains(entity)) {
-            TransactionCategoryEntity newTransactionCategoryEntity = new TransactionCategoryEntity();
+    public TransactionCategoryEntity add(TransactionCategoryEntity entity) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category " +
+                     "where name = '" + entity.getName() + "' and " +
+                     "needed_sum " + (entity.getNeededSum() != null ? "= " + entity.getNeededSum() : "is " + null) + " and " +
+                     "user_id " + (entity.getNeededSum() != null ? "= " + CurrentUser.currentUser.getId() : "is " + null))) {
 
-            newTransactionCategoryEntity.setName(entity.getName());
+            ResultSet resultSet = preparedStatement.executeQuery();
 
-            transactionCategoryEntities.add(newTransactionCategoryEntity);
+            if (resultSet.next()) {
+                TransactionCategoryEntity category = new TransactionCategoryEntity(resultSet.getInt(1), (resultSet.getInt(1) != 0 ? new UserRepository().findById(resultSet.getInt(4)) : null));
+                BigDecimal neededSum = resultSet.getBigDecimal(3);
 
-            return newTransactionCategoryEntity.getCopy();
-        }
+                category.setName(resultSet.getString(2));
+                if (neededSum != null) {
+                    category.setNeededSum(neededSum);
+                }
 
-        for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            if (transactionCategory.equals(entity)) {
-                return transactionCategory;
+                return category;
             }
         }
 
-        return null;
-    }
+        TransactionCategoryEntity newCategory = new TransactionCategoryEntity(entity.getNeededSum() != null ? CurrentUser.currentUser : null);
+        BigDecimal neededSum = entity.getNeededSum();
 
-    public TransactionCategoryEntity addGoal(TransactionCategoryEntity entity) {
-        if (!transactionCategoryEntities.contains(entity)) {
-            TransactionCategoryEntity newTransactionCategoryEntity = new TransactionCategoryEntity(CurrentUser.currentUser);
-
-            newTransactionCategoryEntity.setName(entity.getName());
-            newTransactionCategoryEntity.setNeededSum(entity.getNeededSum());
-
-            transactionCategoryEntities.add(newTransactionCategoryEntity);
-
-            return newTransactionCategoryEntity.getCopy();
+        newCategory.setName(entity.getName());
+        if (neededSum != null) {
+            newCategory.setNeededSum(neededSum);
         }
 
-        for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            if (transactionCategory.equals(entity)) {
-                return transactionCategory;
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into transaction_category(name, needed_sum, user_id) values (" +
+                     "'" + entity.getName() + "', " + (entity.getNeededSum() != null ? entity.getNeededSum() : null) + ", " + (entity.getNeededSum() != null ? CurrentUser.currentUser.getId() : null) + ")")) {
+
+            preparedStatement.executeUpdate();
+        }
+
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category " +
+                     "where name = '" + entity.getName() + "' and " +
+                     "needed_sum " + (entity.getNeededSum() != null ? "= " + entity.getNeededSum() : "is " + null) + " and " +
+                     "user_id " + (entity.getNeededSum() != null ? "= " + CurrentUser.currentUser.getId() : "is " + null))) {
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                newCategory = new TransactionCategoryEntity(resultSet.getInt(1), entity.getNeededSum() != null ? CurrentUser.currentUser : null);
+
+                newCategory.setName(entity.getName());
+                if (neededSum != null) {
+                    newCategory.setNeededSum(neededSum);
+                }
+
+                return newCategory.getCopy();
             }
         }
 
@@ -53,10 +79,26 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     }
 
     @Override
-    public TransactionCategoryEntity findById(int id) {
-        for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            if (transactionCategory.getId() == id) {
-                return transactionCategory.getCopy();
+    public TransactionCategoryEntity findById(int id) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category where id = ?")) {
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int userId = resultSet.getInt(4);
+                TransactionCategoryEntity category;
+                if (userId != 0) {
+                    category = new TransactionCategoryEntity(resultSet.getInt(1), new UserRepository().findById(userId));
+                } else {
+                    category = new TransactionCategoryEntity(resultSet.getInt(1));
+                }
+
+                category.setName(resultSet.getString(2));
+                category.setNeededSum(resultSet.getBigDecimal(3));
+
+                return category;
             }
         }
 

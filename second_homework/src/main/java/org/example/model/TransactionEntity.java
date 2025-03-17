@@ -9,12 +9,12 @@ public class TransactionEntity {
      * Field sum can be positive number as money arriving or negative number as money spending
      */
     private BigDecimal sum;
+    private Date date;
+    private String description;
     /**
      * Field category is meant for a category or a goal of money spent
      */
     private TransactionCategoryEntity category;
-    private Date date;
-    private String description;
     private final UserEntity user;
 
     public TransactionEntity(UserEntity user) {
@@ -120,6 +120,6 @@ public class TransactionEntity {
 
     @Override
     public String toString() {
-        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " uuid: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
+        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " id: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
     }
 }
