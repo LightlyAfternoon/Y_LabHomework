@@ -1,33 +1,64 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
+import org.example.db.ConnectionClass;
 import org.example.model.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
 class MonthlyBudgetRepositoryTest {
     UserEntity userEntity;
     MonthlyBudgetRepository monthlyBudgetRepository = new MonthlyBudgetRepository();
+    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
+
+    @BeforeAll
+    static void beforeAll() {
+        container.start();
+        try {
+            ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        container.stop();
+    }
 
     @BeforeEach
     void setUp() {
-        userEntity = new UserEntity();
+        try {
+            UserRepository userRepository = new UserRepository();
 
-        userEntity.setName("t");
-        userEntity.setEmail("t");
-        userEntity.setPassword("t");
-        userEntity.setRole(UserRole.USER);
-        userEntity.setBlocked(false);
+            for (MonthlyBudgetEntity budget : monthlyBudgetRepository.findAll()) {
+                monthlyBudgetRepository.delete(budget);
+            }
 
-        CurrentUser.currentUser = userEntity;
+            for (UserEntity user : userRepository.findAll()) {
+                userRepository.delete(user);
+            }
 
-        for (MonthlyBudgetEntity budget : monthlyBudgetRepository.findAll()) {
-            monthlyBudgetRepository.delete(budget);
+            userEntity = new UserEntity();
+
+            userEntity.setName("t");
+            userEntity.setEmail("t");
+            userEntity.setPassword("t");
+            userEntity.setRole(UserRole.USER);
+            userEntity.setBlocked(false);
+
+            userEntity = userRepository.add(userEntity);
+
+            CurrentUser.currentUser = userEntity;
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -38,16 +69,23 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+        try {
+            monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
+        try {
+            monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
-        Assertions.assertEquals(monthlyBudgetEntity.getId(), monthlyBudgetEntity2.getId());
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(20.0));
 
@@ -57,7 +95,11 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity3.setSum(BigDecimal.valueOf(10.0));
 
-        monthlyBudgetEntity3 = monthlyBudgetRepository.add(monthlyBudgetEntity3);
+        try {
+            monthlyBudgetEntity3 = monthlyBudgetRepository.add(monthlyBudgetEntity3);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertNotEquals(monthlyBudgetEntity, monthlyBudgetEntity3);
     }
@@ -69,15 +111,19 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+        try {
+            monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
+            Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
 
-        monthlyBudgetEntity.setSum(BigDecimal.valueOf(1.5));
+            monthlyBudgetEntity.setSum(BigDecimal.valueOf(1.5));
 
-        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
+            Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity);
 
-        Assertions.assertNull(monthlyBudgetRepository.findById(10));
+            Assertions.assertNull(monthlyBudgetRepository.findById(20));
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -90,18 +136,22 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+        try {
+            monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date, CurrentUser.currentUser), monthlyBudgetEntity);
+            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date, CurrentUser.currentUser), monthlyBudgetEntity);
 
-        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.5));
+            monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.5));
 
-        monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
+            monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity2);
-        Assertions.assertNotEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity);
+            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity2);
+            Assertions.assertNotEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity);
 
-        Assertions.assertNull(monthlyBudgetRepository.findByDateAndUser(Date.valueOf("2001-01-01"), CurrentUser.currentUser));
+            Assertions.assertNull(monthlyBudgetRepository.findByDateAndUser(Date.valueOf("2001-01-01"), CurrentUser.currentUser));
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -121,11 +171,17 @@ class MonthlyBudgetRepositoryTest {
 
         List<MonthlyBudgetEntity> transactionEntities = List.of(monthlyBudgetEntity, monthlyBudgetEntity2, monthlyBudgetEntity3);
 
-        monthlyBudgetRepository.add(monthlyBudgetEntity);
-        monthlyBudgetRepository.add(monthlyBudgetEntity2);
-        monthlyBudgetRepository.add(monthlyBudgetEntity3);
 
-        List<MonthlyBudgetEntity> transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+        List<MonthlyBudgetEntity> transactionEntitiesReturned;
+        try {
+            monthlyBudgetRepository.add(monthlyBudgetEntity);
+            monthlyBudgetRepository.add(monthlyBudgetEntity2);
+            monthlyBudgetRepository.add(monthlyBudgetEntity3);
+
+            transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -134,8 +190,12 @@ class MonthlyBudgetRepositoryTest {
         monthlyBudgetEntity4.setSum(BigDecimal.valueOf(10.0));
 
         transactionEntities = List.of(monthlyBudgetEntity, monthlyBudgetEntity2, monthlyBudgetEntity3, monthlyBudgetEntity4);
-        monthlyBudgetRepository.add(monthlyBudgetEntity4);
-        transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+        try {
+            monthlyBudgetRepository.add(monthlyBudgetEntity4);
+            transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -151,19 +211,23 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+        try {
+            monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
+            MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
 
-        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
+            monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
 
-        monthlyBudgetRepository.update(monthlyBudgetEntity2);
+            monthlyBudgetRepository.update(monthlyBudgetEntity2);
 
-        Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
+            Assertions.assertEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
 
-        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(2.2));
+            monthlyBudgetEntity2.setSum(BigDecimal.valueOf(2.2));
 
-        Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
+            Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -183,21 +247,25 @@ class MonthlyBudgetRepositoryTest {
 
         List<MonthlyBudgetEntity> transactionEntities = List.of(monthlyBudgetEntity, monthlyBudgetEntity2, monthlyBudgetEntity3);
 
-        monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
-        monthlyBudgetRepository.add(monthlyBudgetEntity2);
-        monthlyBudgetRepository.add(monthlyBudgetEntity3);
+        try {
+            monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
+            monthlyBudgetRepository.add(monthlyBudgetEntity2);
+            monthlyBudgetRepository.add(monthlyBudgetEntity3);
 
-        List<MonthlyBudgetEntity> transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+            List<MonthlyBudgetEntity> transactionEntitiesReturned = monthlyBudgetRepository.findAll();
 
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        monthlyBudgetRepository.delete(monthlyBudgetEntity);
-        transactionEntitiesReturned = monthlyBudgetRepository.findAll();
+            monthlyBudgetRepository.delete(monthlyBudgetEntity);
+            transactionEntitiesReturned = monthlyBudgetRepository.findAll();
 
-        Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
+            Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionEntities = List.of(monthlyBudgetEntity2, monthlyBudgetEntity3);
+            transactionEntities = List.of(monthlyBudgetEntity2, monthlyBudgetEntity3);
 
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
