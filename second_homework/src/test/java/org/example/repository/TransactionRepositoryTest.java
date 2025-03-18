@@ -10,7 +10,6 @@ import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -27,16 +26,15 @@ class TransactionRepositoryTest {
     @BeforeAll
     static void beforeAll() {
         container.start();
-        try {
-            ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
+
+        ConnectionClass.nullConnection();
     }
 
     @BeforeEach

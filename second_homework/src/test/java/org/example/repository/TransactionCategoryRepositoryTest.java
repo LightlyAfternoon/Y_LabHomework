@@ -9,7 +9,6 @@ import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,16 +21,15 @@ class TransactionCategoryRepositoryTest {
     @BeforeAll
     static void beforeAll() {
         container.start();
-        try {
-            ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
+
+        ConnectionClass.nullConnection();
     }
 
     @BeforeEach
@@ -277,6 +275,44 @@ class TransactionCategoryRepositoryTest {
             categoryRepository.add(categoryEntity4);
 
             transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
+    }
+
+    @Test
+    void findAllUserGoalsTest() {
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
+
+        categoryEntity.setName("t");
+
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
+
+        categoryEntity2.setName("t2");
+        categoryEntity2.setNeededSum(BigDecimal.valueOf(20.0));
+
+        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity();
+
+        categoryEntity3.setName("t3");
+
+        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(CurrentUser.currentUser);
+
+        categoryEntity4.setName("t4");
+        categoryEntity4.setNeededSum(BigDecimal.valueOf(40.4));
+
+        List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity2, categoryEntity4);
+
+
+        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned;
+        try {
+            categoryRepository.add(categoryEntity);
+            categoryRepository.add(categoryEntity2);
+            categoryRepository.add(categoryEntity3);
+            categoryRepository.add(categoryEntity4);
+
+            transactionCategoryEntitiesReturned = categoryRepository.findAllUserGoals(CurrentUser.currentUser);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }

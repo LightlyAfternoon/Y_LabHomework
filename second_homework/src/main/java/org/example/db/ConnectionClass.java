@@ -21,7 +21,7 @@ public class ConnectionClass {
     private static String password;
     private static Database database;
 
-    private ConnectionClass() {};
+    private ConnectionClass() {}
 
     public static void setConfig() throws IOException {
         try (InputStream inputStream = ConnectionClass.class.getResourceAsStream("/db/db.properties")) {
@@ -35,16 +35,11 @@ public class ConnectionClass {
         }
     }
 
-    public static void setConfig(String newUrl, String newUser, String newPassword) throws IOException {
-        try (InputStream inputStream = ConnectionClass.class.getResourceAsStream("/db/db.properties")) {
-            Properties properties = new Properties();
+    public static void setConfig(String newUrl, String newUser, String newPassword) {
+        url = newUrl;
+        user = newUser;
+        password = newPassword;
 
-            properties.load(inputStream);
-
-            url = newUrl;
-            user = newUser;
-            password = newPassword;
-        }
     }
 
     public static Connection getConnection() throws SQLException, LiquibaseException {
@@ -65,5 +60,10 @@ public class ConnectionClass {
         }
 
         return connection;
+    }
+
+    public static void nullConnection() {
+        database = null;
+        connection = null;
     }
 }
