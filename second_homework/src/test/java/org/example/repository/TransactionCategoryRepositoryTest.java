@@ -1,34 +1,65 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
+import org.example.db.ConnectionClass;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 
 class TransactionCategoryRepositoryTest {
     UserEntity userEntity;
     TransactionCategoryRepository categoryRepository = new TransactionCategoryRepository();
+    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
+
+    @BeforeAll
+    static void beforeAll() {
+        container.start();
+        try {
+            ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        container.stop();
+    }
 
     @BeforeEach
     void setUp() {
-        userEntity = new UserEntity();
+        try {
+            UserRepository userRepository = new UserRepository();
 
-        userEntity.setName("t");
-        userEntity.setEmail("t");
-        userEntity.setPassword("t");
-        userEntity.setRole(UserRole.USER);
-        userEntity.setBlocked(false);
+            for (TransactionCategoryEntity category : categoryRepository.findAll()) {
+                categoryRepository.delete(category);
+            }
 
-        CurrentUser.currentUser = userEntity;
+            for (UserEntity user : userRepository.findAll()) {
+                userRepository.delete(user);
+            }
 
-        for (TransactionCategoryEntity category : categoryRepository.findAll()) {
-            categoryRepository.delete(category);
+            userEntity = new UserEntity();
+
+            userEntity.setName("t");
+            userEntity.setEmail("t");
+            userEntity.setPassword("t");
+            userEntity.setRole(UserRole.USER);
+            userEntity.setBlocked(false);
+
+            userEntity = userRepository.add(userEntity);
+
+            CurrentUser.currentUser = userEntity;
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -38,13 +69,21 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        categoryEntity = categoryRepository.add(categoryEntity);
+        try {
+            categoryEntity = categoryRepository.add(categoryEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
 
         categoryEntity2.setName("t");
 
-        categoryEntity2 = categoryRepository.add(categoryEntity2);
+        try {
+            categoryEntity2 = categoryRepository.add(categoryEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(categoryEntity, categoryEntity2);
         Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
@@ -57,7 +96,11 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity3.setName("t3");
 
-        categoryEntity3 = categoryRepository.add(categoryEntity3);
+        try {
+            categoryEntity3 = categoryRepository.add(categoryEntity3);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertNotEquals(categoryEntity, categoryEntity3);
     }
@@ -69,14 +112,22 @@ class TransactionCategoryRepositoryTest {
         categoryEntity.setName("t");
         categoryEntity.setNeededSum(BigDecimal.valueOf(10.0));
 
-        categoryEntity = categoryRepository.addGoal(categoryEntity);
+        try {
+            categoryEntity = categoryRepository.add(categoryEntity);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
 
         categoryEntity2.setName("t");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(10.00));
 
-        categoryEntity2 = categoryRepository.addGoal(categoryEntity2);
+        try {
+            categoryEntity2 = categoryRepository.add(categoryEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(categoryEntity, categoryEntity2);
         Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
@@ -90,7 +141,11 @@ class TransactionCategoryRepositoryTest {
         categoryEntity3.setName("t3");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(30.3));
 
-        categoryEntity3 = categoryRepository.addGoal(categoryEntity3);
+        try {
+            categoryEntity3 = categoryRepository.add(categoryEntity3);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertNotEquals(categoryEntity, categoryEntity3);
     }
@@ -101,15 +156,19 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        categoryEntity = categoryRepository.add(categoryEntity);
+        try {
+            categoryEntity = categoryRepository.add(categoryEntity);
 
-        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
+            Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
 
-        categoryEntity.setName("t0");
+            categoryEntity.setName("t0");
 
-        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
+            Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity);
 
-        Assertions.assertNull(categoryRepository.findById(10));
+            Assertions.assertNull(categoryRepository.findById(10));
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -118,19 +177,23 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        categoryRepository.add(categoryEntity);
+        try {
+            categoryRepository.add(categoryEntity);
 
-        Assertions.assertEquals(categoryRepository.findByName("t"), categoryEntity);
+            Assertions.assertEquals(categoryRepository.findByName("t"), categoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
+            TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
 
-        categoryEntity2.setName("t0");
+            categoryEntity2.setName("t0");
 
-        categoryRepository.add(categoryEntity2);
+            categoryRepository.add(categoryEntity2);
 
-        Assertions.assertNotEquals(categoryRepository.findByName("t"), categoryEntity2);
-        Assertions.assertEquals(categoryRepository.findByName("t0"), categoryEntity2);
-        Assertions.assertNull(categoryRepository.findByName("t2"));
+            Assertions.assertNotEquals(categoryRepository.findByName("t"), categoryEntity2);
+            Assertions.assertEquals(categoryRepository.findByName("t0"), categoryEntity2);
+            Assertions.assertNull(categoryRepository.findByName("t2"));
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -149,11 +212,17 @@ class TransactionCategoryRepositoryTest {
 
         List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3);
 
-        categoryRepository.add(categoryEntity);
-        categoryRepository.add(categoryEntity2);
-        categoryRepository.add(categoryEntity3);
+        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned;
 
-        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findAll();
+        try {
+            categoryRepository.add(categoryEntity);
+            categoryRepository.add(categoryEntity2);
+            categoryRepository.add(categoryEntity3);
+
+            transactionCategoryEntitiesReturned = categoryRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
 
@@ -162,8 +231,13 @@ class TransactionCategoryRepositoryTest {
         categoryEntity4.setName("t4");
 
         categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3, categoryEntity4);
-        categoryRepository.add(categoryEntity4);
-        transactionCategoryEntitiesReturned = categoryRepository.findAll();
+        try {
+            categoryRepository.add(categoryEntity4);
+
+            transactionCategoryEntitiesReturned = categoryRepository.findAll();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
 
@@ -190,15 +264,22 @@ class TransactionCategoryRepositoryTest {
         TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(CurrentUser.currentUser);
 
         categoryEntity4.setName("t4");
+        categoryEntity4.setNeededSum(BigDecimal.valueOf(40.4));
 
         List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3, categoryEntity4);
 
-        categoryRepository.add(categoryEntity);
-        categoryRepository.addGoal(categoryEntity2);
-        categoryRepository.add(categoryEntity3);
-        categoryRepository.addGoal(categoryEntity4);
 
-        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
+        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned;
+        try {
+            categoryRepository.add(categoryEntity);
+            categoryRepository.add(categoryEntity2);
+            categoryRepository.add(categoryEntity3);
+            categoryRepository.add(categoryEntity4);
+
+            transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
@@ -209,19 +290,23 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        categoryEntity = categoryRepository.add(categoryEntity);
+        try {
+            categoryEntity = categoryRepository.add(categoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
+            TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
 
-        categoryEntity2.setName("t2");
+            categoryEntity2.setName("t2");
 
-        categoryRepository.update(categoryEntity2);
+            categoryRepository.update(categoryEntity2);
 
-        Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
+            Assertions.assertEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
 
-        categoryEntity2.setName("t0");
+            categoryEntity2.setName("t0");
 
-        Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
+            Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -240,21 +325,25 @@ class TransactionCategoryRepositoryTest {
 
         List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3);
 
-        categoryEntity = categoryRepository.add(categoryEntity);
-        categoryRepository.add(categoryEntity2);
-        categoryRepository.add(categoryEntity3);
+        try {
+            categoryEntity = categoryRepository.add(categoryEntity);
+            categoryRepository.add(categoryEntity2);
+            categoryRepository.add(categoryEntity3);
 
-        List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findAll();
+            List<TransactionCategoryEntity> transactionCategoryEntitiesReturned = categoryRepository.findAll();
 
-        Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
+            Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
 
-        categoryRepository.delete(categoryEntity);
-        transactionCategoryEntitiesReturned = categoryRepository.findAll();
+            categoryRepository.delete(categoryEntity);
+            transactionCategoryEntitiesReturned = categoryRepository.findAll();
 
-        Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);
+            Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);
 
-        categoryEntities = List.of(categoryEntity2, categoryEntity3);
+            categoryEntities = List.of(categoryEntity2, categoryEntity3);
 
-        Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
+            Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

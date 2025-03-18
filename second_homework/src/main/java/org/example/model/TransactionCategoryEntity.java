@@ -109,16 +109,18 @@ public class TransactionCategoryEntity {
     public String toString() {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
-        try {
-            for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
-                if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
-                    totalSum = totalSum.add(transaction.getSum());
+        if (this.getNeededSum() != null) {
+            try {
+                for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
+                    if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
+                        totalSum = totalSum.add(transaction.getSum());
+                    }
                 }
+            } catch (SQLException | LiquibaseException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
         }
 
-        return this.getName() + " Необходимая сумма: " + (this.getNeededSum() != null? totalSum + "/" + this.getNeededSum() : "") + " id: " + this.getId();
+        return this.getName() + (this.getNeededSum() != null? " Необходимая сумма: " + totalSum + "/" + this.getNeededSum() : "") + " id: " + this.getId() + (this.getUser() != null? " id пользователя: " + this.getUser().getId() : "");
     }
 }
