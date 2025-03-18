@@ -2,9 +2,7 @@ package org.example;
 
 import liquibase.exception.LiquibaseException;
 import org.example.command.CommandClass;
-import org.example.db.ConnectionClass;
 import org.example.model.*;
-import org.example.repository.UserRepository;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -20,6 +18,7 @@ public class App
     public static void main( String[] args ) {
         Scanner scanner = new Scanner(System.in);
         String command = "";
+        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Здравствуйте! Хотите зарегистрироваться или войти в аккаунт? \n" +
@@ -35,7 +34,7 @@ public class App
                 case "/login" -> {
                     UserRole role;
                     try {
-                        role = CommandClass.getLoggedInUserRole();
+                        role = commandClass.getLoggedInUserRole();
                     } catch (SQLException | LiquibaseException e) {
                         throw new RuntimeException(e);
                     }
@@ -50,7 +49,7 @@ public class App
                         return;
                     }
                 }
-                case "/register" -> System.out.println(CommandClass.register());
+                case "/register" -> System.out.println(commandClass.register());
                 case "/exit" -> {
                     return;
                 }
@@ -65,6 +64,7 @@ public class App
     static void menuForUser() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
+        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -85,12 +85,12 @@ public class App
 
             switch (command) {
                 case "/budget" -> {
-                    MonthlyBudgetEntity monthlyBudgetEntity = CommandClass.addBudget();
+                    MonthlyBudgetEntity monthlyBudgetEntity = commandClass.addBudget();
 
                     System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
                 }
-                case "/goal" -> CommandClass.addGoal();
-                case "/add_transaction" -> CommandClass.addTransaction();
+                case "/goal" -> commandClass.addGoal();
+                case "/add_transaction" -> commandClass.addTransaction();
                 case "/delete_account" -> {
                     System.out.println("Для подтверждения введите команду /confirm\n" +
                             "Для возвращения в меню введите команду /menu:");
@@ -100,7 +100,7 @@ public class App
                     }
 
                     if (command.equals("/confirm")) {
-                        CommandClass.deleteAccount();
+                        commandClass.deleteAccount();
 
                         return;
                     } else if (command.equals("/menu")) {
@@ -112,14 +112,14 @@ public class App
                     }
                 }
                 case "/show_transactions" -> {
-                    System.out.println(CommandClass.getTransactions());
+                    System.out.println(commandClass.getTransactions());
 
                     transactionsMenu();
 
                     return;
                 }
-                case "/show_goals" -> System.out.println(CommandClass.getAllUserGoals());
-                case "/balance" -> System.out.println("Текущий баланс: " + CommandClass.getCurrentBalance());
+                case "/show_goals" -> System.out.println(commandClass.getAllUserGoals());
+                case "/balance" -> System.out.println("Текущий баланс: " + commandClass.getCurrentBalance());
                 case "/balance_for_period" -> {
                     System.out.println("Введите начальную дату в формате 2000-12-21:");
                     scanner = new Scanner(System.in);
@@ -128,10 +128,10 @@ public class App
                     System.out.println("Введите конечную дату в формате 2000-12-21:");
                     Date to = getDate(scanner);
 
-                    System.out.println("Доход за выбранный период: " + CommandClass.getIncomeForPeriod(from, to));
-                    System.out.println("Расход за выбранный период: " + CommandClass.getExpenseForPeriod(from, to) + "\n");
+                    System.out.println("Доход за выбранный период: " + commandClass.getIncomeForPeriod(from, to));
+                    System.out.println("Расход за выбранный период: " + commandClass.getExpenseForPeriod(from, to) + "\n");
                 }
-                case "/category_expenses" -> System.out.println(CommandClass.getCategoryExpenses());
+                case "/category_expenses" -> System.out.println(commandClass.getCategoryExpenses());
                 case "/exit" -> {
                     return;
                 }
@@ -143,6 +143,7 @@ public class App
     private static void transactionsMenu() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
+        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -157,11 +158,11 @@ public class App
 
             switch (command) {
                 case "/filter_transactions" -> {
-                    System.out.println(CommandClass.filterTransactions());
+                    System.out.println(commandClass.filterTransactions());
 
                     transactionsMenu();
                 }
-                case "/edit_transaction" -> CommandClass.editTransaction();
+                case "/edit_transaction" -> commandClass.editTransaction();
                 case "/delete_transaction" -> {
                     System.out.println("Для подтверждения введите команду /confirm\n" +
                             "Для возвращения в меню введите команду /menu:");
@@ -171,7 +172,7 @@ public class App
                     }
 
                     if (command.equals("/confirm")) {
-                        CommandClass.deleteTransaction();
+                        commandClass.deleteTransaction();
                     } else if (command.equals("/menu")) {
                         menuForUser();
 
@@ -196,6 +197,7 @@ public class App
     static void menuForAdmin() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
+        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -207,7 +209,7 @@ public class App
             }
 
             switch (command) {
-                case "/users" -> System.out.println(CommandClass.getAllUsers());
+                case "/users" -> System.out.println(commandClass.getAllUsers());
                 case "/exit" -> {
                     return;
                 }

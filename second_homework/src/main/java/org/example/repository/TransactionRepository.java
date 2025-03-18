@@ -229,12 +229,14 @@ public class TransactionRepository implements Repository<TransactionEntity> {
 
     @Override
     public boolean delete(TransactionEntity entity) throws SQLException, LiquibaseException {
-        try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("delete from transaction where id = ?")) {
-            preparedStatement.setInt(1, entity.getId());
+        if (entity != null) {
+            try (Connection connection = ConnectionClass.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement("delete from transaction where id = ?")) {
+                preparedStatement.setInt(1, entity.getId());
 
-            if (preparedStatement.executeUpdate() > 0) {
-                return true;
+                if (preparedStatement.executeUpdate() > 0) {
+                    return true;
+                }
             }
         }
 

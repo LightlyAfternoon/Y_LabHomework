@@ -107,20 +107,6 @@ public class TransactionCategoryEntity {
 
     @Override
     public String toString() {
-        BigDecimal totalSum = BigDecimal.valueOf(0);
-
-        if (this.getNeededSum() != null) {
-            try {
-                for (TransactionEntity transaction : new TransactionRepository().findAllWithUser(CurrentUser.currentUser)) {
-                    if (transaction.getCategory() != null && transaction.getCategory().equals(this) && transaction.getCategory().getNeededSum() != null) {
-                        totalSum = totalSum.add(transaction.getSum());
-                    }
-                }
-            } catch (SQLException | LiquibaseException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return this.getName() + (this.getNeededSum() != null? " Необходимая сумма: " + totalSum + "/" + this.getNeededSum() : "") + " id: " + this.getId() + (this.getUser() != null? " id пользователя: " + this.getUser().getId() : "");
+        return this.getName() + " id: " + this.getId() + (this.getUser() != null? " id пользователя: " + this.getUser().getId() : "");
     }
 }
