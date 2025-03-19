@@ -41,9 +41,9 @@ class CommandClassTest {
 
         UserEntity user = new UserEntity();
 
-        user.setName("t");
         user.setEmail("t");
         user.setPassword("t");
+        user.setName("t");
         user.setRole(UserRole.USER);
         user.setBlocked(false);
 
@@ -100,36 +100,36 @@ class CommandClassTest {
     }
 
     @Test
-    void registerTest() throws SQLException, LiquibaseException {
+    void getRegisteredUserTest() throws SQLException, LiquibaseException {
         String emailAndPassword = "t\nt\nt";
         InputStream in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
         UserEntity user2 = new UserEntity();
-        user2.setName("t");
         user2.setEmail("t");
         user2.setPassword("t");
+        user2.setName("t");
         user2.setRole(UserRole.USER);
         user2.setBlocked(false);
 
         Mockito.when(userRepository.add(user2)).thenReturn(null);
 
-        Assertions.assertEquals("Пользователь с такой почтой уже существует\n", commandClass.register());
+        Assertions.assertNull(commandClass.getRegisteredUser());
 
-        emailAndPassword = "t2\nt2\nt";
+        emailAndPassword = "t2\nt\nt2";
         in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
         user2 = new UserEntity();
-        user2.setName("t2");
         user2.setEmail("t2");
         user2.setPassword("t");
+        user2.setName("t2");
         user2.setRole(UserRole.USER);
         user2.setBlocked(false);
 
         Mockito.when(userRepository.add(user2)).thenReturn(user2);
 
-        Assertions.assertEquals("Вы успешно зарегистрировались\n", commandClass.register());
+        Assertions.assertEquals(user2, commandClass.getRegisteredUser());
     }
 
     @Test
@@ -349,9 +349,9 @@ class CommandClassTest {
 
         UserEntity user2 = new UserEntity();
 
-        user2.setName("t2");
         user2.setEmail("t2");
         user2.setPassword("t2");
+        user2.setName("t2");
         user2.setBlocked(false);
 
         TransactionEntity transactionEntity3 = new TransactionEntity(user2);

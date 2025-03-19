@@ -43,9 +43,9 @@ class UserRepositoryTest {
     void addTest() {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("t");
         userEntity.setPassword("t");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
@@ -57,9 +57,9 @@ class UserRepositoryTest {
 
         UserEntity userEntity2 = new UserEntity();
 
-        userEntity2.setName("t");
         userEntity2.setEmail("t");
         userEntity2.setPassword("t");
+        userEntity2.setName("t");
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
@@ -72,9 +72,9 @@ class UserRepositoryTest {
 
         UserEntity userEntity3 = new UserEntity();
 
-        userEntity3.setName("t2");
         userEntity3.setEmail("t");
         userEntity3.setPassword("t2");
+        userEntity3.setName("t2");
         userEntity3.setRole(UserRole.USER);
         userEntity3.setBlocked(true);
 
@@ -91,9 +91,9 @@ class UserRepositoryTest {
     void findByIdTest() {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("t");
         userEntity.setPassword("t");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
@@ -128,25 +128,25 @@ class UserRepositoryTest {
     void findAllTest() {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("t");
         userEntity.setPassword("t");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
         UserEntity userEntity2 = new UserEntity();
 
-        userEntity2.setName("t2");
         userEntity2.setEmail("t2");
         userEntity2.setPassword("t2");
+        userEntity2.setName("t2");
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(true);
 
         UserEntity userEntity3 = new UserEntity();
 
-        userEntity3.setName("t3");
         userEntity3.setEmail("t3");
         userEntity3.setPassword("t2");
+        userEntity3.setName("t3");
         userEntity3.setRole(UserRole.ADMIN);
         userEntity3.setBlocked(false);
 
@@ -167,9 +167,9 @@ class UserRepositoryTest {
 
         UserEntity userEntity4 = new UserEntity();
 
-        userEntity4.setName("t4");
         userEntity4.setEmail("t4");
         userEntity4.setPassword("t2");
+        userEntity4.setName("t4");
         userEntity4.setRole(UserRole.ADMIN);
         userEntity4.setBlocked(false);
 
@@ -193,9 +193,9 @@ class UserRepositoryTest {
     void updateTest() {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("t");
         userEntity.setPassword("t");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
@@ -207,9 +207,9 @@ class UserRepositoryTest {
 
         UserEntity userEntity2 = new UserEntity(userEntity.getId());
 
-        userEntity2.setName("t2");
         userEntity2.setEmail("t2");
         userEntity2.setPassword("t2");
+        userEntity2.setName("t2");
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
@@ -235,25 +235,25 @@ class UserRepositoryTest {
     void deleteTest() {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("t");
         userEntity.setPassword("t");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
         UserEntity userEntity2 = new UserEntity();
 
-        userEntity2.setName("t2");
         userEntity2.setEmail("t2");
         userEntity2.setPassword("t2");
+        userEntity2.setName("t2");
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(true);
 
         UserEntity userEntity3 = new UserEntity();
 
-        userEntity3.setName("t3");
         userEntity3.setEmail("t3");
         userEntity3.setPassword("t2");
+        userEntity3.setName("t3");
         userEntity3.setRole(UserRole.ADMIN);
         userEntity3.setBlocked(false);
 
@@ -290,9 +290,9 @@ class UserRepositoryTest {
     void findUserWithEmailAndPasswordTest() throws SQLException, LiquibaseException {
         UserEntity userEntity = new UserEntity();
 
-        userEntity.setName("t");
         userEntity.setEmail("te");
         userEntity.setPassword("tp");
+        userEntity.setName("t");
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
@@ -302,9 +302,9 @@ class UserRepositoryTest {
 
         UserEntity userEntity2 = new UserEntity();
 
-        userEntity2.setName("t2");
         userEntity2.setEmail("te2");
         userEntity2.setPassword("tp2");
+        userEntity2.setName("t2");
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 

@@ -57,9 +57,9 @@ class TransactionRepositoryTest {
 
             userEntity = new UserEntity();
 
-            userEntity.setName("t");
             userEntity.setEmail("t");
             userEntity.setPassword("t");
+            userEntity.setName("t");
             userEntity.setRole(UserRole.USER);
             userEntity.setBlocked(false);
 
@@ -305,9 +305,9 @@ class TransactionRepositoryTest {
 
         UserEntity user = new UserEntity();
 
-        user.setName("t2");
         user.setEmail("t2");
         user.setPassword("t2");
+        user.setName("t2");
         user.setBlocked(false);
 
         try {
@@ -384,9 +384,9 @@ class TransactionRepositoryTest {
 
         UserEntity user = new UserEntity();
 
-        user.setName("t2");
         user.setEmail("t2");
         user.setPassword("t2");
+        user.setName("t2");
         user.setBlocked(false);
 
         try {

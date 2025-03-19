@@ -47,9 +47,9 @@ class TransactionCategoryRepositoryTest {
 
             userEntity = new UserEntity();
 
-            userEntity.setName("t");
             userEntity.setEmail("t");
             userEntity.setPassword("t");
+            userEntity.setName("t");
             userEntity.setRole(UserRole.USER);
             userEntity.setBlocked(false);
 

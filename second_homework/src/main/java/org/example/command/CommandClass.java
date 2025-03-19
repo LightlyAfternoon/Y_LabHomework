@@ -41,28 +41,35 @@ public class CommandClass {
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     }
 
-    public UserRole getLoggedInUserRole() throws SQLException, LiquibaseException {
+    private String sendEmail() {
         scanner = new Scanner(System.in);
 
         System.out.println("Введите почту:");
-        String email = scanner.next();
 
+        return scanner.next();
+    }
+
+    private String sendPassword() {
         System.out.println("Введите пароль:");
-        String password = scanner.next();
 
-        UserEntity user = userRepository.findUserWithEmailAndPassword(email, password);
+        return scanner.next();
+    }
+
+    public UserRole getLoggedInUserRole() {
+        UserEntity user;
+        try {
+            user = userRepository.findUserWithEmailAndPassword(sendEmail(), sendPassword());
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
 
         if (user != null) {
             CurrentUser.currentUser = user;
 
-            System.out.println("Вы успешно вошли в систему\n");
-
             return CurrentUser.currentUser.getRole();
-        } else {
-            System.out.println("Пользователь с такими почтой и паролем не найдены\n");
-
-            return null;
         }
+
+        return null;
     }
 
     public String getAllUsers() {
@@ -79,43 +86,37 @@ public class CommandClass {
         return output.toString();
     }
 
-    public String register() {
-        scanner = new Scanner(System.in);
-
+    private String sendUserName() {
         System.out.println("Введите имя:");
-        String name = scanner.next();
 
-        System.out.println("Введите почту:");
-        String email = scanner.next();
+        return scanner.next();
+    }
 
-        System.out.println("Введите пароль:");
-        String password = scanner.next();
-
+    public UserEntity getRegisteredUser() {
         UserEntity user = new UserEntity();
 
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
+        user.setEmail(sendEmail());
+        user.setPassword(sendPassword());
+        user.setName(sendUserName());
         user.setBlocked(false);
 
         try {
-            user = userRepository.add(user);
+            return userRepository.add(user);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
-
-        if (user != null) {
-            return "Вы успешно зарегистрировались\n";
-        } else {
-            return "Пользователь с такой почтой уже существует\n";
-        }
     }
 
-    public MonthlyBudgetEntity addBudget() {
+    private BigDecimal sendBudgetSum() {
         System.out.println("Введите бюджет на данный месяц:");
 
         scanner = new Scanner(System.in);
-        BigDecimal budget = scanner.nextBigDecimal();
+
+        return scanner.nextBigDecimal();
+    }
+
+    public MonthlyBudgetEntity addBudget() {
+        BigDecimal budget = sendBudgetSum();
 
         MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
         SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
@@ -142,19 +143,25 @@ public class CommandClass {
         return monthlyBudgetEntity;
     }
 
-    public TransactionCategoryEntity addGoal() {
+    private String sendGoalName() {
         System.out.println("Введите названия цели:");
 
         scanner = new Scanner(System.in);
-        String name = scanner.nextLine();
 
+        return scanner.nextLine();
+    }
+
+    private BigDecimal sendGoalSum() {
         System.out.println("Введите необходимую для цели сумму:");
-        BigDecimal sum = scanner.nextBigDecimal();
 
+        return scanner.nextBigDecimal();
+    }
+
+    public TransactionCategoryEntity addGoal() {
         TransactionCategoryEntity goal = new TransactionCategoryEntity(CurrentUser.currentUser);
 
-        goal.setName(name);
-        goal.setNeededSum(sum);
+        goal.setName(sendGoalName());
+        goal.setNeededSum(sendGoalSum());
 
         try {
             return categoryRepository.add(goal);
@@ -163,12 +170,15 @@ public class CommandClass {
         }
     }
 
-    public TransactionEntity addTransaction() {
+    private BigDecimal sendTransactionSum() {
         System.out.println("Введите сумму (положительное число для дохода, отрицательное - для расхода):");
 
         scanner = new Scanner(System.in);
-        BigDecimal sum = scanner.nextBigDecimal();
 
+        return scanner.nextBigDecimal();
+    }
+
+    private TransactionCategoryEntity sendCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
         try {
             for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
@@ -179,40 +189,45 @@ public class CommandClass {
         }
         scanner.nextLine();
         String categoryName = scanner.nextLine();
-        TransactionCategoryEntity category;
+
         try {
-            category = categoryRepository.findByName(categoryName);
+            return categoryRepository.findByName(categoryName);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private Date sendDate() {
         System.out.println("Введите дату в формате 2000-12-21 или оставьте поле пустым (будет выбрана текущая дата):");
         String text = scanner.nextLine();
-        System.out.println(text);
-        Date date;
+
         if (!text.isBlank()) {
             try {
-                date = new Date(simpleDateFormat.parse(text).getTime());
+                return new Date(simpleDateFormat.parse(text).getTime());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         } else {
             try {
-                date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+                return new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
 
+    private String sendDescription() {
         System.out.println("Введите описание или оставьте поле пустым:");
-        String description = scanner.nextLine();
+        return scanner.nextLine();
+    }
 
+    public TransactionEntity addTransaction() {
         TransactionEntity transaction = new TransactionEntity(CurrentUser.currentUser);
 
-        transaction.setSum(sum);
-        transaction.setCategory(category);
-        transaction.setDate(date);
-        transaction.setDescription(description);
+        transaction.setSum(sendTransactionSum());
+        transaction.setCategory(sendCategory());
+        transaction.setDate(sendDate());
+        transaction.setDescription(sendDescription());
 
         try {
             transaction = transactionRepository.add(transaction);
@@ -229,17 +244,11 @@ public class CommandClass {
         UserEntity user = CurrentUser.currentUser;
         CurrentUser.currentUser = null;
 
-        boolean isDeleted = false;
+        boolean isDeleted;
         try {
             isDeleted = userRepository.delete(user);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
-        }
-
-        if (isDeleted) {
-            System.out.println("Аккаунт удалён");
-        } else {
-            System.out.println("Не удалось удалить аккаунт");
         }
 
         return isDeleted;
@@ -259,7 +268,7 @@ public class CommandClass {
         return output.toString();
     }
 
-    public String filterTransactions() {
+    private Date sendFilterDate() {
         System.out.println("Введите дату в формате 2000-12-21 или оставьте поле пустым:");
 
         scanner = new Scanner(System.in);
@@ -274,6 +283,10 @@ public class CommandClass {
             }
         }
 
+        return date;
+    }
+
+    private TransactionCategoryEntity sendFilterCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
         try {
             for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
@@ -290,13 +303,20 @@ public class CommandClass {
             throw new RuntimeException(e);
         }
 
-        System.out.println("Введите Pos для фильтрации доходов, Neg для фильтрации расходов или оставьте поле пустым:");
-        String type = scanner.nextLine();
+        return category;
+    }
 
+    private String sendFilterSumType() {
+        System.out.println("Введите Pos для фильтрации доходов, Neg для фильтрации расходов или оставьте поле пустым:");
+
+        return scanner.nextLine();
+    }
+
+    public String filterTransactions() {
         StringBuilder output = new StringBuilder();
 
         try {
-            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(date, category, type, CurrentUser.currentUser)) {
+            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(sendFilterDate(), sendFilterCategory(), sendFilterSumType(), CurrentUser.currentUser)) {
                 output.append(transaction.toString()).append("\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -306,62 +326,80 @@ public class CommandClass {
         return output.toString();
     }
 
-    public boolean editTransaction() {
-        System.out.println("Введите id транзакции, которую необходимо изменить:");
+    private int sendTransactionId() {
+        System.out.println("Введите id транзакции:");
 
         scanner = new Scanner(System.in);
-        String id = scanner.nextLine();
+
+        return scanner.nextInt();
+    }
+
+    private BigDecimal sendNewTransactionSum() {
+        System.out.println("Введите новую сумму (положительное число для дохода, отрицательное - для расхода):");
+
+        return scanner.nextBigDecimal();
+    }
+
+    private TransactionCategoryEntity sendNewTransactionCategory() {
+        System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
+        try {
+            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
+                System.out.println("\n" + category.getName() + "\n");
+            }
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
+        String categoryName = scanner.nextLine();
+        TransactionCategoryEntity category;
+        try {
+            category = categoryRepository.findByName(categoryName);
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return category;
+    }
+
+    private Date sendNewTransactionDate() {
+        System.out.println("Введите новую дату в формате 2000-12-21 или оставьте поле пустым (будет выбрана текущая дата):");
+        String text = scanner.nextLine();
+        Date date;
+        if (!text.isBlank()) {
+            try {
+                date = new Date(simpleDateFormat.parse(text).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return date;
+    }
+
+    private String sendNewTransactionDescription() {
+        System.out.println("Введите новое описание или оставьте поле пустым:");
+
+        return scanner.nextLine();
+    }
+
+    public boolean editTransaction() {
         TransactionEntity transaction;
         try {
-            transaction = transactionRepository.findById(Integer.parseInt(id));
+            transaction = transactionRepository.findById(sendTransactionId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
 
         if (transaction != null) {
-            System.out.println("Введите новую сумму (положительное число для дохода, отрицательное - для расхода):");
-            BigDecimal sum = scanner.nextBigDecimal();
-
-            System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
-            try {
-                for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
-                    System.out.println("\n" + category.getName() + "\n");
-                }
-            } catch (SQLException | LiquibaseException e) {
-                throw new RuntimeException(e);
-            }
-            String categoryName = scanner.nextLine();
-            TransactionCategoryEntity category;
-            try {
-                category = categoryRepository.findByName(categoryName);
-            } catch (SQLException | LiquibaseException e) {
-                throw new RuntimeException(e);
-            }
-
-            System.out.println("Введите дату в формате 2000-12-21 или оставьте поле пустым (будет выбрана текущая дата):");
-            String text = scanner.nextLine();
-            Date date;
-            if (!text.isBlank()) {
-                try {
-                    date = new Date(simpleDateFormat.parse(text).getTime());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                try {
-                    date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            System.out.println("Введите новое описание или оставьте поле пустым:");
-            String description = scanner.nextLine();
-
-            transaction.setSum(sum);
-            transaction.setCategory(category);
-            transaction.setDate(date);
-            transaction.setDescription(description);
+            transaction.setSum(sendNewTransactionSum());
+            transaction.setCategory(sendNewTransactionCategory());
+            transaction.setDate(sendNewTransactionDate());
+            transaction.setDescription(sendNewTransactionDescription());
 
             try {
                 transactionRepository.update(transaction);
@@ -373,27 +411,16 @@ public class CommandClass {
 
             return true;
         } else {
-            System.out.println("Транзакция с указанным id не найдена");
-
             return false;
         }
     }
 
     public boolean deleteTransaction() {
-        System.out.println("Введите id транзакции, которую необходимо удалить");
-
-        scanner = new Scanner(System.in);
         TransactionEntity transaction;
         try {
-            transaction = transactionRepository.findById(Integer.parseInt(scanner.nextLine()));
+            transaction = transactionRepository.findById(sendTransactionId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
-        }
-
-        if (transaction != null) {
-            System.out.println("Транзакция удалена");
-        } else {
-            System.out.println("Транзакция с указанным id не найдена");
         }
 
         try {

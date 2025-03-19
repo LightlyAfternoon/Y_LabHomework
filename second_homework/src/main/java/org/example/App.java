@@ -33,10 +33,11 @@ public class App
             switch (command) {
                 case "/login" -> {
                     UserRole role;
-                    try {
-                        role = commandClass.getLoggedInUserRole();
-                    } catch (SQLException | LiquibaseException e) {
-                        throw new RuntimeException(e);
+
+                    if ((role = commandClass.getLoggedInUserRole()) != null) {
+                        System.out.println("Вы успешно вошли в систему\n");
+                    } else {
+                        System.out.println("Пользователь с такими почтой и паролем не найдены\n");
                     }
 
                     if (role == UserRole.USER) {
@@ -49,7 +50,13 @@ public class App
                         return;
                     }
                 }
-                case "/register" -> System.out.println(commandClass.register());
+                case "/register" -> {
+                    if (commandClass.getRegisteredUser() != null) {
+                        System.out.println("Вы успешно зарегистрировались\n");
+                    } else {
+                        System.out.println("Пользователь с такой почтой уже существует\n");
+                    }
+                }
                 case "/exit" -> {
                     return;
                 }
@@ -100,7 +107,11 @@ public class App
                     }
 
                     if (command.equals("/confirm")) {
-                        commandClass.deleteAccount();
+                        if (commandClass.deleteAccount()) {
+                            System.out.println("Аккаунт удалён");
+                        } else {
+                            System.out.println("Не удалось удалить аккаунт");
+                        }
 
                         return;
                     } else if (command.equals("/menu")) {
@@ -162,7 +173,11 @@ public class App
 
                     transactionsMenu();
                 }
-                case "/edit_transaction" -> commandClass.editTransaction();
+                case "/edit_transaction" -> {
+                    if (!commandClass.editTransaction()) {
+                        System.out.println("Транзакция с указанным id не найдена");
+                    }
+                }
                 case "/delete_transaction" -> {
                     System.out.println("Для подтверждения введите команду /confirm\n" +
                             "Для возвращения в меню введите команду /menu:");
@@ -172,7 +187,11 @@ public class App
                     }
 
                     if (command.equals("/confirm")) {
-                        commandClass.deleteTransaction();
+                        if (commandClass.deleteTransaction()) {
+                            System.out.println("Транзакция удалена");
+                        } else {
+                            System.out.println("Транзакция с указанным id не найдена");
+                        }
                     } else if (command.equals("/menu")) {
                         menuForUser();
 
