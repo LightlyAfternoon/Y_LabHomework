@@ -560,4 +560,195 @@ public class CommandClass {
 
         return output.toString();
     }
+
+    public void showMenu(UserRole role) {
+        if (role == UserRole.USER) {
+            menuForUser();
+        } else if (role == UserRole.ADMIN) {
+            menuForAdmin();
+        }
+    }
+
+    /**
+     * Users menu after login
+     */
+    static void menuForUser() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+        CommandClass commandClass = new CommandClass();
+
+        while (true) {
+            System.out.println("Введите желаемое действие:\n" +
+                    "/budget - установить месячный бюджет\n" +
+                    "/goal - установить цель\n" +
+                    "/add_transaction - создать транзакцию\n" +
+                    "/delete_account - удалить аккаунт\n" +
+                    "/show_transactions - вывести все транзакции\n" +
+                    "/show_goals - вывести все цели\n" +
+                    "/balance - вывести текущий баланс\n" +
+                    "/balance_for_period - вывести доход и расход за период\n" +
+                    "/category_expenses - вывести расходы по категориям\n" +
+                    "/exit - выйти из приложения\n");
+
+            if (scanner.hasNext()) {
+                command = scanner.next();
+            }
+
+            switch (command) {
+                case "/budget" -> {
+                    MonthlyBudgetEntity monthlyBudgetEntity = commandClass.addBudget();
+
+                    System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
+                }
+                case "/goal" -> commandClass.addGoal();
+                case "/add_transaction" -> commandClass.addTransaction();
+                case "/delete_account" -> {
+                    System.out.println("Для подтверждения введите команду /confirm\n" +
+                            "Для возвращения в меню введите команду /menu:");
+
+                    if (scanner.hasNext()) {
+                        command = scanner.next();
+                    }
+
+                    if (command.equals("/confirm")) {
+                        if (commandClass.deleteAccount()) {
+                            System.out.println("Аккаунт удалён");
+                        } else {
+                            System.out.println("Не удалось удалить аккаунт");
+                        }
+
+                        return;
+                    } else if (command.equals("/menu")) {
+                        menuForUser();
+
+                        return;
+                    } else {
+                        System.out.println("Команда не распознана\n");
+                    }
+                }
+                case "/show_transactions" -> {
+                    System.out.println(commandClass.getTransactions());
+
+                    transactionsMenu();
+
+                    return;
+                }
+                case "/show_goals" -> System.out.println(commandClass.getAllUserGoals());
+                case "/balance" -> System.out.println("Текущий баланс: " + commandClass.getCurrentBalance());
+                case "/balance_for_period" -> {
+                    System.out.println("Введите начальную дату в формате 2000-12-21:");
+                    scanner = new Scanner(System.in);
+                    Date from = getDate(scanner);
+
+                    System.out.println("Введите конечную дату в формате 2000-12-21:");
+                    Date to = getDate(scanner);
+
+                    System.out.println("Доход за выбранный период: " + commandClass.getIncomeForPeriod(from, to));
+                    System.out.println("Расход за выбранный период: " + commandClass.getExpenseForPeriod(from, to) + "\n");
+                }
+                case "/category_expenses" -> System.out.println(commandClass.getCategoryExpenses());
+                case "/exit" -> {
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
+            }
+        }
+    }
+
+    private static void transactionsMenu() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+        CommandClass commandClass = new CommandClass();
+
+        while (true) {
+            System.out.println("Введите желаемое действие:\n" +
+                    "/filter_transactions - отфильтровать список транзакций\n" +
+                    "/edit_transaction - изменить транзакцию\n" +
+                    "/delete_transaction - удалить транзакцию\n" +
+                    "/menu - вернуться в меню\n");
+
+            if (scanner.hasNext()) {
+                command = scanner.next();
+            }
+
+            switch (command) {
+                case "/filter_transactions" -> {
+                    System.out.println(commandClass.filterTransactions());
+
+                    transactionsMenu();
+                }
+                case "/edit_transaction" -> {
+                    if (!commandClass.editTransaction()) {
+                        System.out.println("Транзакция с указанным id не найдена");
+                    }
+                }
+                case "/delete_transaction" -> {
+                    System.out.println("Для подтверждения введите команду /confirm\n" +
+                            "Для возвращения в меню введите команду /menu:");
+
+                    if (scanner.hasNext()) {
+                        command = scanner.next();
+                    }
+
+                    if (command.equals("/confirm")) {
+                        if (commandClass.deleteTransaction()) {
+                            System.out.println("Транзакция удалена");
+                        } else {
+                            System.out.println("Транзакция с указанным id не найдена");
+                        }
+                    } else if (command.equals("/menu")) {
+                        menuForUser();
+
+                        return;
+                    } else {
+                        System.out.println("Команда не распознана\n");
+                    }
+                }
+                case "/menu" -> {
+                    menuForUser();
+
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
+            }
+        }
+    }
+
+    /**
+     * Admins menu after login
+     */
+    static void menuForAdmin() {
+        Scanner scanner = new Scanner(System.in);
+        String command = "";
+        CommandClass commandClass = new CommandClass();
+
+        while (true) {
+            System.out.println("Введите желаемое действие:\n" +
+                    "/users - вывести список всех пользователей приложения\n" +
+                    "/exit - выйти из приложения\n");
+
+            if (scanner.hasNext()) {
+                command = scanner.next();
+            }
+
+            switch (command) {
+                case "/users" -> System.out.println(commandClass.getAllUsers());
+                case "/exit" -> {
+                    return;
+                }
+                default -> System.out.println("Команда не распознана\n");
+            }
+        }
+    }
+
+    private static Date getDate(Scanner scanner) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String text = scanner.nextLine();
+
+        try {
+            return new Date(simpleDateFormat.parse(text).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
