@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="create-table-role" author="Afternoon">
+        <createTable tableName="role">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="character varying(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-user" author="Afternoon">
+        <createTable tableName="user">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="character varying(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="character varying(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="character varying(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_blocked" type="bit(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="integer">
+                <constraints foreignKeyName="user_role_id_fkey" references="role(id)" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-transaction_category" author="Afternoon">
+        <createTable tableName="transaction_category">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="character varying(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="needed_sum" type="numeric"/>
+            <column name="user_id" type="integer">
+                <constraints foreignKeyName="transaction_category_user_id_fkey" references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-transaction" author="Afternoon">
+        <createTable tableName="transaction">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sum" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="character varying(50)"/>
+            <column name="category_id" type="integer">
+                <constraints foreignKeyName="transaction_category_id_fkey" references="transaction_category(id)"/>
+            </column>
+            <column name="user_id" type="integer">
+                <constraints foreignKeyName="transaction_user_id_fkey" references="user(id)" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-monthly_budget" author="Afternoon">
+        <createTable tableName="monthly_budget">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="integer">
+                <constraints foreignKeyName="monthly_budget_user_id_fkey" references="user(id)" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
