@@ -17,28 +17,17 @@ import java.util.Scanner;
 
 public class CommandClass {
     private Scanner scanner;
-    private final SimpleDateFormat simpleDateFormat;
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionCategoryRepository categoryRepository;
     private final MonthlyBudgetRepository budgetRepository;
-
-    public CommandClass() {
-        userRepository = new UserRepository();
-        transactionRepository = new TransactionRepository();
-        categoryRepository = new TransactionCategoryRepository();
-        budgetRepository = new MonthlyBudgetRepository();
-
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    }
 
     public CommandClass(UserRepository newUserRepository, TransactionRepository newTransactionRepository, TransactionCategoryRepository newCategoryRepository, MonthlyBudgetRepository newBudgetRepository) {
         userRepository = newUserRepository;
         transactionRepository = newTransactionRepository;
         categoryRepository = newCategoryRepository;
         budgetRepository = newBudgetRepository;
-
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     }
 
     private String sendEmail() {
@@ -572,10 +561,9 @@ public class CommandClass {
     /**
      * Users menu after login
      */
-    static void menuForUser() {
+    void menuForUser() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -596,12 +584,12 @@ public class CommandClass {
 
             switch (command) {
                 case "/budget" -> {
-                    MonthlyBudgetEntity monthlyBudgetEntity = commandClass.addBudget();
+                    MonthlyBudgetEntity monthlyBudgetEntity = addBudget();
 
                     System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
                 }
-                case "/goal" -> commandClass.addGoal();
-                case "/add_transaction" -> commandClass.addTransaction();
+                case "/goal" -> addGoal();
+                case "/add_transaction" -> addTransaction();
                 case "/delete_account" -> {
                     System.out.println("Для подтверждения введите команду /confirm\n" +
                             "Для возвращения в меню введите команду /menu:");
@@ -611,7 +599,7 @@ public class CommandClass {
                     }
 
                     if (command.equals("/confirm")) {
-                        if (commandClass.deleteAccount()) {
+                        if (deleteAccount()) {
                             System.out.println("Аккаунт удалён");
                         } else {
                             System.out.println("Не удалось удалить аккаунт");
@@ -627,14 +615,14 @@ public class CommandClass {
                     }
                 }
                 case "/show_transactions" -> {
-                    System.out.println(commandClass.getTransactions());
+                    System.out.println(getTransactions());
 
                     transactionsMenu();
 
                     return;
                 }
-                case "/show_goals" -> System.out.println(commandClass.getAllUserGoals());
-                case "/balance" -> System.out.println("Текущий баланс: " + commandClass.getCurrentBalance());
+                case "/show_goals" -> System.out.println(getAllUserGoals());
+                case "/balance" -> System.out.println("Текущий баланс: " + getCurrentBalance());
                 case "/balance_for_period" -> {
                     System.out.println("Введите начальную дату в формате 2000-12-21:");
                     scanner = new Scanner(System.in);
@@ -643,10 +631,10 @@ public class CommandClass {
                     System.out.println("Введите конечную дату в формате 2000-12-21:");
                     Date to = getDate(scanner);
 
-                    System.out.println("Доход за выбранный период: " + commandClass.getIncomeForPeriod(from, to));
-                    System.out.println("Расход за выбранный период: " + commandClass.getExpenseForPeriod(from, to) + "\n");
+                    System.out.println("Доход за выбранный период: " + getIncomeForPeriod(from, to));
+                    System.out.println("Расход за выбранный период: " + getExpenseForPeriod(from, to) + "\n");
                 }
-                case "/category_expenses" -> System.out.println(commandClass.getCategoryExpenses());
+                case "/category_expenses" -> System.out.println(getCategoryExpenses());
                 case "/exit" -> {
                     return;
                 }
@@ -655,10 +643,9 @@ public class CommandClass {
         }
     }
 
-    private static void transactionsMenu() {
+    private void transactionsMenu() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -673,12 +660,12 @@ public class CommandClass {
 
             switch (command) {
                 case "/filter_transactions" -> {
-                    System.out.println(commandClass.filterTransactions());
+                    System.out.println(filterTransactions());
 
                     transactionsMenu();
                 }
                 case "/edit_transaction" -> {
-                    if (!commandClass.editTransaction()) {
+                    if (!editTransaction()) {
                         System.out.println("Транзакция с указанным id не найдена");
                     }
                 }
@@ -691,7 +678,7 @@ public class CommandClass {
                     }
 
                     if (command.equals("/confirm")) {
-                        if (commandClass.deleteTransaction()) {
+                        if (deleteTransaction()) {
                             System.out.println("Транзакция удалена");
                         } else {
                             System.out.println("Транзакция с указанным id не найдена");
@@ -717,10 +704,9 @@ public class CommandClass {
     /**
      * Admins menu after login
      */
-    static void menuForAdmin() {
+    void menuForAdmin() {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass();
 
         while (true) {
             System.out.println("Введите желаемое действие:\n" +
@@ -732,7 +718,7 @@ public class CommandClass {
             }
 
             switch (command) {
-                case "/users" -> System.out.println(commandClass.getAllUsers());
+                case "/users" -> System.out.println(getAllUsers());
                 case "/exit" -> {
                     return;
                 }

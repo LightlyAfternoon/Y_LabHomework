@@ -2,6 +2,10 @@ package org.example;
 
 import org.example.command.CommandClass;
 import org.example.model.*;
+import org.example.repository.MonthlyBudgetRepository;
+import org.example.repository.TransactionCategoryRepository;
+import org.example.repository.TransactionRepository;
+import org.example.repository.UserRepository;
 
 import java.util.Scanner;
 
@@ -13,7 +17,8 @@ public class App
     public static void main( String[] args ) {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass();
+        CommandClass commandClass = new CommandClass(new UserRepository(), new TransactionRepository(),
+                new TransactionCategoryRepository(), new MonthlyBudgetRepository());
 
         while (true) {
             System.out.println("Здравствуйте! Хотите зарегистрироваться или войти в аккаунт? \n" +
