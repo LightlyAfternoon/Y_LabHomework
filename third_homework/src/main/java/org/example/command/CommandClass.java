@@ -107,10 +107,10 @@ public class CommandClass {
     public MonthlyBudgetEntity addBudget() {
         BigDecimal budget = sendBudgetSum();
 
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
         try {
-            monthlyBudgetEntity = budgetRepository.findByDateAndUser(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUser());
+            monthlyBudgetEntity = budgetRepository.findByDateAndUserId(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUserId());
         } catch (ParseException | SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -120,7 +120,7 @@ public class CommandClass {
                 monthlyBudgetEntity.setSum(budget);
                 budgetRepository.update(monthlyBudgetEntity);
             } else {
-                monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
+                monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
                 monthlyBudgetEntity.setSum(budget);
 
                 monthlyBudgetEntity = budgetRepository.add(monthlyBudgetEntity);
@@ -147,7 +147,7 @@ public class CommandClass {
     }
 
     public TransactionCategoryEntity addGoal() {
-        TransactionCategoryEntity goal = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity goal = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         goal.setName(sendGoalName());
         goal.setNeededSum(sendGoalSum());
@@ -170,7 +170,7 @@ public class CommandClass {
     private TransactionCategoryEntity sendCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
         try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
+            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
                 System.out.println("\n" + category.getName() + "\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -211,10 +211,11 @@ public class CommandClass {
     }
 
     public TransactionEntity addTransaction() {
-        TransactionEntity transaction = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transaction = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transaction.setSum(sendTransactionSum());
-        transaction.setCategory(sendCategory());
+        TransactionCategoryEntity category = sendCategory();
+        transaction.setCategoryId(category != null ? category.getId() : 0);
         transaction.setDate(sendDate());
         transaction.setDescription(sendDescription());
 
@@ -247,7 +248,7 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         try {
-            for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+            for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
                 output.append(transaction).append("\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -278,7 +279,7 @@ public class CommandClass {
     private TransactionCategoryEntity sendFilterCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
         try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
+            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
                 System.out.println("\n" + category.getName() + "\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -305,7 +306,10 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         try {
-            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(sendFilterDate(), sendFilterCategory(), sendFilterSumType(), CurrentUser.currentUser)) {
+            Date date = sendFilterDate();
+            TransactionCategoryEntity category = sendFilterCategory();
+            String type = sendFilterSumType();
+            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, category != null ? category.getId() : 0, type, CurrentUser.currentUser.getId())) {
                 output.append(transaction.toString()).append("\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -332,7 +336,7 @@ public class CommandClass {
     private TransactionCategoryEntity sendNewTransactionCategory() {
         System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
         try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser)) {
+            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
                 System.out.println("\n" + category.getName() + "\n");
             }
         } catch (SQLException | LiquibaseException e) {
@@ -386,7 +390,8 @@ public class CommandClass {
 
         if (transaction != null) {
             transaction.setSum(sendNewTransactionSum());
-            transaction.setCategory(sendNewTransactionCategory());
+            TransactionCategoryEntity category = sendNewTransactionCategory();
+            transaction.setCategoryId(category != null ? category.getId() : 0);
             transaction.setDate(sendNewTransactionDate());
             transaction.setDescription(sendNewTransactionDescription());
 
@@ -423,14 +428,14 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         try {
-            for (TransactionCategoryEntity goal : categoryRepository.findAllUserGoals(CurrentUser.currentUser)) {
+            for (TransactionCategoryEntity goal : categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId())) {
                 BigDecimal totalSum = BigDecimal.valueOf(0);
                 String goalString = goal.toString();
 
                 if (goal.getNeededSum() != null) {
                     try {
-                        for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
-                            if (transaction.getCategory() != null && transaction.getCategory().equals(goal) && transaction.getCategory().getNeededSum() != null) {
+                        for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
+                            if (transaction.getCategoryId() != 0 && transaction.getCategoryId() == goal.getId() && new TransactionCategoryRepository().findById(transaction.getCategoryId()).getNeededSum() != null) {
                                 totalSum = totalSum.add(transaction.getSum());
                             }
                         }
@@ -452,9 +457,9 @@ public class CommandClass {
 
     private void checkIfSpendMoreThanBudget(TransactionRepository transactionRepository) {
         SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
         try {
-            monthlyBudgetEntity = budgetRepository.findByDateAndUser(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUser());
+            monthlyBudgetEntity = budgetRepository.findByDateAndUserId(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUserId());
         } catch (ParseException | SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -463,7 +468,7 @@ public class CommandClass {
             BigDecimal totalSpentSum = BigDecimal.valueOf(0);
 
             try {
-                for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+                for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
                     if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0) {
                         totalSpentSum = totalSpentSum.add(transactionEntity.getSum());
                     }
@@ -488,7 +493,7 @@ public class CommandClass {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
         try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
                 totalSum = totalSum.add(transactionEntity.getSum());
             }
         } catch (SQLException | LiquibaseException e) {
@@ -502,7 +507,7 @@ public class CommandClass {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
         try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
                 if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
                     totalSum = totalSum.add(transactionEntity.getSum());
                 }
@@ -518,7 +523,7 @@ public class CommandClass {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
         try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser)) {
+            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
                 if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) < 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
                     totalSum = totalSum.add(transactionEntity.getSum());
                 }
@@ -538,7 +543,7 @@ public class CommandClass {
 
         try {
             for (TransactionCategoryEntity category : categoryRepository.findAll()) {
-                for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, category, "Neg", CurrentUser.currentUser)) {
+                for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, category.getId(), "Neg", CurrentUser.currentUser.getId())) {
                     totalSum = totalSum.subtract(transaction.getSum());
                 }
                 output.append(category.getName()).append(": ").append(totalSum).append("\n");

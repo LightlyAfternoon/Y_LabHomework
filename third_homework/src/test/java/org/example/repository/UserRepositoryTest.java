@@ -55,6 +55,8 @@ class UserRepositoryTest {
             throw new RuntimeException(e);
         }
 
+        Assertions.assertNotEquals(0, userEntity.getId());
+
         UserEntity userEntity2 = new UserEntity();
 
         userEntity2.setEmail("t");

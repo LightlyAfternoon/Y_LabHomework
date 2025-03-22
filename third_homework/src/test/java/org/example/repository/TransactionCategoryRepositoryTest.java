@@ -105,7 +105,7 @@ class TransactionCategoryRepositoryTest {
 
     @Test
     void addGoalTest() {
-        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity.setName("t");
         categoryEntity.setNeededSum(BigDecimal.valueOf(10.0));
@@ -116,7 +116,7 @@ class TransactionCategoryRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity2.setName("t");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(10.00));
@@ -134,7 +134,7 @@ class TransactionCategoryRepositoryTest {
 
         Assertions.assertNotEquals(categoryEntity, categoryEntity2);
 
-        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity3.setName("t3");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(30.3));
@@ -245,12 +245,12 @@ class TransactionCategoryRepositoryTest {
     }
 
     @Test
-    void findCommonCategoriesOrGoalsWithUserTest() {
+    void findCommonCategoriesOrGoalsWithUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
 
         categoryEntity.setName("t");
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity2.setName("t2");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(20.0));
@@ -259,7 +259,7 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity3.setName("t3");
 
-        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity4.setName("t4");
         categoryEntity4.setNeededSum(BigDecimal.valueOf(40.4));
@@ -274,7 +274,7 @@ class TransactionCategoryRepositoryTest {
             categoryRepository.add(categoryEntity3);
             categoryRepository.add(categoryEntity4);
 
-            transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUser(CurrentUser.currentUser);
+            transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -283,12 +283,12 @@ class TransactionCategoryRepositoryTest {
     }
 
     @Test
-    void findAllUserGoalsTest() {
+    void findAllGoalsWithUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
 
         categoryEntity.setName("t");
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity2.setName("t2");
         categoryEntity2.setNeededSum(BigDecimal.valueOf(20.0));
@@ -297,7 +297,7 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity3.setName("t3");
 
-        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(CurrentUser.currentUser);
+        TransactionCategoryEntity categoryEntity4 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity4.setName("t4");
         categoryEntity4.setNeededSum(BigDecimal.valueOf(40.4));
@@ -312,7 +312,7 @@ class TransactionCategoryRepositoryTest {
             categoryRepository.add(categoryEntity3);
             categoryRepository.add(categoryEntity4);
 
-            transactionCategoryEntitiesReturned = categoryRepository.findAllUserGoals(CurrentUser.currentUser);
+            transactionCategoryEntitiesReturned = categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -329,7 +329,7 @@ class TransactionCategoryRepositoryTest {
         try {
             categoryEntity = categoryRepository.add(categoryEntity);
 
-            TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
+            TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId(), 0);
 
             categoryEntity2.setName("t2");
 
@@ -351,7 +351,7 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId());
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, categoryEntity.getId());
 
         categoryEntity2.setName("t2");
 

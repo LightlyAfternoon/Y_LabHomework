@@ -14,16 +14,67 @@ public class TransactionEntity {
     /**
      * Field category is meant for a category or a goal of money spent
      */
-    private TransactionCategoryEntity category;
-    private final UserEntity user;
+    private int categoryId;
+    private final int userId;
 
-    public TransactionEntity(UserEntity user) {
-        this.user = user.getCopy();
+    private TransactionEntity(TransactionBuilder builder) {
+        this.id = builder.id;
+        this.sum = builder.sum;
+        this.date = builder.date;
+        this.description = builder.description;
+        this.categoryId = builder.categoryId;
+        this.userId = builder.userId;
     }
 
-    public TransactionEntity(int id, UserEntity user) {
+    public static class TransactionBuilder {
+        private int id;
+        private BigDecimal sum;
+        private Date date;
+        private String description;
+        private int categoryId;
+        private int userId;
+
+        public TransactionBuilder(BigDecimal sum, int userId) {
+            this.sum = sum;
+            this.userId = userId;
+        }
+
+        public TransactionBuilder id(int id) {
+            this.id = id;
+
+            return this;
+        }
+
+        public TransactionBuilder date(Date date) {
+            this.date = date;
+
+            return this;
+        }
+
+        public TransactionBuilder description(String description) {
+            this.description = description;
+
+            return this;
+        }
+
+        public TransactionBuilder categoryId(int categoryId) {
+            this.categoryId = categoryId;
+
+            return this;
+        }
+
+        public TransactionEntity build() {
+            return new TransactionEntity(this);
+        }
+    }
+
+    public TransactionEntity(int userId) {
+        this.userId = userId;
+    }
+
+    public TransactionEntity(int id, int userId) {
         this.id = id;
-        this.user = user.getCopy();
+        this.userId = userId;
     }
 
     public int getId() {
@@ -38,20 +89,12 @@ public class TransactionEntity {
         this.sum = sum;
     }
 
-    public TransactionCategoryEntity getCategory() {
-        if (category != null) {
-            return category.getCopy();
-        } else {
-            return null;
-        }
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(TransactionCategoryEntity category) {
-        if (category != null) {
-            this.category = category.getCopy();
-        } else {
-            this.category = null;
-        }
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Date getDate() {
@@ -70,8 +113,8 @@ public class TransactionEntity {
         this.description = description;
     }
 
-    public UserEntity getUser() {
-        return user.getCopy();
+    public int getUserId() {
+        return userId;
     }
 
     @Override
@@ -89,37 +132,26 @@ public class TransactionEntity {
         TransactionEntity transaction = (TransactionEntity) obj;
 
         return this.sum.compareTo(transaction.sum) == 0 &&
-                ((this.category == null && transaction.category == null) || (this.category != null && this.category.equals(transaction.category))) &&
+                ((this.categoryId == 0 && transaction.categoryId == 0) || (this.categoryId != 0 && this.categoryId == transaction.categoryId)) &&
                 this.date.equals(transaction.date) &&
                 ((this.description == null && transaction.description == null) || (this.description != null && this.description.equals(transaction.description))) &&
-                this.user.equals(transaction.user);
+                this.userId == transaction.userId;
     }
 
     @Override
     public int hashCode() {
         int result = sum.hashCode();
 
-        result = 31 * result + (category != null ? category.hashCode() : 0);
+        result = 31 * result + categoryId;
         result = 31 * result + date.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + user.hashCode();
+        result = 31 * result + userId;
 
         return result;
     }
 
-    public TransactionEntity getCopy() {
-        TransactionEntity transactionEntityCopy = new TransactionEntity(this.id, this.user);
-
-        transactionEntityCopy.sum = this.sum;
-        transactionEntityCopy.category = this.category;
-        transactionEntityCopy.date = this.date;
-        transactionEntityCopy.description = this.description;
-
-        return transactionEntityCopy;
-    }
-
     @Override
     public String toString() {
-        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " Категория/Цель: " + (this.getCategory() != null? this.getCategory().getName() : "none") + " id: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
+        return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " id категории/цели: " + (this.getCategoryId() != 0? this.getCategoryId() : "none") + " id: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
     }
 }

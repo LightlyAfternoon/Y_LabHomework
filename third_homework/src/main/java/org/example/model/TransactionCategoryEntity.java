@@ -1,11 +1,6 @@
 package org.example.model;
 
-import liquibase.exception.LiquibaseException;
-import org.example.CurrentUser;
-import org.example.repository.TransactionRepository;
-
 import java.math.BigDecimal;
-import java.sql.SQLException;
 
 public class TransactionCategoryEntity {
     private int id;
@@ -14,29 +9,53 @@ public class TransactionCategoryEntity {
     /**
      * Fields user and neededSum are meant for users goals
      */
-    private UserEntity user;
+    private int userId;
+
+    private TransactionCategoryEntity(TransactionCategoryBuilder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.neededSum = builder.neededSum;
+        this.userId = builder.userId;
+    }
+
+    public static class TransactionCategoryBuilder {
+        private int id;
+        private String name;
+        private BigDecimal neededSum;
+        private int userId;
+
+        public TransactionCategoryBuilder(String name) {
+            this.name = name;
+        }
+
+        public TransactionCategoryBuilder id(int id) {
+            this.id = id;
+
+            return this;
+        }
+
+        public TransactionCategoryBuilder neededSum(BigDecimal neededSum) {
+            this.neededSum = neededSum;
+
+            return this;
+        }
+
+        public TransactionCategoryBuilder userId(int userId) {
+            this.userId = userId;
+
+            return this;
+        }
+
+        public TransactionCategoryEntity build() {
+            return new TransactionCategoryEntity(this);
+        }
+    }
 
     public TransactionCategoryEntity() {}
 
-    public TransactionCategoryEntity(int id) {
+    public TransactionCategoryEntity(int id, int userId) {
         this.id = id;
-    }
-
-    public TransactionCategoryEntity(UserEntity user) {
-        if (user != null) {
-            this.user = user.getCopy();
-        } else {
-            this.user = null;
-        }
-    }
-
-    public TransactionCategoryEntity(int id, UserEntity user) {
-        this.id = id;
-        if (user != null) {
-            this.user = user.getCopy();
-        } else {
-            this.user = null;
-        }
+        this.userId = userId;
     }
 
     public int getId() {
@@ -51,12 +70,8 @@ public class TransactionCategoryEntity {
         this.name = name;
     }
 
-    public UserEntity getUser() {
-        if (user != null) {
-            return user.getCopy();
-        } else {
-            return null;
-        }
+    public int getUserId() {
+        return userId;
     }
 
     public BigDecimal getNeededSum() {
@@ -82,7 +97,7 @@ public class TransactionCategoryEntity {
         TransactionCategoryEntity transactionCategory = (TransactionCategoryEntity) obj;
 
         return this.name.equals(transactionCategory.name) &&
-                ((this.user == null && transactionCategory.user == null) || (this.user != null && this.user.equals(transactionCategory.user))) &&
+                ((this.userId == 0 && transactionCategory.userId == 0) || (this.userId != 0 && this.userId == transactionCategory.userId)) &&
                 ((this.neededSum == null && transactionCategory.neededSum == null) || (this.neededSum != null && this.neededSum.compareTo(transactionCategory.neededSum) == 0));
     }
 
@@ -90,23 +105,14 @@ public class TransactionCategoryEntity {
     public int hashCode() {
         int result = name.hashCode();
 
-        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + userId;
         result = 31 * result + (neededSum != null ? neededSum.hashCode() : 0);
 
         return result;
     }
 
-    public TransactionCategoryEntity getCopy() {
-        TransactionCategoryEntity transactionCategoryEntityCopy = new TransactionCategoryEntity(this.id, this.user);
-
-        transactionCategoryEntityCopy.name = this.name;
-        transactionCategoryEntityCopy.neededSum = this.neededSum;
-
-        return transactionCategoryEntityCopy;
-    }
-
     @Override
     public String toString() {
-        return this.getName() + " id: " + this.getId() + (this.getUser() != null? " id пользователя: " + this.getUser().getId() : "");
+        return this.getName() + " id: " + this.getId() + (this.getUserId() != 0 ? " id пользователя: " + this.getUserId() : "");
     }
 }

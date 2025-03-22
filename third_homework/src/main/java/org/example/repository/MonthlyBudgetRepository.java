@@ -3,65 +3,57 @@ package org.example.repository;
 import liquibase.exception.LiquibaseException;
 import org.example.db.ConnectionClass;
 import org.example.model.MonthlyBudgetEntity;
-import org.example.model.UserEntity;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigDecimal;
+import java.sql.*;
 import java.util.ArrayList;
-import java.sql.Date;
 import java.util.List;
 
 public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> {
     @Override
     public MonthlyBudgetEntity add(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
-        try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget " +
-                     "where date = '" + entity.getDate() + "' and " +
-                     "sum = " + entity.getSum() + " and " +
-                     "user_id = " + entity.getUser().getId())) {
+        int id = getId(entity);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                MonthlyBudgetEntity budget = new MonthlyBudgetEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(4)), resultSet.getDate(2));
-
-                budget.setSum(resultSet.getBigDecimal(3));
-
-                return budget;
-            }
+        if (id != 0) {
+            return new MonthlyBudgetEntity.MonthlyBudgetBuilder(entity.getUserId(), entity.getSum()).
+                    id(id).date(entity.getDate()).build();
         }
 
-        MonthlyBudgetEntity newBudget = new MonthlyBudgetEntity(entity.getUser(), entity.getDate());
-
-        newBudget.setSum(entity.getSum());
-
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("insert into monthly_budget(date, sum, user_id) values (" +
-                     "'" + entity.getDate() + "', " + entity.getSum() + ", " + entity.getUser().getId() + ")")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into monthly_budget(date, sum, user_id) values (?, ?, ?)")) {
+            preparedStatement.setDate(1, entity.getDate());
+            preparedStatement.setBigDecimal(2, entity.getSum());
+            preparedStatement.setInt(3, entity.getUserId());
 
             preparedStatement.executeUpdate();
         }
 
+        id = getId(entity);
+
+        if (id != 0) {
+            return new MonthlyBudgetEntity.MonthlyBudgetBuilder(entity.getUserId(), entity.getSum()).
+                    id(id).date(entity.getDate()).build();
+        }
+
+        return null;
+    }
+
+    private int getId(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget " +
-                     "where date = '" + entity.getDate() + "' and " +
-                     "sum = " + entity.getSum() + " and " +
-                     "user_id = " + entity.getUser().getId())) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select id from monthly_budget " +
+                     "where date = ? and sum = ? and user_id = ?")) {
+            preparedStatement.setDate(1, entity.getDate());
+            preparedStatement.setBigDecimal(2, entity.getSum());
+            preparedStatement.setInt(3, entity.getUserId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                newBudget = new MonthlyBudgetEntity(resultSet.getInt(1), entity.getUser(), entity.getDate());
-
-                newBudget.setSum(entity.getSum());
-
-                return newBudget.getCopy();
+                return resultSet.getInt(1);
             }
-        }
 
-        return null;
+            return 0;
+        }
     }
 
     @Override
@@ -74,32 +66,29 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
 
             if (resultSet.next()) {
                 int userId = resultSet.getInt(4);
-                MonthlyBudgetEntity budget = new MonthlyBudgetEntity(resultSet.getInt(1), new UserRepository().findById(userId), resultSet.getDate(2));
+                BigDecimal sum = resultSet.getBigDecimal(3);
 
-                budget.setSum(resultSet.getBigDecimal(3));
-
-                return budget;
+                return new MonthlyBudgetEntity.MonthlyBudgetBuilder(userId, sum).
+                        id(id).date(resultSet.getDate(2)).build();
             }
         }
 
         return null;
     }
 
-    public MonthlyBudgetEntity findByDateAndUser(Date date, UserEntity user) throws SQLException, LiquibaseException {
+    public MonthlyBudgetEntity findByDateAndUserId(Date date, int userId) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget where date = ? and user_id = ?")) {
             preparedStatement.setDate(1, date);
-            preparedStatement.setInt(2, user.getId());
+            preparedStatement.setInt(2, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                int userId = resultSet.getInt(4);
-                MonthlyBudgetEntity budget = new MonthlyBudgetEntity(resultSet.getInt(1), new UserRepository().findById(userId), resultSet.getDate(2));
+                BigDecimal sum = resultSet.getBigDecimal(3);
 
-                budget.setSum(resultSet.getBigDecimal(3));
-
-                return budget;
+                return new MonthlyBudgetEntity.MonthlyBudgetBuilder(userId, sum).
+                        id(resultSet.getInt(1)).date(date).build();
             }
         }
 
@@ -117,9 +106,10 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
 
             while (resultSet.next()) {
                 int userId = resultSet.getInt(4);
-                MonthlyBudgetEntity budget = new MonthlyBudgetEntity(resultSet.getInt(1), new UserRepository().findById(userId), resultSet.getDate(2));
+                BigDecimal sum = resultSet.getBigDecimal(3);
 
-                budget.setSum(resultSet.getBigDecimal(3));
+                MonthlyBudgetEntity budget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(userId, sum).
+                        id(resultSet.getInt(1)).date(resultSet.getDate(2)).build();
 
                 budgetEntities.add(budget);
             }
@@ -132,8 +122,9 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     public void update(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("update monthly_budget " +
-                     "set sum = "+entity.getSum()+" where id = ?")) {
-            preparedStatement.setInt(1, entity.getId());
+                     "set sum = ? where id = ?")) {
+            preparedStatement.setBigDecimal(1, entity.getSum());
+            preparedStatement.setInt(2, entity.getId());
 
             preparedStatement.executeUpdate();
         }

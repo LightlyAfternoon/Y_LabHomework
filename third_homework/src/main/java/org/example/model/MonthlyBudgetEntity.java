@@ -7,14 +7,49 @@ import java.text.SimpleDateFormat;
 
 public class MonthlyBudgetEntity {
     private int id;
-    private final UserEntity user;
+    private final int userId;
     private final Date date;
     private BigDecimal sum;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
 
-    public MonthlyBudgetEntity(UserEntity user) {
-        this.user = user.getCopy();
+    private MonthlyBudgetEntity(MonthlyBudgetBuilder builder) {
+        this.id = builder.id;
+        this.userId = builder.userId;
+        this.date = builder.date;
+        this.sum = builder.sum;
+    }
+
+    public static class MonthlyBudgetBuilder {
+        private int id;
+        private int userId;
+        private Date date;
+        private BigDecimal sum;
+
+        public MonthlyBudgetBuilder(int userId, BigDecimal sum) {
+            this.userId = userId;
+            this.sum = sum;
+        }
+
+        public MonthlyBudgetBuilder id(int id) {
+            this.id = id;
+
+            return this;
+        }
+
+        public MonthlyBudgetBuilder date(Date date) {
+            this.date = date;
+
+            return this;
+        }
+
+        public MonthlyBudgetEntity build() {
+            return new MonthlyBudgetEntity(this);
+        }
+    }
+
+    public MonthlyBudgetEntity(int userId) {
+        this.userId = userId;
 
         Date newDate = new Date(System.currentTimeMillis());
 
@@ -25,8 +60,8 @@ public class MonthlyBudgetEntity {
         }
     }
 
-    public MonthlyBudgetEntity(UserEntity user, Date date) {
-        this.user = user.getCopy();
+    public MonthlyBudgetEntity(int userId, Date date) {
+        this.userId = userId;
 
         try {
             this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
@@ -35,9 +70,9 @@ public class MonthlyBudgetEntity {
         }
     }
 
-    public MonthlyBudgetEntity(int id, UserEntity user, Date date) {
+    public MonthlyBudgetEntity(int id, int userId, Date date) {
         this.id = id;
-        this.user = user.getCopy();
+        this.userId = userId;
 
         try {
             this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
@@ -50,8 +85,8 @@ public class MonthlyBudgetEntity {
         return id;
     }
 
-    public UserEntity getUser() {
-        return user.getCopy();
+    public int getUserId() {
+        return userId;
     }
 
     public Date getDate() {
@@ -80,26 +115,18 @@ public class MonthlyBudgetEntity {
 
         MonthlyBudgetEntity monthlyBudgetEntity = (MonthlyBudgetEntity) obj;
 
-        return this.user.equals(monthlyBudgetEntity.user) &&
+        return this.userId == monthlyBudgetEntity.userId &&
                 this.date.equals(monthlyBudgetEntity.date) &&
                 this.sum.equals(monthlyBudgetEntity.sum);
     }
 
     @Override
     public int hashCode() {
-        int result = user.hashCode();
+        int result = userId;
 
         result = 31 * result + date.hashCode();
         result = 31 * result + sum.hashCode();
 
         return result;
-    }
-
-    public MonthlyBudgetEntity getCopy() {
-        MonthlyBudgetEntity monthlyBudgetEntityCopy = new MonthlyBudgetEntity(this.id, this.user, this.date);
-
-        monthlyBudgetEntityCopy.sum = this.sum;
-
-        return monthlyBudgetEntityCopy;
     }
 }

@@ -1,6 +1,5 @@
 package org.example.model;
 
-
 public class UserEntity {
     private int id;
     private String name;
@@ -9,13 +8,63 @@ public class UserEntity {
     private UserRole role;
     private boolean isBlocked;
 
+    private UserEntity(UserBuilder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.email = builder.email;
+        this.password = builder.password;
+        this.role = builder.role;
+        this.isBlocked = builder.isBlocked;
+    }
+
+    public static class UserBuilder {
+        private int id;
+        private String name;
+        private String email;
+        private String password;
+        private UserRole role;
+        private boolean isBlocked;
+
+        public UserBuilder(String email, String password ,String name) {
+            this.name = name;
+            this.email = email;
+            this.password = password;
+            this.role = UserRole.USER;
+            this.isBlocked = false;
+        }
+
+        public UserBuilder id(int id) {
+            this.id = id;
+
+            return this;
+        }
+
+        public UserBuilder role(UserRole role) {
+            this.role = role;
+
+            return this;
+        }
+
+        public UserBuilder isBlocked(Boolean isBlocked) {
+            this.isBlocked = isBlocked;
+
+            return this;
+        }
+
+        public UserEntity build() {
+            return new UserEntity(this);
+        }
+    }
+
     public UserEntity() {
         this.role = UserRole.USER;
+        this.isBlocked = false;
     }
 
     public UserEntity(int id) {
         this.id = id;
         this.role = UserRole.USER;
+        this.isBlocked = false;
     }
 
     public int getId() {
@@ -93,18 +142,6 @@ public class UserEntity {
         result = 31 * result + (isBlocked ? 1 : 0);
 
         return result;
-    }
-
-    public UserEntity getCopy() {
-        UserEntity userEntityCopy = new UserEntity(this.id);
-
-        userEntityCopy.name = this.name;
-        userEntityCopy.email = this.email;
-        userEntityCopy.password = this.password;
-        userEntityCopy.role = this.role;
-        userEntityCopy.isBlocked = this.isBlocked;
-
-        return userEntityCopy;
     }
 
     @Override

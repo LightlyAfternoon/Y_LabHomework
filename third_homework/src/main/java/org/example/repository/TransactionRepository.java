@@ -2,10 +2,9 @@ package org.example.repository;
 
 import liquibase.exception.LiquibaseException;
 import org.example.db.ConnectionClass;
-import org.example.model.TransactionCategoryEntity;
 import org.example.model.TransactionEntity;
-import org.example.model.UserEntity;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,65 +12,74 @@ import java.util.List;
 public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public TransactionEntity add(TransactionEntity entity) throws SQLException, LiquibaseException {
-        try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction " +
-                     "where sum = "+entity.getSum()+" and " +
-                     "date = '"+entity.getDate()+"' and " +
-                     "description "+(entity.getDescription() != null ? "= '" + entity.getDescription()+"'" : "is " + null)+" and " +
-                     "category_id "+(entity.getCategory() != null ? "= " + entity.getCategory().getId() : "is " + null)+" and " +
-                     "user_id = "+entity.getUser().getId())) {
+        int id = getId(entity);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                TransactionEntity transaction = new TransactionEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(6)));
-
-                transaction.setSum(resultSet.getBigDecimal(2));
-                transaction.setDate(resultSet.getDate(3));
-                transaction.setDescription(resultSet.getString(4));
-                transaction.setCategory(new TransactionCategoryRepository().findById(resultSet.getInt(5)));
-
-                return transaction;
-            }
+        if (id != 0) {
+            return new TransactionEntity.TransactionBuilder(entity.getSum(), entity.getUserId()).
+                    id(id).date(entity.getDate()).description(entity.getDescription()).categoryId(entity.getCategoryId()).build();
         }
 
-        TransactionEntity newTransaction = new TransactionEntity(entity.getUser());
-
-        newTransaction.setSum(entity.getSum());
-        newTransaction.setDate(entity.getDate());
-        newTransaction.setDescription(entity.getDescription());
-        newTransaction.setCategory(entity.getCategory());
-
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("insert into transaction(sum, date, description, category_id, user_id) values (" +
-                     entity.getSum()+", '"+entity.getDate()+"', "+(entity.getDescription() != null ? "'"+entity.getDescription()+"'" : null)+", "+(entity.getCategory() != null ? entity.getCategory().getId() : null)+", "+entity.getUser().getId()+")")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into transaction(sum, date, description, category_id, user_id) " +
+                     "values (?, ?, ?, ?, ?)")) {
+            preparedStatement.setBigDecimal(1, entity.getSum());
+            preparedStatement.setDate(2, entity.getDate());
+            preparedStatement.setString(3, entity.getDescription());
+            if (entity.getCategoryId() != 0) {
+                preparedStatement.setInt(4, entity.getCategoryId());
+            } else {
+                preparedStatement.setNull(4, Types.INTEGER);
+            }
+            if (entity.getUserId() != 0) {
+                preparedStatement.setInt(5, entity.getUserId());
+            } else {
+                preparedStatement.setNull(5, Types.INTEGER);
+            }
 
             preparedStatement.executeUpdate();
         }
 
+        id = getId(entity);
+
+        if (id != 0) {
+            return new TransactionEntity.TransactionBuilder(entity.getSum(), entity.getUserId()).
+                    id(id).date(entity.getDate()).description(entity.getDescription()).categoryId(entity.getCategoryId()).build();
+        }
+
+        return null;
+    }
+
+    private int getId(TransactionEntity entity) throws SQLException, LiquibaseException {
+        int parameterIndex = 1;
+        String sql = "select id from transaction " +
+                "where sum = ? and date = ? and description = ?";
+
+        if (entity.getCategoryId() != 0) {
+            sql += " and category_id = ?";
+        } else {
+            sql += " and category_id is null";
+        }
+
+        sql += " and user_id = ?";
+
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction " +
-                     "where sum = "+entity.getSum()+" and " +
-                     "date = '"+entity.getDate()+"' and " +
-                     "description "+(entity.getDescription() != null ? "= '" + entity.getDescription()+"'" : "is " + null)+" and " +
-                     "category_id "+(entity.getCategory() != null ? "= " + entity.getCategory().getId() : "is " + null)+" and " +
-                     "user_id = "+entity.getUser().getId())) {
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setBigDecimal(parameterIndex++, entity.getSum());
+            preparedStatement.setDate(parameterIndex++, entity.getDate());
+            preparedStatement.setString(parameterIndex++, entity.getDescription());
+            if (entity.getCategoryId() != 0) {
+                preparedStatement.setInt(parameterIndex++, entity.getCategoryId());
+            }
+            preparedStatement.setInt(parameterIndex, entity.getUserId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                newTransaction = new TransactionEntity(resultSet.getInt(1), entity.getUser());
-
-                newTransaction.setSum(entity.getSum());
-                newTransaction.setDate(entity.getDate());
-                newTransaction.setDescription(entity.getDescription());
-                newTransaction.setCategory(entity.getCategory());
-
-                return newTransaction.getCopy();
+                return resultSet.getInt(1);
             }
-        }
 
-        return null;
+            return 0;
+        }
     }
 
     @Override
@@ -83,14 +91,11 @@ public class TransactionRepository implements Repository<TransactionEntity> {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                TransactionEntity transaction = new TransactionEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(6)));
+                BigDecimal sum = resultSet.getBigDecimal(2);
+                int userId = resultSet.getInt(6);
 
-                transaction.setSum(resultSet.getBigDecimal(2));
-                transaction.setDate(resultSet.getDate(3));
-                transaction.setDescription(resultSet.getString(4));
-                transaction.setCategory(new TransactionCategoryRepository().findById(resultSet.getInt(5)));
-
-                return transaction;
+                return new TransactionEntity.TransactionBuilder(sum, userId).
+                        id(id).date(resultSet.getDate(3)).description(resultSet.getString(4)).categoryId(resultSet.getInt(5)).build();
             }
         }
 
@@ -107,12 +112,11 @@ public class TransactionRepository implements Repository<TransactionEntity> {
             List<TransactionEntity> transactionEntities = new ArrayList<>();
 
             while (resultSet.next()) {
-                TransactionEntity transaction = new TransactionEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(6)));
+                BigDecimal sum = resultSet.getBigDecimal(2);
+                int userId = resultSet.getInt(6);
 
-                transaction.setSum(resultSet.getBigDecimal(2));
-                transaction.setDate(resultSet.getDate(3));
-                transaction.setDescription(resultSet.getString(4));
-                transaction.setCategory(new TransactionCategoryRepository().findById(resultSet.getInt(5)));
+                TransactionEntity transaction = new TransactionEntity.TransactionBuilder(sum, userId).
+                        id(resultSet.getInt(1)).date(resultSet.getDate(3)).description(resultSet.getString(4)).categoryId(resultSet.getInt(5)).build();
 
                 transactionEntities.add(transaction);
             }
@@ -121,22 +125,20 @@ public class TransactionRepository implements Repository<TransactionEntity> {
         }
     }
 
-    public List<TransactionEntity> findAllWithUser(UserEntity user) throws SQLException, LiquibaseException {
+    public List<TransactionEntity> findAllWithUser(int userId) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction where user_id = ?")) {
-            preparedStatement.setInt(1, user.getId());
+            preparedStatement.setInt(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             List<TransactionEntity> transactionEntities = new ArrayList<>();
 
             while (resultSet.next()) {
-                TransactionEntity transaction = new TransactionEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(6)));
+                BigDecimal sum = resultSet.getBigDecimal(2);
 
-                transaction.setSum(resultSet.getBigDecimal(2));
-                transaction.setDate(resultSet.getDate(3));
-                transaction.setDescription(resultSet.getString(4));
-                transaction.setCategory(new TransactionCategoryRepository().findById(resultSet.getInt(5)));
+                TransactionEntity transaction = new TransactionEntity.TransactionBuilder(sum, userId).
+                        id(resultSet.getInt(1)).date(resultSet.getDate(3)).description(resultSet.getString(4)).categoryId(resultSet.getInt(5)).build();
 
                 transactionEntities.add(transaction);
             }
@@ -145,7 +147,42 @@ public class TransactionRepository implements Repository<TransactionEntity> {
         }
     }
 
-    public List<TransactionEntity> findAllWithDateAndCategoryAndTypeAndUser(Date date, TransactionCategoryEntity category, String type, UserEntity user) throws SQLException, LiquibaseException {
+    public List<TransactionEntity> findAllWithDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId) throws SQLException, LiquibaseException {
+        String sql = getFilteredSql(date, categoryId, type);
+
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+
+            if (date != null) {
+                preparedStatement.setDate(parameterIndex++, date);
+            }
+            if (categoryId != 0) {
+                preparedStatement.setInt(parameterIndex++, categoryId);
+            }
+            if (type != null && !type.isBlank()) {
+                preparedStatement.setInt(parameterIndex++, 0);
+            }
+            preparedStatement.setInt(parameterIndex, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<TransactionEntity> transactionEntities = new ArrayList<>();
+
+            while (resultSet.next()) {
+                BigDecimal sum = resultSet.getBigDecimal(2);
+
+                TransactionEntity transaction = new TransactionEntity.TransactionBuilder(sum, userId).
+                        id(resultSet.getInt(1)).date(resultSet.getDate(3)).description(resultSet.getString(4)).categoryId(resultSet.getInt(5)).build();
+
+                transactionEntities.add(transaction);
+            }
+
+            return transactionEntities;
+        }
+    }
+
+    private static String getFilteredSql(Date date, int categoryId, String type) {
         String sql = "select * from transaction where";
         boolean moreThanOneParameters = false;
 
@@ -154,7 +191,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
             moreThanOneParameters = true;
         }
 
-        if (category != null) {
+        if (categoryId != 0) {
             if (moreThanOneParameters) {
                 sql += " and";
             }
@@ -181,47 +218,30 @@ public class TransactionRepository implements Repository<TransactionEntity> {
         }
 
         sql += " user_id = ?";
-
-        try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-
-            if (date != null) {
-                preparedStatement.setDate(parameterIndex++, date);
-            }
-            if (category != null) {
-                preparedStatement.setInt(parameterIndex++, category.getId());
-            }
-            if (type != null && !type.isBlank()) {
-                preparedStatement.setInt(parameterIndex++, 0);
-            }
-            preparedStatement.setInt(parameterIndex, user.getId());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            List<TransactionEntity> transactionEntities = new ArrayList<>();
-
-            while (resultSet.next()) {
-                TransactionEntity transaction = new TransactionEntity(resultSet.getInt(1), new UserRepository().findById(resultSet.getInt(6)));
-
-                transaction.setSum(resultSet.getBigDecimal(2));
-                transaction.setDate(resultSet.getDate(3));
-                transaction.setDescription(resultSet.getString(4));
-                transaction.setCategory(new TransactionCategoryRepository().findById(resultSet.getInt(5)));
-
-                transactionEntities.add(transaction);
-            }
-
-            return transactionEntities;
-        }
+        return sql;
     }
 
     @Override
     public void update(TransactionEntity entity) throws SQLException, LiquibaseException {
+        int parameterIndex = 1;
+        String sql = "update transaction " +
+                "set sum = ?, date = ?, description = ?";
+
+        if (entity.getCategoryId() != 0) {
+            sql += ", category_id = ?";
+        }
+
+        sql += " where id = ?";
+
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("update transaction " +
-                     "set sum = "+entity.getSum()+", category_id = "+(entity.getCategory() != null ? entity.getCategory().getId() : null)+", date = '"+entity.getDate()+"', description = "+(entity.getDescription() != null ? "'"+entity.getDescription()+"'" : null)+" where id = ?")) {
-            preparedStatement.setInt(1, entity.getId());
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setBigDecimal(parameterIndex++, entity.getSum());
+            preparedStatement.setDate(parameterIndex++, entity.getDate());
+            preparedStatement.setString(parameterIndex++, entity.getDescription());
+            if (entity.getCategoryId() != 0) {
+                preparedStatement.setInt(parameterIndex++, entity.getCategoryId());
+            }
+            preparedStatement.setInt(parameterIndex, entity.getId());
 
             preparedStatement.executeUpdate();
         }

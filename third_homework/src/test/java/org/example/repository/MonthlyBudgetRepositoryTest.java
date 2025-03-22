@@ -63,7 +63,7 @@ class MonthlyBudgetRepositoryTest {
     @Test
     void addTest() {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
@@ -73,7 +73,7 @@ class MonthlyBudgetRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(10.10));
 
@@ -84,12 +84,13 @@ class MonthlyBudgetRepositoryTest {
         }
 
         Assertions.assertEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
+        Assertions.assertEquals(monthlyBudgetEntity.getId(), monthlyBudgetEntity2.getId());
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(20.0));
 
         Assertions.assertNotEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
 
-        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity3.setSum(BigDecimal.valueOf(10.0));
 
@@ -105,7 +106,7 @@ class MonthlyBudgetRepositoryTest {
     @Test
     void findByIdTest() {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
@@ -125,28 +126,28 @@ class MonthlyBudgetRepositoryTest {
     }
 
     @Test
-    void findByDateAndUserTest() {
+    void findByDateAndUserIdTest() {
         Date date = Date.valueOf("2000-01-01");
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         Date date2 = Date.valueOf("2000-02-01");
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser, date2);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date2);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
         try {
             monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date, CurrentUser.currentUser), monthlyBudgetEntity);
+            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUserId(date, CurrentUser.currentUser.getId()), monthlyBudgetEntity);
 
             monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.5));
 
             monthlyBudgetEntity2 = monthlyBudgetRepository.add(monthlyBudgetEntity2);
 
-            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity2);
-            Assertions.assertNotEquals(monthlyBudgetRepository.findByDateAndUser(date2, CurrentUser.currentUser), monthlyBudgetEntity);
+            Assertions.assertEquals(monthlyBudgetRepository.findByDateAndUserId(date2, CurrentUser.currentUser.getId()), monthlyBudgetEntity2);
+            Assertions.assertNotEquals(monthlyBudgetRepository.findByDateAndUserId(date2, CurrentUser.currentUser.getId()), monthlyBudgetEntity);
 
-            Assertions.assertNull(monthlyBudgetRepository.findByDateAndUser(Date.valueOf("2001-01-01"), CurrentUser.currentUser));
+            Assertions.assertNull(monthlyBudgetRepository.findByDateAndUserId(Date.valueOf("2001-01-01"), CurrentUser.currentUser.getId()));
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -155,15 +156,15 @@ class MonthlyBudgetRepositoryTest {
     @Test
     void findAllTest() {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(20.0));
 
-        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity3.setSum(BigDecimal.valueOf(30.3));
 
@@ -183,7 +184,7 @@ class MonthlyBudgetRepositoryTest {
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        MonthlyBudgetEntity monthlyBudgetEntity4 = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity4 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity4.setSum(BigDecimal.valueOf(10.0));
 
@@ -205,14 +206,14 @@ class MonthlyBudgetRepositoryTest {
     @Test
     void updateTest() {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
         try {
             monthlyBudgetEntity = monthlyBudgetRepository.add(monthlyBudgetEntity);
 
-            MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
+            MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser.getId(), date);
 
             monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
 
@@ -230,16 +231,16 @@ class MonthlyBudgetRepositoryTest {
 
     @Test
     void deleteTest() {
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser);
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
         Date date = new Date(System.currentTimeMillis());
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser, date);
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(monthlyBudgetEntity.getId(), CurrentUser.currentUser.getId(), date);
 
         monthlyBudgetEntity2.setSum(BigDecimal.valueOf(1.23));
 
-        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser);
+        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
 
         monthlyBudgetEntity3.setSum(BigDecimal.valueOf(30.3));
 

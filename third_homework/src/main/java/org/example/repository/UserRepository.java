@@ -16,63 +16,54 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public UserEntity add(UserEntity entity) throws SQLException, LiquibaseException {
         if (!emailExists(entity.getEmail())) {
-            try (Connection connection = ConnectionClass.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
-                         "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
-                         "password = '"+entity.getPassword()+"' and role_id = "+(entity.getRole() == UserRole.ADMIN ? 1 : 2)+" and is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"'")) {
+            int id = getId(entity);
 
-                ResultSet resultSet = preparedStatement.executeQuery();
-
-                if (resultSet.next()) {
-                    UserEntity user = new UserEntity(resultSet.getInt(1));
-
-                    user.setName(resultSet.getString(2));
-                    user.setEmail(resultSet.getString(3));
-                    user.setPassword(resultSet.getString(4));
-                    user.setBlocked(resultSet.getBoolean(5));
-                    user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
-
-                    return user;
-                }
+            if (id != 0) {
+                return new UserEntity.UserBuilder(entity.getEmail(), entity.getPassword(), entity.getName()).
+                        id(id).role(entity.getRole()).isBlocked(entity.getBlocked()).build();
             }
 
-            UserEntity newUser = new UserEntity();
-
-            newUser.setName(entity.getName());
-            newUser.setEmail(entity.getEmail());
-            newUser.setPassword(entity.getPassword());
-            newUser.setRole(entity.getRole());
-            newUser.setBlocked(entity.getBlocked());
-
             try (Connection connection = ConnectionClass.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement("insert into \"user\"(name, email, password, role_id, is_blocked) values (" +
-                         "'"+entity.getName()+"', '"+entity.getEmail()+"', '"+entity.getPassword()+"', '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', B'"+(entity.getBlocked() ? 1 : 0)+"')")) {
+                 PreparedStatement preparedStatement = connection.prepareStatement("insert into \"user\"(name, email, password, role_id, is_blocked)" +
+                         "values(?, ?, ?, ?, ?::bit)")) {
+                preparedStatement.setString(1, entity.getName());
+                preparedStatement.setString(2, entity.getEmail());
+                preparedStatement.setString(3, entity.getPassword());
+                preparedStatement.setInt(4, (entity.getRole() == UserRole.ADMIN ? 1 : 2));
+                preparedStatement.setString(5, String.valueOf(entity.getBlocked() ? 1 : 0));
 
                 preparedStatement.executeUpdate();
             }
 
-            try (Connection connection = ConnectionClass.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" " +
-                         "where name = '"+entity.getName()+"' and email = '"+entity.getEmail()+"' and " +
-                         "password = '"+entity.getPassword()+"' and role_id = '" + (entity.getRole() == UserRole.ADMIN ? 1 : 2) + "' and is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"'")) {
+            id = getId(entity);
 
-                ResultSet resultSet = preparedStatement.executeQuery();
-
-                if (resultSet.next()) {
-                    newUser = new UserEntity(resultSet.getInt(1));
-
-                    newUser.setName(entity.getName());
-                    newUser.setEmail(entity.getEmail());
-                    newUser.setPassword(entity.getPassword());
-                    newUser.setRole(entity.getRole());
-                    newUser.setBlocked(entity.getBlocked());
-                }
+            if (id != 0) {
+                return new UserEntity.UserBuilder(entity.getEmail(), entity.getPassword(), entity.getName()).
+                        id(id).role(entity.getRole()).isBlocked(entity.getBlocked()).build();
             }
-
-            return newUser.getCopy();
         }
 
         return null;
+    }
+
+    private int getId(UserEntity entity) throws SQLException, LiquibaseException {
+        try (Connection connection = ConnectionClass.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select id from \"user\" " +
+                     "where name = ? and email = ? and password = ? and role_id = ? and is_blocked = ?::bit")) {
+            preparedStatement.setString(1, entity.getName());
+            preparedStatement.setString(2, entity.getEmail());
+            preparedStatement.setString(3, entity.getPassword());
+            preparedStatement.setInt(4, (entity.getRole() == UserRole.ADMIN ? 1 : 2));
+            preparedStatement.setString(5, String.valueOf(entity.getBlocked() ? 1 : 0));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+
+            return 0;
+        }
     }
 
     @Override
@@ -84,15 +75,12 @@ public class UserRepository implements Repository<UserEntity> {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                UserEntity user = new UserEntity(resultSet.getInt(1));
+                String email = resultSet.getString(3);
+                String password = resultSet.getString(4);
+                String name = resultSet.getString(2);
 
-                user.setName(resultSet.getString(2));
-                user.setEmail(resultSet.getString(3));
-                user.setPassword(resultSet.getString(4));
-                user.setBlocked(resultSet.getBoolean(5));
-                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
-
-                return user;
+                return new UserEntity.UserBuilder(email, password, name).
+                        id(id).role(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER).isBlocked(resultSet.getBoolean(5)).build();
             }
         }
 
@@ -108,13 +96,12 @@ public class UserRepository implements Repository<UserEntity> {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                UserEntity user = new UserEntity(resultSet.getInt(1));
+                String email = resultSet.getString(3);
+                String password = resultSet.getString(4);
+                String name = resultSet.getString(2);
 
-                user.setName(resultSet.getString(2));
-                user.setEmail(resultSet.getString(3));
-                user.setPassword(resultSet.getString(4));
-                user.setBlocked(resultSet.getBoolean(5));
-                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
+                UserEntity user = new UserEntity.UserBuilder(email, password, name).
+                        id(resultSet.getInt(1)).role(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER).isBlocked(resultSet.getBoolean(5)).build();
 
                 userEntities.add(user);
             }
@@ -127,8 +114,13 @@ public class UserRepository implements Repository<UserEntity> {
     public void update(UserEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("update \"user\" " +
-                     "set name = '"+entity.getName()+"', email = '"+entity.getEmail()+"', password = '"+entity.getPassword()+"', role_id = '" + (entity.getRole() ==  UserRole.ADMIN? 1 : 2) + "', is_blocked = B'"+(entity.getBlocked() ? 1 : 0)+"' where id = ?")) {
-            preparedStatement.setInt(1, entity.getId());
+                     "set name = ?, email = ?, password = ?, role_id = ?, is_blocked = ?::bit where id = ?")) {
+            preparedStatement.setString(1, entity.getName());
+            preparedStatement.setString(2, entity.getEmail());
+            preparedStatement.setString(3, entity.getPassword());
+            preparedStatement.setInt(4, (entity.getRole() == UserRole.ADMIN ? 1 : 2));
+            preparedStatement.setString(5, String.valueOf(entity.getBlocked() ? 1 : 0));
+            preparedStatement.setInt(6, entity.getId());
 
             preparedStatement.executeUpdate();
         }
@@ -168,15 +160,10 @@ public class UserRepository implements Repository<UserEntity> {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                UserEntity user = new UserEntity(resultSet.getInt(1));
+                String name = resultSet.getString(2);
 
-                user.setName(resultSet.getString(2));
-                user.setEmail(resultSet.getString(3));
-                user.setPassword(resultSet.getString(4));
-                user.setBlocked(resultSet.getBoolean(5));
-                user.setRole(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER);
-
-                return user;
+                return new UserEntity.UserBuilder(email, password, name).
+                        id(resultSet.getInt(1)).role(resultSet.getInt(6) == 1 ? UserRole.ADMIN : UserRole.USER).isBlocked(resultSet.getBoolean(5)).build();
             }
         }
 

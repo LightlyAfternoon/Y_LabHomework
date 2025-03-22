@@ -79,7 +79,7 @@ class TransactionRepositoryTest {
 
     @Test
     void addTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -89,7 +89,7 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
@@ -99,9 +99,9 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
         transactionEntity2.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t");
 
@@ -112,15 +112,16 @@ class TransactionRepositoryTest {
         }
 
         Assertions.assertEquals(transactionEntity, transactionEntity2);
+        Assertions.assertEquals(transactionEntity.getId(), transactionEntity2.getId());
 
         transactionEntity.setSum(BigDecimal.valueOf(20.0));
 
         Assertions.assertNotEquals(transactionEntity, transactionEntity2);
 
-        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity3.setSum(BigDecimal.valueOf(10.0));
-        transactionEntity3.setCategory(categoryEntity);
+        transactionEntity3.setCategoryId(categoryEntity.getId());
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t2");
 
@@ -135,7 +136,7 @@ class TransactionRepositoryTest {
 
     @Test
     void findByIdTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -145,7 +146,7 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
@@ -166,7 +167,7 @@ class TransactionRepositoryTest {
 
     @Test
     void findAllTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -176,21 +177,21 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity2.setSum(BigDecimal.valueOf(20.0));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
-        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity3.setSum(BigDecimal.valueOf(30.3));
-        transactionEntity3.setCategory(categoryEntity);
+        transactionEntity3.setCategoryId(categoryEntity.getId());
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t3");
 
@@ -209,7 +210,7 @@ class TransactionRepositoryTest {
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         try {
             date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
@@ -217,7 +218,7 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
         transactionEntity4.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity4.setCategory(categoryEntity);
+        transactionEntity4.setCategoryId(categoryEntity.getId());
         transactionEntity4.setDate(date);
         transactionEntity4.setDescription("t4");
 
@@ -238,7 +239,7 @@ class TransactionRepositoryTest {
 
     @Test
     void findAllWithUserTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -248,21 +249,21 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity2.setSum(BigDecimal.valueOf(20.0));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
-        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity3.setSum(BigDecimal.valueOf(30.3));
-        transactionEntity3.setCategory(categoryEntity);
+        transactionEntity3.setCategoryId(categoryEntity.getId());
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t3");
 
@@ -274,14 +275,14 @@ class TransactionRepositoryTest {
             transactionRepository.add(transactionEntity2);
             transactionRepository.add(transactionEntity3);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         try {
             date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
@@ -289,14 +290,14 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
         transactionEntity4.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity4.setCategory(categoryEntity);
+        transactionEntity4.setCategoryId(categoryEntity.getId());
         transactionEntity4.setDate(date);
         transactionEntity4.setDescription("t4");
 
         transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3, transactionEntity4);
         try {
             transactionRepository.add(transactionEntity4);
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -318,34 +319,34 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        transactionEntity = new TransactionEntity(user);
+        transactionEntity = new TransactionEntity(user.getId());
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
         try {
             transactionRepository.add(transactionEntity);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity.setSum(BigDecimal.valueOf(21.30));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
         try {
             transactionRepository.add(transactionEntity);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -354,8 +355,8 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    void findAllWithDateAndCategoryAndTypeAndUserTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+    void findAllWithDateAndCategoryIdAndTypeAndUserIdTest() {
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -365,11 +366,11 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
         Date date2;
         try {
             date2 = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis() + 86_400_000).toString()).getTime());
@@ -378,7 +379,7 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity2.setSum(BigDecimal.valueOf(20.0));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date2);
         transactionEntity2.setDescription("t2");
 
@@ -395,17 +396,17 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        TransactionEntity transactionEntity3 = new TransactionEntity(user);
+        TransactionEntity transactionEntity3 = new TransactionEntity(user.getId());
 
         transactionEntity3.setSum(BigDecimal.valueOf(30.3));
-        transactionEntity3.setCategory(categoryEntity);
+        transactionEntity3.setCategoryId(categoryEntity.getId());
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t3");
 
-        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity4.setSum(BigDecimal.valueOf(-10.10));
-        transactionEntity4.setCategory(null);
+        transactionEntity4.setCategoryId(0);
         transactionEntity4.setDate(date2);
         transactionEntity4.setDescription(null);
 
@@ -418,7 +419,7 @@ class TransactionRepositoryTest {
             transactionRepository.add(transactionEntity3);
             transactionRepository.add(transactionEntity4);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, null, null, CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, 0, null, CurrentUser.currentUser.getId());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
@@ -430,18 +431,18 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
 
         try {
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(date, null, null, CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, 0, null, CurrentUser.currentUser.getId());
 
             transactionEntities = List.of(transactionEntity);
 
             Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, categoryEntity, null, CurrentUser.currentUser);
+            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, categoryEntity.getId(), null, CurrentUser.currentUser.getId());
             transactionEntities = List.of(transactionEntity, transactionEntity2);
 
             Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryAndTypeAndUser(null, null, "Pos", user);
+            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, 0, "Pos", user.getId());
             transactionEntities = List.of(transactionEntity3);
 
             Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
@@ -452,7 +453,7 @@ class TransactionRepositoryTest {
 
     @Test
     void updateTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -462,7 +463,7 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
@@ -472,7 +473,7 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser.getId());
 
         try {
             date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
@@ -480,7 +481,7 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
         transactionEntity2.setSum(BigDecimal.valueOf(1.23));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
@@ -499,7 +500,7 @@ class TransactionRepositoryTest {
 
     @Test
     void deleteTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -509,11 +510,11 @@ class TransactionRepositoryTest {
         }
 
         transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategory(categoryEntity);
+        transactionEntity.setCategoryId(categoryEntity.getId());
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser);
+        TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser.getId());
 
         try {
             date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
@@ -521,14 +522,14 @@ class TransactionRepositoryTest {
             throw new RuntimeException(e);
         }
         transactionEntity2.setSum(BigDecimal.valueOf(1.23));
-        transactionEntity2.setCategory(categoryEntity);
+        transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
-        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser);
+        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity3.setSum(BigDecimal.valueOf(30.3));
-        transactionEntity3.setCategory(categoryEntity);
+        transactionEntity3.setCategoryId(categoryEntity.getId());
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t3");
 
