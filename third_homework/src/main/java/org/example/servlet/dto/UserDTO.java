@@ -1,6 +1,8 @@
-package org.example.model;
+package org.example.servlet.dto;
 
-public class UserEntity {
+import org.example.model.UserRole;
+
+public class UserDTO {
     private int id;
     private String name;
     private String email;
@@ -8,7 +10,7 @@ public class UserEntity {
     private UserRole role;
     private boolean isBlocked;
 
-    private UserEntity(UserBuilder builder) {
+    private UserDTO(UserBuilder builder) {
         this.id = builder.id;
         this.name = builder.name;
         this.email = builder.email;
@@ -51,17 +53,17 @@ public class UserEntity {
             return this;
         }
 
-        public UserEntity build() {
-            return new UserEntity(this);
+        public UserDTO build() {
+            return new UserDTO(this);
         }
     }
 
-    public UserEntity() {
+    public UserDTO() {
         this.role = UserRole.USER;
         this.isBlocked = false;
     }
 
-    public UserEntity(int id) {
+    public UserDTO(int id) {
         this.id = id;
         this.role = UserRole.USER;
         this.isBlocked = false;
@@ -116,14 +118,14 @@ public class UserEntity {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof UserEntity)) {
+        if (!(obj instanceof UserDTO)) {
             return false;
         }
         if (this == obj) {
             return true;
         }
 
-        UserEntity user = (UserEntity) obj;
+        UserDTO user = (UserDTO) obj;
 
         return this.name.equals(user.name) &&
                 this.email.equals(user.email) &&
