@@ -1,7 +1,12 @@
 package org.example.model;
 
+import org.example.servlet.dto.Default;
+
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class TransactionEntity {
     private int id;
@@ -46,7 +51,16 @@ public class TransactionEntity {
         }
 
         public TransactionBuilder date(Date date) {
-            this.date = date;
+            if (date != null) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    this.date = new Date(dateFormat.parse(date.toString()).getTime());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                this.date = null;
+            }
 
             return this;
         }
@@ -72,6 +86,7 @@ public class TransactionEntity {
         this.userId = userId;
     }
 
+    @Default
     public TransactionEntity(int id, int userId) {
         this.id = id;
         this.userId = userId;
@@ -102,7 +117,16 @@ public class TransactionEntity {
     }
 
     public void setDate(Date date) {
-        this.date = date;
+        if (date != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                this.date = new Date(dateFormat.parse(date.toString()).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            this.date = null;
+        }
     }
 
     public String getDescription() {

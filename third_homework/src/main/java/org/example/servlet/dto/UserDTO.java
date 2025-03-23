@@ -113,6 +113,10 @@ public class UserDTO {
         isBlocked = blocked;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

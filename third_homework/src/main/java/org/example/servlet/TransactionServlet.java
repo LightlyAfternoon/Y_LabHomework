@@ -7,21 +7,22 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
-import org.example.service.UserService;
-import org.example.servlet.dto.UserDTO;
+import org.example.service.TransactionService;
+import org.example.servlet.dto.TransactionDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/user/*")
-public class UserServlet extends HttpServlet {
-    UserService userService;
+@WebServlet("/transaction/*")
+public class TransactionServlet extends HttpServlet {
+    TransactionService transactionService;
 
-    public UserServlet(UserService userService) {
-        this.userService = userService;
+    public TransactionServlet(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 
     @Override
@@ -34,10 +35,10 @@ public class UserServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                UserDTO userDTO = userService.findById(id);
+                TransactionDTO transactionDTO = transactionService.findById(id);
 
-                if (userDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTO));
+                if (transactionDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -46,10 +47,10 @@ public class UserServlet extends HttpServlet {
             }
         } else {
             try {
-                List<UserDTO> userDTOS = userService.findAll();
+                List<TransactionDTO> transactionDTOS = transactionService.findAll();
 
-                if (userDTOS != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTOS));
+                if (transactionDTOS != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -64,15 +65,16 @@ public class UserServlet extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter printWriter = new PrintWriter(resp.getWriter());
         ObjectMapper objectMapper = new ObjectMapper();
-        String userString = req.getReader().lines().collect(Collectors.joining());
+        String transactionString = req.getReader().lines().collect(Collectors.joining());
 
-        if (!userString.isBlank()) {
+        if (!transactionString.isBlank()) {
             try {
-                UserDTO userDTO = objectMapper.readValue(userString, UserDTO.class);
-                userDTO = userService.add(userDTO);
+                objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+                TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
+                transactionDTO = transactionService.add(transactionDTO);
 
-                if (userDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTO));
+                if (transactionDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -88,17 +90,18 @@ public class UserServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {resp.setContentType("application/json");
         PrintWriter printWriter = new PrintWriter(resp.getWriter());
         ObjectMapper objectMapper = new ObjectMapper();
-        String userString = req.getReader().lines().collect(Collectors.joining());
+        String transactionString = req.getReader().lines().collect(Collectors.joining());
 
         if (req.getPathInfo() != null && req.getPathInfo().split("/").length > 1) {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                UserDTO userDTO = objectMapper.readValue(userString, UserDTO.class);
-                userDTO = userService.update(userDTO, id);
+                objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+                TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
+                transactionDTO = transactionService.update(transactionDTO, id);
 
-                if (userDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTO));
+                if (transactionDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -118,16 +121,16 @@ public class UserServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                boolean isDeleted = userService.delete(id);
+                boolean isDeleted = transactionService.delete(id);
 
                 if (isDeleted) {
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 
-                    printWriter.write("User deleted!");
+                    printWriter.write("Transaction deleted!");
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
-                    printWriter.write("User NOT found!");
+                    printWriter.write("Transaction NOT found!");
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

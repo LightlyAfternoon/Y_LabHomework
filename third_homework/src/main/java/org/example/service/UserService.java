@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public UserDTO update(UserDTO userDTO, int id) throws SQLException, LiquibaseException {
-        UserDTO dto = new UserDTO.UserBuilder(userDTO.getEmail(), userDTO.getPassword() ,userDTO.getName()).
+        UserDTO dto = new UserDTO.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
                 id(id).role(userDTO.getRole()).isBlocked(userDTO.getBlocked()).build();
         userRepository.update(userDTOMapper.mapToEntity(dto));
 

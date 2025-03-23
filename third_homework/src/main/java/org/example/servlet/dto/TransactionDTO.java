@@ -2,6 +2,9 @@ package org.example.servlet.dto;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class TransactionDTO {
     private int id;
@@ -15,7 +18,7 @@ public class TransactionDTO {
      * Field category is meant for a category or a goal of money spent
      */
     private int categoryId;
-    private final int userId;
+    private int userId;
 
     private TransactionDTO(TransactionBuilder builder) {
         this.id = builder.id;
@@ -46,7 +49,16 @@ public class TransactionDTO {
         }
 
         public TransactionBuilder date(Date date) {
-            this.date = date;
+            if (date != null) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    this.date = new Date(dateFormat.parse(date.toString()).getTime());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                this.date = null;
+            }
 
             return this;
         }
@@ -72,10 +84,13 @@ public class TransactionDTO {
         this.userId = userId;
     }
 
+    @Default
     public TransactionDTO(int id, int userId) {
         this.id = id;
         this.userId = userId;
     }
+
+    public TransactionDTO() {}
 
     public int getId() {
         return id;
@@ -102,7 +117,16 @@ public class TransactionDTO {
     }
 
     public void setDate(Date date) {
-        this.date = date;
+        if (date != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                this.date = new Date(dateFormat.parse(date.toString()).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            this.date = null;
+        }
     }
 
     public String getDescription() {
@@ -115,6 +139,14 @@ public class TransactionDTO {
 
     public int getUserId() {
         return userId;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     @Override
