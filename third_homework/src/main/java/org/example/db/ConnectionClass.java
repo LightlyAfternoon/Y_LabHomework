@@ -21,6 +21,14 @@ public class ConnectionClass {
     private static String password;
     private static Database database;
 
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private ConnectionClass() {}
 
     public static void setConfig() throws IOException {

@@ -50,4 +50,8 @@ public class UserService {
 
         return userRepository.delete(user);
     }
+
+    public UserDTO findUserWithEmailAndPassword(String email, String password) throws SQLException, LiquibaseException {
+        return userDTOMapper.mapToDTO(userRepository.findUserWithEmailAndPassword(email, password));
+    }
 }

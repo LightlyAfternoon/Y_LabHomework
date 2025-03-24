@@ -7,7 +7,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.repository.TransactionRepository;
+import org.example.repository.UserRepository;
 import org.example.service.TransactionService;
+import org.example.service.UserService;
 import org.example.servlet.dto.TransactionDTO;
 
 import java.io.IOException;
@@ -20,6 +23,10 @@ import java.util.stream.Collectors;
 @WebServlet("/transaction/*")
 public class TransactionServlet extends HttpServlet {
     TransactionService transactionService;
+
+    public TransactionServlet() {
+        this.transactionService = new TransactionService(new TransactionRepository());
+    }
 
     public TransactionServlet(TransactionService transactionService) {
         this.transactionService = transactionService;

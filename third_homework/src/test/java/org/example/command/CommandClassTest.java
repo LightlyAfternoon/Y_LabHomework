@@ -1,5 +1,6 @@
 package org.example.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.model.*;
@@ -7,6 +8,8 @@ import org.example.repository.MonthlyBudgetRepository;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.servlet.dto.UserDTO;
+import org.example.servlet.mapper.UserDTOMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,7 @@ class CommandClassTest {
     TransactionCategoryRepository categoryRepository;
     TransactionRepository transactionRepository;
     CommandClass commandClass;
+    HttpRequestsClass httpRequestsClass;
 
     @BeforeEach
     void setUp() throws SQLException, LiquibaseException {
@@ -36,8 +40,9 @@ class CommandClassTest {
         monthlyBudgetRepository = Mockito.mock(MonthlyBudgetRepository.class);
         categoryRepository = Mockito.mock(TransactionCategoryRepository.class);
         transactionRepository = Mockito.mock(TransactionRepository.class);
+        httpRequestsClass = Mockito.mock(HttpRequestsClass.class);
 
-        commandClass = new CommandClass(userRepository, transactionRepository, categoryRepository, monthlyBudgetRepository);
+        commandClass = new CommandClass(httpRequestsClass, userRepository, transactionRepository, categoryRepository, monthlyBudgetRepository);
 
         UserEntity user = new UserEntity();
 
@@ -55,38 +60,37 @@ class CommandClassTest {
     }
 
     @Test
-    void getLoggedInUserRoleTest() throws SQLException, LiquibaseException {
+    void getLoggedInUserRoleTest() throws SQLException, LiquibaseException, JsonProcessingException {
         String emailAndPassword = "t\nt";
         InputStream in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
         Mockito.when(userRepository.findUserWithEmailAndPassword("t", "t")).thenReturn(CurrentUser.currentUser);
+        Mockito.when(httpRequestsClass.getLoggedInUser()).thenReturn(new UserDTO.UserBuilder("t", "t", "t").id(1).build());
 
-        try {
-            Assertions.assertEquals(UserRole.USER, commandClass.getLoggedInUserRole());
+        Assertions.assertEquals(UserRole.USER, commandClass.getLoggedInUserRole());
 
-            emailAndPassword = "t2\nt";
-            in = new ByteArrayInputStream(emailAndPassword.getBytes());
-            System.setIn(in);
+        emailAndPassword = "t2\nt";
+        in = new ByteArrayInputStream(emailAndPassword.getBytes());
+        System.setIn(in);
 
-            Mockito.when(userRepository.findUserWithEmailAndPassword("t2", "t")).thenReturn(null);
+        Mockito.when(userRepository.findUserWithEmailAndPassword("t2", "t")).thenReturn(null);
+        Mockito.when(httpRequestsClass.getLoggedInUser()).thenReturn(null);
 
-            Assertions.assertNull(commandClass.getLoggedInUserRole());
+        Assertions.assertNull(commandClass.getLoggedInUserRole());
 
-            emailAndPassword = "t\nt2";
-            in = new ByteArrayInputStream(emailAndPassword.getBytes());
-            System.setIn(in);
+        emailAndPassword = "t\nt2";
+        in = new ByteArrayInputStream(emailAndPassword.getBytes());
+        System.setIn(in);
 
-            Mockito.when(userRepository.findUserWithEmailAndPassword("t", "t2")).thenReturn(null);
+        Mockito.when(userRepository.findUserWithEmailAndPassword("t", "t2")).thenReturn(null);
+        Mockito.when(httpRequestsClass.getLoggedInUser()).thenReturn(null);
 
-            Assertions.assertNull(commandClass.getLoggedInUserRole());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertNull(commandClass.getLoggedInUserRole());
     }
 
     @Test
-    void getAllUsersTest() throws SQLException, LiquibaseException {
+    void getAllUsersTest() throws SQLException, LiquibaseException, JsonProcessingException {
         List<UserEntity> userEntities = List.of(CurrentUser.currentUser);
         StringBuilder output = new StringBuilder();
 
@@ -95,12 +99,13 @@ class CommandClassTest {
         }
 
         Mockito.when(userRepository.findAll()).thenReturn(userEntities);
+        Mockito.when(httpRequestsClass.getAllUsers()).thenReturn(userEntities.stream().map(UserDTOMapper.INSTANCE::mapToDTO).toList());
 
         Assertions.assertEquals(output.toString(), commandClass.getAllUsers());
     }
 
     @Test
-    void getRegisteredUserTest() throws SQLException, LiquibaseException {
+    void getRegisteredUserTest() throws SQLException, LiquibaseException, JsonProcessingException {
         String emailAndPassword = "t\nt\nt";
         InputStream in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
@@ -113,6 +118,7 @@ class CommandClassTest {
         user2.setBlocked(false);
 
         Mockito.when(userRepository.add(user2)).thenReturn(null);
+        Mockito.when(httpRequestsClass.getRegisteredUser()).thenReturn(null);
 
         Assertions.assertNull(commandClass.getRegisteredUser());
 
@@ -128,6 +134,7 @@ class CommandClassTest {
         user2.setBlocked(false);
 
         Mockito.when(userRepository.add(user2)).thenReturn(user2);
+        Mockito.when(httpRequestsClass.getRegisteredUser()).thenReturn(UserDTOMapper.INSTANCE.mapToDTO(user2));
 
         Assertions.assertEquals(user2, commandClass.getRegisteredUser());
     }

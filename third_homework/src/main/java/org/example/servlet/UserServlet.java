@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.example.servlet.dto.UserDTO;
 
@@ -19,6 +20,10 @@ import java.util.stream.Collectors;
 @WebServlet("/user/*")
 public class UserServlet extends HttpServlet {
     UserService userService;
+
+    public UserServlet() {
+        this.userService = new UserService(new UserRepository());
+    }
 
     public UserServlet(UserService userService) {
         this.userService = userService;

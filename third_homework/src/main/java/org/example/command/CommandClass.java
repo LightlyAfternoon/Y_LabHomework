@@ -1,5 +1,7 @@
 package org.example.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.model.*;
@@ -7,8 +9,17 @@ import org.example.repository.MonthlyBudgetRepository;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.servlet.dto.LogInDTO;
+import org.example.servlet.dto.UserDTO;
+import org.example.servlet.mapper.UserDTOMapper;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -22,33 +33,21 @@ public class CommandClass {
     private final TransactionRepository transactionRepository;
     private final TransactionCategoryRepository categoryRepository;
     private final MonthlyBudgetRepository budgetRepository;
+    private final HttpRequestsClass httpRequestsClass;
 
-    public CommandClass(UserRepository newUserRepository, TransactionRepository newTransactionRepository, TransactionCategoryRepository newCategoryRepository, MonthlyBudgetRepository newBudgetRepository) {
+    public CommandClass(HttpRequestsClass httpRequestsClass, UserRepository newUserRepository, TransactionRepository newTransactionRepository, TransactionCategoryRepository newCategoryRepository, MonthlyBudgetRepository newBudgetRepository) {
+        this.httpRequestsClass = httpRequestsClass;
         userRepository = newUserRepository;
         transactionRepository = newTransactionRepository;
         categoryRepository = newCategoryRepository;
         budgetRepository = newBudgetRepository;
     }
 
-    private String sendEmail() {
-        scanner = new Scanner(System.in);
-
-        System.out.println("Введите почту:");
-
-        return scanner.next();
-    }
-
-    private String sendPassword() {
-        System.out.println("Введите пароль:");
-
-        return scanner.next();
-    }
-
     public UserRole getLoggedInUserRole() {
         UserEntity user;
         try {
-            user = userRepository.findUserWithEmailAndPassword(sendEmail(), sendPassword());
-        } catch (SQLException | LiquibaseException e) {
+            user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getLoggedInUser());
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
@@ -65,33 +64,24 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         try {
-            for (UserEntity user : userRepository.findAll()){
-                output.append(user).append("\n");
+            for (UserDTO userDTO : httpRequestsClass.getAllUsers()){
+                output.append(UserDTOMapper.INSTANCE.mapToEntity(userDTO)).append("\n");
             }
-        } catch (SQLException | LiquibaseException e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
         return output.toString();
     }
 
-    private String sendUserName() {
-        System.out.println("Введите имя:");
-
-        return scanner.next();
-    }
-
     public UserEntity getRegisteredUser() {
-        UserEntity user = new UserEntity();
-
-        user.setEmail(sendEmail());
-        user.setPassword(sendPassword());
-        user.setName(sendUserName());
-        user.setBlocked(false);
+        UserEntity user;
 
         try {
-            return userRepository.add(user);
-        } catch (SQLException | LiquibaseException e) {
+            user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getRegisteredUser());
+
+            return user;
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }

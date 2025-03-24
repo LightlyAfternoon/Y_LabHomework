@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.command.CommandClass;
+import org.example.command.HttpRequestsClass;
 import org.example.model.*;
 import org.example.repository.MonthlyBudgetRepository;
 import org.example.repository.TransactionCategoryRepository;
@@ -17,7 +18,7 @@ public class App
     public static void main( String[] args ) {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass(new UserRepository(), new TransactionRepository(),
+        CommandClass commandClass = new CommandClass(new HttpRequestsClass(), new UserRepository(), new TransactionRepository(),
                 new TransactionCategoryRepository(), new MonthlyBudgetRepository());
 
         while (true) {
