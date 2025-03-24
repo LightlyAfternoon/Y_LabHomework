@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.servlet.dto.Default;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.ParseException;
@@ -11,7 +13,7 @@ public class MonthlyBudgetEntity {
     private final Date date;
     private BigDecimal sum;
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
 
     private MonthlyBudgetEntity(MonthlyBudgetBuilder builder) {
         this.id = builder.id;
@@ -38,7 +40,13 @@ public class MonthlyBudgetEntity {
         }
 
         public MonthlyBudgetBuilder date(Date date) {
-            this.date = date;
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+
+            try {
+                this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
             return this;
         }
@@ -70,6 +78,7 @@ public class MonthlyBudgetEntity {
         }
     }
 
+    @Default
     public MonthlyBudgetEntity(int id, int userId, Date date) {
         this.id = id;
         this.userId = userId;

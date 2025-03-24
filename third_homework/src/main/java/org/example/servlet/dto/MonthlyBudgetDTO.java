@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 
 public class MonthlyBudgetDTO {
     private int id;
-    private final int userId;
-    private final Date date;
+    private int userId;
+    private Date date;
     private BigDecimal sum;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
@@ -38,7 +38,13 @@ public class MonthlyBudgetDTO {
         }
 
         public MonthlyBudgetBuilder date(Date date) {
-            this.date = date;
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+
+            try {
+                this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
             return this;
         }
@@ -70,6 +76,7 @@ public class MonthlyBudgetDTO {
         }
     }
 
+    @Default
     public MonthlyBudgetDTO(int id, int userId, Date date) {
         this.id = id;
         this.userId = userId;
@@ -80,6 +87,8 @@ public class MonthlyBudgetDTO {
             throw new RuntimeException(e);
         }
     }
+
+    public MonthlyBudgetDTO() {}
 
     public int getId() {
         return id;

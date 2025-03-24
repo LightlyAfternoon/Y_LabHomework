@@ -69,7 +69,6 @@ public class TransactionCategoryServlet extends HttpServlet {
 
         if (!transactionCategoryString.isBlank()) {
             try {
-                objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
                 TransactionCategoryDTO transactionCategoryDTO = objectMapper.readValue(transactionCategoryString, TransactionCategoryDTO.class);
                 transactionCategoryDTO = transactionCategoryService.add(transactionCategoryDTO);
 
@@ -96,7 +95,6 @@ public class TransactionCategoryServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
                 TransactionCategoryDTO transactionCategoryDTO = objectMapper.readValue(transactionCategoryString, TransactionCategoryDTO.class);
                 transactionCategoryDTO = transactionCategoryService.update(transactionCategoryDTO, id);
 

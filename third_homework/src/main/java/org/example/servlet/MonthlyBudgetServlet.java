@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
-import org.example.service.TransactionService;
-import org.example.servlet.dto.TransactionDTO;
+import org.example.service.MonthlyBudgetService;
+import org.example.servlet.dto.MonthlyBudgetDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,12 +17,12 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@WebServlet("/transaction/*")
-public class TransactionServlet extends HttpServlet {
-    TransactionService transactionService;
+@WebServlet("/budget/*")
+public class MonthlyBudgetServlet extends HttpServlet {
+    MonthlyBudgetService monthlyBudgetService;
 
-    public TransactionServlet(TransactionService transactionService) {
-        this.transactionService = transactionService;
+    public MonthlyBudgetServlet(MonthlyBudgetService monthlyBudgetService) {
+        this.monthlyBudgetService = monthlyBudgetService;
     }
 
     @Override
@@ -36,10 +36,10 @@ public class TransactionServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                TransactionDTO transactionDTO = transactionService.findById(id);
+                MonthlyBudgetDTO monthlyBudgetDTO = monthlyBudgetService.findById(id);
 
-                if (transactionDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                if (monthlyBudgetDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -48,10 +48,10 @@ public class TransactionServlet extends HttpServlet {
             }
         } else {
             try {
-                List<TransactionDTO> transactionDTOS = transactionService.findAll();
+                List<MonthlyBudgetDTO> monthlyBudgetDTOS = monthlyBudgetService.findAll();
 
-                if (transactionDTOS != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTOS));
+                if (monthlyBudgetDTOS != null) {
+                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -66,16 +66,16 @@ public class TransactionServlet extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter printWriter = new PrintWriter(resp.getWriter());
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-        String transactionString = req.getReader().lines().collect(Collectors.joining());
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM"));
+        String monthlyBudgetString = req.getReader().lines().collect(Collectors.joining());
 
-        if (!transactionString.isBlank()) {
+        if (!monthlyBudgetString.isBlank()) {
             try {
-                TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
-                transactionDTO = transactionService.add(transactionDTO);
+                MonthlyBudgetDTO monthlyBudgetDTO = objectMapper.readValue(monthlyBudgetString, MonthlyBudgetDTO.class);
+                monthlyBudgetDTO = monthlyBudgetService.add(monthlyBudgetDTO);
 
-                if (transactionDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                if (monthlyBudgetDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -91,18 +91,18 @@ public class TransactionServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {resp.setContentType("application/json");
         PrintWriter printWriter = new PrintWriter(resp.getWriter());
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-        String transactionString = req.getReader().lines().collect(Collectors.joining());
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM"));
+        String monthlyBudgetString = req.getReader().lines().collect(Collectors.joining());
 
         if (req.getPathInfo() != null && req.getPathInfo().split("/").length > 1) {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
-                transactionDTO = transactionService.update(transactionDTO, id);
+                MonthlyBudgetDTO monthlyBudgetDTO = objectMapper.readValue(monthlyBudgetString, MonthlyBudgetDTO.class);
+                monthlyBudgetDTO = monthlyBudgetService.update(monthlyBudgetDTO, id);
 
-                if (transactionDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                if (monthlyBudgetDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
@@ -122,16 +122,16 @@ public class TransactionServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().split("/")[1]);
 
             try {
-                boolean isDeleted = transactionService.delete(id);
+                boolean isDeleted = monthlyBudgetService.delete(id);
 
                 if (isDeleted) {
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 
-                    printWriter.write("Transaction deleted!");
+                    printWriter.write("MonthlyBudget deleted!");
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
-                    printWriter.write("Transaction NOT found!");
+                    printWriter.write("MonthlyBudget NOT found!");
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);
