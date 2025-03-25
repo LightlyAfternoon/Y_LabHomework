@@ -7,7 +7,6 @@ import org.example.repository.MonthlyBudgetRepository;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
-import org.example.servlet.dto.TransactionCategoryDTO;
 import org.example.servlet.dto.UserDTO;
 import org.example.servlet.mapper.MonthlyBudgetDTOMapper;
 import org.example.servlet.mapper.TransactionCategoryDTOMapper;
@@ -501,9 +500,7 @@ class CommandClassTest {
         Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category.getName())).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category));
         Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category2.getName())).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category2));
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), null, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
-        for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
-            System.out.println("+"+categoryDTO.getName());
-        }
+
         transactionEntity = commandClass.addTransaction();
         int id = transactionEntity.getId();
 

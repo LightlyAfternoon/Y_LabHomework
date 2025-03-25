@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.servlet.dto.Default;
+
 import java.math.BigDecimal;
 
 public class TransactionCategoryEntity {
@@ -53,6 +55,7 @@ public class TransactionCategoryEntity {
 
     public TransactionCategoryEntity() {}
 
+    @Default
     public TransactionCategoryEntity(int id, int userId) {
         this.id = id;
         this.userId = userId;

@@ -53,6 +53,7 @@ public class TransactionCategoryDTO {
 
     public TransactionCategoryDTO() {}
 
+    @Default
     public TransactionCategoryDTO(int id, int userId) {
         this.id = id;
         this.userId = userId;

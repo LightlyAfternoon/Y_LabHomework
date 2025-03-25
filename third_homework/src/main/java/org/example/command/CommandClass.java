@@ -147,8 +147,10 @@ public class CommandClass {
     public TransactionEntity addTransaction() {
         BigDecimal sum = sendTransactionSum();
         TransactionCategoryEntity category = sendCategory();
+        Date date = sendDate();
+        String description = sendDescription();
 
-        TransactionEntity transaction = TransactionDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), sendDate(), sendDescription()));
+        TransactionEntity transaction = TransactionDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), date, description));
 
         checkIfSpendMoreThanBudget();
 

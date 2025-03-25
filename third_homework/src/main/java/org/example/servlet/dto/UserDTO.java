@@ -63,6 +63,7 @@ public class UserDTO {
         this.isBlocked = false;
     }
 
+    @Default
     public UserDTO(int id) {
         this.id = id;
         this.role = UserRole.USER;
@@ -111,10 +112,6 @@ public class UserDTO {
 
     public void setBlocked(boolean blocked) {
         isBlocked = blocked;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     @Override

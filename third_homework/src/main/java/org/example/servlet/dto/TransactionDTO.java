@@ -151,14 +151,6 @@ public class TransactionDTO {
         return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

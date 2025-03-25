@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.servlet.dto.Default;
+
 public class UserEntity {
     private int id;
     private String name;
@@ -61,6 +63,7 @@ public class UserEntity {
         this.isBlocked = false;
     }
 
+    @Default
     public UserEntity(int id) {
         this.id = id;
         this.role = UserRole.USER;
