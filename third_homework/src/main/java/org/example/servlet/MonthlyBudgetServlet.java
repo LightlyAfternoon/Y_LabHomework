@@ -13,7 +13,9 @@ import org.example.servlet.dto.MonthlyBudgetDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +51,20 @@ public class MonthlyBudgetServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
             } catch (SQLException | LiquibaseException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (req.getParameter("date") != null && req.getParameter("user") != null) {
+            try {
+                Date date = new Date(new SimpleDateFormat("yyyy-MM").parse(req.getParameter("date")).getTime());
+                int userId = Integer.parseInt(req.getParameter("user"));
+                MonthlyBudgetDTO monthlyBudgetDTO = monthlyBudgetService.findByDateAndUserId(date, userId);
+
+                if (monthlyBudgetDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+            } catch (SQLException | LiquibaseException | ParseException e) {
                 throw new RuntimeException(e);
             }
         } else {

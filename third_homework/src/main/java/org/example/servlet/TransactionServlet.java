@@ -7,15 +7,16 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.CurrentUser;
 import org.example.repository.TransactionRepository;
-import org.example.repository.UserRepository;
 import org.example.service.TransactionService;
-import org.example.service.UserService;
 import org.example.servlet.dto.TransactionDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,9 +54,27 @@ public class TransactionServlet extends HttpServlet {
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);
             }
+        } else if (req.getParameter("date") != null && req.getParameter("category") != null &&
+                req.getParameter("type") != null && req.getParameter("user") != null) {
+            try {
+                Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse(req.getParameter("date")).getTime());
+                int categoryId = Integer.parseInt(req.getParameter("category"));
+                String type = req.getParameter("type");
+                int userId = Integer.parseInt(req.getParameter("user"));
+
+                List<TransactionDTO> transactionDTOS = transactionService.findAllWithDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId);
+
+                if (transactionDTOS != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionDTOS));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+            } catch (SQLException | LiquibaseException | ParseException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             try {
-                List<TransactionDTO> transactionDTOS = transactionService.findAll();
+                List<TransactionDTO> transactionDTOS = transactionService.findAllWithUser(CurrentUser.currentUser.getId());
 
                 if (transactionDTOS != null) {
                     printWriter.write(objectMapper.writeValueAsString(transactionDTOS));

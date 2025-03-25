@@ -6,6 +6,7 @@ import org.example.repository.MonthlyBudgetRepository;
 import org.example.servlet.dto.MonthlyBudgetDTO;
 import org.example.servlet.mapper.MonthlyBudgetDTOMapper;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,5 +50,9 @@ public class MonthlyBudgetService {
         MonthlyBudgetEntity monthlyBudget = monthlyBudgetRepository.findById(id);
 
         return monthlyBudgetRepository.delete(monthlyBudget);
+    }
+
+    public MonthlyBudgetDTO findByDateAndUserId(Date date, int userId) throws SQLException, LiquibaseException {
+        return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.findByDateAndUserId(date, userId));
     }
 }

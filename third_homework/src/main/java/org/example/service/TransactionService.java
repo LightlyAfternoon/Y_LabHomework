@@ -6,6 +6,7 @@ import org.example.repository.TransactionRepository;
 import org.example.servlet.dto.TransactionDTO;
 import org.example.servlet.mapper.TransactionDTOMapper;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,5 +50,27 @@ public class TransactionService {
         TransactionEntity transaction = transactionRepository.findById(id);
 
         return transactionRepository.delete(transaction);
+    }
+
+    public List<TransactionDTO> findAllWithUser(int userId) throws SQLException, LiquibaseException {
+        List<TransactionEntity> transactionEntities = transactionRepository.findAllWithUser(userId);
+        List<TransactionDTO> transactionDTOS = new ArrayList<>();
+
+        for (TransactionEntity transaction : transactionEntities) {
+            transactionDTOS.add(transactionDTOMapper.mapToDTO(transaction));
+        }
+
+        return transactionDTOS;
+    }
+
+    public List<TransactionDTO> findAllWithDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId) throws SQLException, LiquibaseException {
+        List<TransactionEntity> transactionEntities = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId);
+        List<TransactionDTO> transactionDTOS = new ArrayList<>();
+
+        for (TransactionEntity transaction : transactionEntities) {
+            transactionDTOS.add(transactionDTOMapper.mapToDTO(transaction));
+        }
+
+        return transactionDTOS;
     }
 }

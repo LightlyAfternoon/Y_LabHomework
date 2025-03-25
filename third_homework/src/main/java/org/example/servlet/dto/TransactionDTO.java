@@ -49,15 +49,20 @@ public class TransactionDTO {
         }
 
         public TransactionBuilder date(Date date) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
             if (date != null) {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     this.date = new Date(dateFormat.parse(date.toString()).getTime());
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
             } else {
-                this.date = null;
+                try {
+                    this.date = new Date(dateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             return this;
@@ -117,15 +122,20 @@ public class TransactionDTO {
     }
 
     public void setDate(Date date) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         if (date != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
                 this.date = new Date(dateFormat.parse(date.toString()).getTime());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            this.date = null;
+            try {
+                this.date = new Date(dateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

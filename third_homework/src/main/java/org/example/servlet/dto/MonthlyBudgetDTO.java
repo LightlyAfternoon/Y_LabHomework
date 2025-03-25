@@ -26,9 +26,16 @@ public class MonthlyBudgetDTO {
         private Date date;
         private BigDecimal sum;
 
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+
         public MonthlyBudgetBuilder(int userId, BigDecimal sum) {
             this.userId = userId;
             this.sum = sum;
+            try {
+                this.date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public MonthlyBudgetBuilder id(int id) {
@@ -38,8 +45,6 @@ public class MonthlyBudgetDTO {
         }
 
         public MonthlyBudgetBuilder date(Date date) {
-            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
-
             try {
                 this.date = new Date(simpleDateFormat.parse(String.valueOf(date)).getTime());
             } catch (ParseException e) {

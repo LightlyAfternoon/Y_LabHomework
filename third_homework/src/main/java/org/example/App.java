@@ -18,8 +18,7 @@ public class App
     public static void main( String[] args ) {
         Scanner scanner = new Scanner(System.in);
         String command = "";
-        CommandClass commandClass = new CommandClass(new HttpRequestsClass(), new UserRepository(), new TransactionRepository(),
-                new TransactionCategoryRepository(), new MonthlyBudgetRepository());
+        CommandClass commandClass = new CommandClass(new HttpRequestsClass());
 
         while (true) {
             System.out.println("Здравствуйте! Хотите зарегистрироваться или войти в аккаунт? \n" +

@@ -27,14 +27,7 @@ public class TransactionCategoryService {
     }
 
     public List<TransactionCategoryDTO> findAll() throws SQLException, LiquibaseException {
-        List<TransactionCategoryEntity> transactionCategoryEntities = transactionCategoryRepository.findAll();
-        List<TransactionCategoryDTO> transactionCategoryDTOS = new ArrayList<>();
-
-        for (TransactionCategoryEntity transactionCategory : transactionCategoryEntities) {
-            transactionCategoryDTOS.add(transactionCategoryDTOMapper.mapToDTO(transactionCategory));
-        }
-
-        return transactionCategoryDTOS;
+        return transactionCategoryRepository.findAll().stream().map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList();
     }
 
     public TransactionCategoryDTO update(TransactionCategoryDTO transactionCategoryDTO, int id) throws SQLException, LiquibaseException {
@@ -49,5 +42,17 @@ public class TransactionCategoryService {
         TransactionCategoryEntity transactionCategory = transactionCategoryRepository.findById(id);
 
         return transactionCategoryRepository.delete(transactionCategory);
+    }
+
+    public List<TransactionCategoryDTO> findAllGoalsWithUserId(int userId) throws SQLException, LiquibaseException {
+        return transactionCategoryRepository.findAllGoalsWithUserId(userId).stream().map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList();
+    }
+
+    public List<TransactionCategoryDTO> findCommonCategoriesOrGoalsWithUserId(int userId) throws SQLException, LiquibaseException {
+        return transactionCategoryRepository.findCommonCategoriesOrGoalsWithUserId(userId).stream().map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList();
+    }
+
+    public TransactionCategoryDTO findByName(String name) throws SQLException, LiquibaseException {
+        return transactionCategoryDTOMapper.mapToDTO(transactionCategoryRepository.findByName(name));
     }
 }

@@ -1,27 +1,17 @@
 package org.example.command;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.model.*;
-import org.example.repository.MonthlyBudgetRepository;
-import org.example.repository.TransactionCategoryRepository;
-import org.example.repository.TransactionRepository;
-import org.example.repository.UserRepository;
-import org.example.servlet.dto.LogInDTO;
+import org.example.servlet.dto.TransactionCategoryDTO;
+import org.example.servlet.dto.TransactionDTO;
 import org.example.servlet.dto.UserDTO;
+import org.example.servlet.mapper.MonthlyBudgetDTOMapper;
+import org.example.servlet.mapper.TransactionCategoryDTOMapper;
+import org.example.servlet.mapper.TransactionDTOMapper;
 import org.example.servlet.mapper.UserDTOMapper;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
@@ -29,27 +19,34 @@ import java.util.Scanner;
 public class CommandClass {
     private Scanner scanner;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private final UserRepository userRepository;
-    private final TransactionRepository transactionRepository;
-    private final TransactionCategoryRepository categoryRepository;
-    private final MonthlyBudgetRepository budgetRepository;
     private final HttpRequestsClass httpRequestsClass;
 
-    public CommandClass(HttpRequestsClass httpRequestsClass, UserRepository newUserRepository, TransactionRepository newTransactionRepository, TransactionCategoryRepository newCategoryRepository, MonthlyBudgetRepository newBudgetRepository) {
+    public CommandClass(HttpRequestsClass httpRequestsClass) {
         this.httpRequestsClass = httpRequestsClass;
-        userRepository = newUserRepository;
-        transactionRepository = newTransactionRepository;
-        categoryRepository = newCategoryRepository;
-        budgetRepository = newBudgetRepository;
+    }
+
+    private String sendEmail() {
+        scanner = new Scanner(System.in);
+
+        System.out.println("Введите почту:");
+
+        return scanner.next();
+    }
+
+    private String sendPassword() {
+        System.out.println("Введите пароль:");
+
+        return scanner.next();
+    }
+
+    private String sendUserName() {
+        System.out.println("Введите имя:");
+
+        return scanner.next();
     }
 
     public UserRole getLoggedInUserRole() {
-        UserEntity user;
-        try {
-            user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getLoggedInUser());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        UserEntity user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getLoggedInUser(sendEmail(), sendPassword()));
 
         if (user != null) {
             CurrentUser.currentUser = user;
@@ -63,27 +60,15 @@ public class CommandClass {
     public String getAllUsers() {
         StringBuilder output = new StringBuilder();
 
-        try {
             for (UserDTO userDTO : httpRequestsClass.getAllUsers()){
                 output.append(UserDTOMapper.INSTANCE.mapToEntity(userDTO)).append("\n");
             }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         return output.toString();
     }
 
     public UserEntity getRegisteredUser() {
-        UserEntity user;
-
-        try {
-            user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getRegisteredUser());
-
-            return user;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getRegisteredUser(sendEmail(), sendPassword(), sendUserName()));
     }
 
     private BigDecimal sendBudgetSum() {
@@ -95,31 +80,7 @@ public class CommandClass {
     }
 
     public MonthlyBudgetEntity addBudget() {
-        BigDecimal budget = sendBudgetSum();
-
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
-        SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
-        try {
-            monthlyBudgetEntity = budgetRepository.findByDateAndUserId(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUserId());
-        } catch (ParseException | SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            if (monthlyBudgetEntity != null) {
-                monthlyBudgetEntity.setSum(budget);
-                budgetRepository.update(monthlyBudgetEntity);
-            } else {
-                monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
-                monthlyBudgetEntity.setSum(budget);
-
-                monthlyBudgetEntity = budgetRepository.add(monthlyBudgetEntity);
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-
-        return monthlyBudgetEntity;
+        return MonthlyBudgetDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addBudget(sendBudgetSum()));
     }
 
     private String sendGoalName() {
@@ -137,16 +98,7 @@ public class CommandClass {
     }
 
     public TransactionCategoryEntity addGoal() {
-        TransactionCategoryEntity goal = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
-
-        goal.setName(sendGoalName());
-        goal.setNeededSum(sendGoalSum());
-
-        try {
-            return categoryRepository.add(goal);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addGoal(sendGoalName(), sendGoalSum()));
     }
 
     private BigDecimal sendTransactionSum() {
@@ -159,90 +111,59 @@ public class CommandClass {
 
     private TransactionCategoryEntity sendCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
-        try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
-                System.out.println("\n" + category.getName() + "\n");
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+
+        for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
+            System.out.println("\n" + categoryDTO.getName() + "\n");
         }
+
         scanner.nextLine();
         String categoryName = scanner.nextLine();
 
-        try {
-            return categoryRepository.findByName(categoryName);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private Date sendDate() {
         System.out.println("Введите дату в формате 2000-12-21 или оставьте поле пустым (будет выбрана текущая дата):");
         String text = scanner.nextLine();
+        Date date = null;
 
         if (!text.isBlank()) {
             try {
-                return new Date(simpleDateFormat.parse(text).getTime());
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                return new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+                date = new Date(simpleDateFormat.parse(text).getTime());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }
+
+        return date;
     }
 
     private String sendDescription() {
         System.out.println("Введите описание или оставьте поле пустым:");
+
         return scanner.nextLine();
     }
 
     public TransactionEntity addTransaction() {
-        TransactionEntity transaction = new TransactionEntity(CurrentUser.currentUser.getId());
-
-        transaction.setSum(sendTransactionSum());
+        BigDecimal sum = sendTransactionSum();
         TransactionCategoryEntity category = sendCategory();
-        transaction.setCategoryId(category != null ? category.getId() : 0);
-        transaction.setDate(sendDate());
-        transaction.setDescription(sendDescription());
 
-        try {
-            transaction = transactionRepository.add(transaction);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionEntity transaction = TransactionDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), sendDate(), sendDescription()));
 
-        checkIfSpendMoreThanBudget(transactionRepository);
+        checkIfSpendMoreThanBudget();
 
         return transaction;
     }
 
     public boolean deleteAccount() {
-        UserEntity user = CurrentUser.currentUser;
-        CurrentUser.currentUser = null;
-
-        boolean isDeleted;
-        try {
-            isDeleted = userRepository.delete(user);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-
-        return isDeleted;
+        return httpRequestsClass.deleteAccount(CurrentUser.currentUser.getId());
     }
 
     public String getTransactions() {
         StringBuilder output = new StringBuilder();
 
-        try {
-            for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                output.append(transaction).append("\n");
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+        for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()){
+            output.append(TransactionDTOMapper.INSTANCE.mapToEntity(transactionDTO)).append("\n");
         }
 
         return output.toString();
@@ -268,22 +189,14 @@ public class CommandClass {
 
     private TransactionCategoryEntity sendFilterCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
-        try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
-                System.out.println("\n" + category.getName() + "\n");
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-        String categoryName = scanner.nextLine();
-        TransactionCategoryEntity category;
-        try {
-            category = categoryRepository.findByName(categoryName);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+
+        for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
+            System.out.println("\n" + categoryDTO.getName() + "\n");
         }
 
-        return category;
+        String categoryName = scanner.nextLine();
+
+        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private String sendFilterSumType() {
@@ -294,16 +207,12 @@ public class CommandClass {
 
     public String filterTransactions() {
         StringBuilder output = new StringBuilder();
+        Date date = sendFilterDate();
+        TransactionCategoryEntity category = sendFilterCategory();
+        String type = sendFilterSumType();
 
-        try {
-            Date date = sendFilterDate();
-            TransactionCategoryEntity category = sendFilterCategory();
-            String type = sendFilterSumType();
-            for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, category != null ? category.getId() : 0, type, CurrentUser.currentUser.getId())) {
-                output.append(transaction.toString()).append("\n");
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+        for (TransactionDTO transactionDTO : httpRequestsClass.filterTransactions(date, category != null ? category.getId() : 0, type, CurrentUser.currentUser.getId())){
+            output.append(TransactionDTOMapper.INSTANCE.mapToEntity(transactionDTO)).append("\n");
         }
 
         return output.toString();
@@ -325,37 +234,24 @@ public class CommandClass {
 
     private TransactionCategoryEntity sendNewTransactionCategory() {
         System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
-        try {
-            for (TransactionCategoryEntity category : categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())) {
-                System.out.println("\n" + category.getName() + "\n");
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-        String categoryName = scanner.nextLine();
-        TransactionCategoryEntity category;
-        try {
-            category = categoryRepository.findByName(categoryName);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+
+        for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
+            System.out.println("\n" + categoryDTO.getName() + "\n");
         }
 
-        return category;
+        scanner.nextLine();
+        String categoryName = scanner.nextLine();
+
+        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private Date sendNewTransactionDate() {
         System.out.println("Введите новую дату в формате 2000-12-21 или оставьте поле пустым (будет выбрана текущая дата):");
         String text = scanner.nextLine();
-        Date date;
+        Date date = null;
         if (!text.isBlank()) {
             try {
                 date = new Date(simpleDateFormat.parse(text).getTime());
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -371,100 +267,58 @@ public class CommandClass {
     }
 
     public boolean editTransaction() {
-        TransactionEntity transaction;
-        try {
-            transaction = transactionRepository.findById(sendTransactionId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        int id = sendTransactionId();
+        BigDecimal sum = sendNewTransactionSum();
+        TransactionCategoryEntity category = sendNewTransactionCategory();
+        Date date = sendNewTransactionDate();
+        String description = sendNewTransactionDescription();
 
-        if (transaction != null) {
-            transaction.setSum(sendNewTransactionSum());
-            TransactionCategoryEntity category = sendNewTransactionCategory();
-            transaction.setCategoryId(category != null ? category.getId() : 0);
-            transaction.setDate(sendNewTransactionDate());
-            transaction.setDescription(sendNewTransactionDescription());
-
-            try {
-                transactionRepository.update(transaction);
-            } catch (SQLException | LiquibaseException e) {
-                throw new RuntimeException(e);
-            }
-
-            checkIfSpendMoreThanBudget(transactionRepository);
+        if (httpRequestsClass.editTransaction(id, sum, (category != null ? category.getId() : 0), date, description)) {
+            checkIfSpendMoreThanBudget();
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public boolean deleteTransaction() {
-        TransactionEntity transaction;
-        try {
-            transaction = transactionRepository.findById(sendTransactionId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            return transactionRepository.delete(transaction);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        return httpRequestsClass.deleteTransaction(sendTransactionId());
     }
 
     public String getAllUserGoals() {
         StringBuilder output = new StringBuilder();
 
-        try {
-            for (TransactionCategoryEntity goal : categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId())) {
-                BigDecimal totalSum = BigDecimal.valueOf(0);
-                String goalString = goal.toString();
+        for (TransactionCategoryDTO goalDTO : httpRequestsClass.getAllUserGoals(CurrentUser.currentUser.getId())) {
+            BigDecimal totalSum = BigDecimal.valueOf(0);
+            String goalString = goalDTO.toString();
 
-                if (goal.getNeededSum() != null) {
-                    try {
-                        for (TransactionEntity transaction : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                            if (transaction.getCategoryId() != 0 && transaction.getCategoryId() == goal.getId() && new TransactionCategoryRepository().findById(transaction.getCategoryId()).getNeededSum() != null) {
-                                totalSum = totalSum.add(transaction.getSum());
-                            }
-                        }
-                    } catch (SQLException | LiquibaseException e) {
-                        throw new RuntimeException(e);
+            if (goalDTO.getNeededSum() != null) {
+                for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
+                    if (transactionDTO.getCategoryId() != 0 && transactionDTO.getCategoryId() == goalDTO.getId() && httpRequestsClass.getCategoryOrGoalWithId(transactionDTO.getCategoryId()).getNeededSum() != null) {
+                        totalSum = totalSum.add(transactionDTO.getSum());
                     }
-
-                    goalString += " Необходимая сумма = " + totalSum + "/" + goal.getNeededSum();
                 }
 
-                output.append(goalString).append("\n");
+                goalString += " Необходимая сумма = " + totalSum + "/" + goalDTO.getNeededSum();
             }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+
+            output.append(goalString).append("\n");
         }
 
         return output.toString();
     }
 
-    private void checkIfSpendMoreThanBudget(TransactionRepository transactionRepository) {
-        SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
-        try {
-            monthlyBudgetEntity = budgetRepository.findByDateAndUserId(new Date(yearAndMonthDateFormat.parse(String.valueOf(monthlyBudgetEntity.getDate())).getTime()), monthlyBudgetEntity.getUserId());
-        } catch (ParseException | SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+    private void checkIfSpendMoreThanBudget() {
+        MonthlyBudgetEntity monthlyBudgetEntity = MonthlyBudgetDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getBudget());
 
         if (monthlyBudgetEntity != null) {
             BigDecimal totalSpentSum = BigDecimal.valueOf(0);
 
-            try {
-                for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                    if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0) {
-                        totalSpentSum = totalSpentSum.add(transactionEntity.getSum());
-                    }
+            for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
+                if (transactionDTO.getSum().compareTo(BigDecimal.valueOf(0)) > 0) {
+                    totalSpentSum = totalSpentSum.add(transactionDTO.getSum());
                 }
-            } catch (SQLException | LiquibaseException e) {
-                throw new RuntimeException(e);
             }
 
             if (totalSpentSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
@@ -482,12 +336,8 @@ public class CommandClass {
     public BigDecimal getCurrentBalance() {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
-        try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                totalSum = totalSum.add(transactionEntity.getSum());
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+        for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
+            totalSum = totalSum.add(transactionDTO.getSum());
         }
 
         return totalSum;
@@ -496,15 +346,11 @@ public class CommandClass {
     public BigDecimal getIncomeForPeriod(Date from, Date to) {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
-        try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) > 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
-                    totalSum = totalSum.add(transactionEntity.getSum());
+            for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
+                if (transactionDTO.getSum().compareTo(BigDecimal.valueOf(0)) > 0 && transactionDTO.getDate().compareTo(from) >= 0 && transactionDTO.getDate().compareTo(to) <= 0) {
+                    totalSum = totalSum.add(transactionDTO.getSum());
                 }
             }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
 
         return totalSum;
     }
@@ -512,14 +358,10 @@ public class CommandClass {
     public BigDecimal getExpenseForPeriod(Date from, Date to) {
         BigDecimal totalSum = BigDecimal.valueOf(0);
 
-        try {
-            for (TransactionEntity transactionEntity : transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())) {
-                if (transactionEntity.getSum().compareTo(BigDecimal.valueOf(0)) < 0 && transactionEntity.getDate().compareTo(from) >= 0 && transactionEntity.getDate().compareTo(to) <= 0) {
-                    totalSum = totalSum.add(transactionEntity.getSum());
-                }
+        for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
+            if (transactionDTO.getSum().compareTo(BigDecimal.valueOf(0)) < 0 && transactionDTO.getDate().compareTo(from) >= 0 && transactionDTO.getDate().compareTo(to) <= 0) {
+                totalSum = totalSum.add(transactionDTO.getSum());
             }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
         }
 
         totalSum = totalSum.subtract(totalSum.add(totalSum));
@@ -531,15 +373,11 @@ public class CommandClass {
         BigDecimal totalSum = BigDecimal.valueOf(0);
         StringBuilder output = new StringBuilder();
 
-        try {
-            for (TransactionCategoryEntity category : categoryRepository.findAll()) {
-                for (TransactionEntity transaction : transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, category.getId(), "Neg", CurrentUser.currentUser.getId())) {
-                    totalSum = totalSum.subtract(transaction.getSum());
-                }
-                output.append(category.getName()).append(": ").append(totalSum).append("\n");
+        for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
+            for (TransactionDTO transactionDTO : httpRequestsClass.filterTransactions(null, categoryDTO.getId(), "Neg", CurrentUser.currentUser.getId())) {
+                totalSum = totalSum.subtract(transactionDTO.getSum());
             }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+            output.append(categoryDTO.getName()).append(": ").append(totalSum).append("\n");
         }
 
         return output.toString();

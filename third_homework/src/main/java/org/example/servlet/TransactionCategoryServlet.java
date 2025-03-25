@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.CurrentUser;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.service.TransactionCategoryService;
 import org.example.servlet.dto.TransactionCategoryDTO;
+import org.example.servlet.dto.TransactionDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -50,9 +52,37 @@ public class TransactionCategoryServlet extends HttpServlet {
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);
             }
+        } else if (req.getParameter("user") != null) {
+            try {
+                int userId = Integer.parseInt(req.getParameter("user"));
+
+                List<TransactionCategoryDTO> goalDTOS = transactionCategoryService.findAllGoalsWithUserId(userId);
+
+                if (goalDTOS != null) {
+                    printWriter.write(objectMapper.writeValueAsString(goalDTOS));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+            } catch (SQLException | LiquibaseException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (req.getParameter("name") != null) {
+            String name = req.getParameter("name");
+
+            try {
+                TransactionCategoryDTO transactionCategoryDTO = transactionCategoryService.findByName(name);
+
+                if (transactionCategoryDTO != null) {
+                    printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+            } catch (SQLException | LiquibaseException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             try {
-                List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAll();
+                List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId());
 
                 if (transactionCategoryDTOS != null) {
                     printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTOS));
