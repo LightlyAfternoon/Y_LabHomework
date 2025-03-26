@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="create-service-schema" author="Afternoon">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS service;
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-not-public-schema" author="Afternoon">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS not_public;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
