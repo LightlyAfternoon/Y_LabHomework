@@ -18,7 +18,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -48,7 +47,7 @@ class TransactionCategoryServletTest {
     @Test
     void doGetTest() throws SQLException, LiquibaseException, IOException, ServletException {
         TransactionCategoryEntity transactionCategory = new TransactionCategoryEntity.TransactionCategoryBuilder("t").
-                id(1).neededSum(BigDecimal.valueOf(10.10)).userId(1).build();
+                id(1).build();
 
         Mockito.when(transactionCategoryRepository.findById(1)).thenReturn(transactionCategory);
         Mockito.when(request.getPathInfo()).thenReturn("/1");
@@ -56,7 +55,7 @@ class TransactionCategoryServletTest {
 
         transactionCategoryServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)), stringWriter.toString());
 
         stringWriter = new StringWriter();
         TransactionCategoryEntity transactionCategory2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").
@@ -68,7 +67,42 @@ class TransactionCategoryServletTest {
 
         transactionCategoryServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(List.of(transactionCategoryDTOMapper.mapToDTO(transactionCategory), transactionCategoryDTOMapper.mapToDTO(transactionCategory2))));
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transactionCategoryDTOMapper.mapToDTO(transactionCategory), transactionCategoryDTOMapper.mapToDTO(transactionCategory2))), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(transactionCategoryRepository.findAllGoalsWithUserId(1)).thenReturn(List.of(transactionCategory2));
+        Mockito.when(request.getPathInfo()).thenReturn(null);
+        Mockito.when(request.getParameter("user")).thenReturn(String.valueOf(1));
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        transactionCategoryServlet.doGet(request, response);
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transactionCategoryDTOMapper.mapToDTO(transactionCategory2))), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(transactionCategoryRepository.findByName("t")).thenReturn(transactionCategory);
+        Mockito.when(request.getPathInfo()).thenReturn(null);
+        Mockito.when(request.getParameter("user")).thenReturn(null);
+        Mockito.when(request.getParameter("name")).thenReturn("t");
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        transactionCategoryServlet.doGet(request, response);
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionCategory), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(transactionCategoryRepository.findById(50)).thenReturn(null);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(request.getParameter("user")).thenReturn(null);
+        Mockito.when(request.getParameter("name")).thenReturn(null);
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        transactionCategoryServlet.doGet(request, response);
+
+        Assertions.assertEquals("", stringWriter.toString());
     }
 
     @Test
@@ -84,7 +118,7 @@ class TransactionCategoryServletTest {
 
         transactionCategoryServlet.doPost(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)), stringWriter.toString());
     }
 
     @Test
@@ -101,24 +135,47 @@ class TransactionCategoryServletTest {
 
         transactionCategoryServlet.doPut(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        TransactionCategoryEntity transactionCategory2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").
+                id(50).neededSum(BigDecimal.valueOf(20)).userId(1).build();
+        stringReader = new StringReader(objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory2)));
+
+        Mockito.doNothing().when(transactionCategoryRepository).update(transactionCategory2);
+        Mockito.when(transactionCategoryRepository.findById(50)).thenReturn(null);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(request.getReader()).thenReturn(new BufferedReader(stringReader));
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        transactionCategoryServlet.doPut(request, response);
+
+        Assertions.assertEquals("", stringWriter.toString());
     }
 
     @Test
     void doDeleteTest() throws SQLException, LiquibaseException, IOException, ServletException {
         TransactionCategoryEntity transactionCategory = new TransactionCategoryEntity.TransactionCategoryBuilder("t").
                 id(1).neededSum(BigDecimal.valueOf(10.10)).userId(1).build();
-        StringReader stringReader = new StringReader(objectMapper.writeValueAsString(transactionCategoryDTOMapper.mapToDTO(transactionCategory)));
 
-        Mockito.doNothing().when(transactionCategoryRepository).update(transactionCategory);
         Mockito.when(transactionCategoryRepository.findById(1)).thenReturn(transactionCategory);
         Mockito.when(transactionCategoryRepository.delete(transactionCategory)).thenReturn(true);
         Mockito.when(request.getPathInfo()).thenReturn("/1");
-        Mockito.when(request.getReader()).thenReturn(new BufferedReader(stringReader));
         Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
         transactionCategoryServlet.doDelete(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), "TransactionCategory deleted!");
+        Assertions.assertEquals("TransactionCategory deleted!", stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(transactionCategoryRepository.findById(50)).thenReturn(null);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        transactionCategoryServlet.doDelete(request, response);
+
+        Assertions.assertEquals("TransactionCategory NOT found!", stringWriter.toString());
     }
 }

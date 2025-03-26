@@ -78,7 +78,7 @@ public class TransactionServlet extends HttpServlet {
             try {
                 List<TransactionDTO> transactionDTOS = transactionService.findAllWithUser(CurrentUser.currentUser.getId());
 
-                if (transactionDTOS != null) {
+                if (transactionDTOS != null && !transactionDTOS.isEmpty()) {
                     printWriter.write(objectMapper.writeValueAsString(transactionDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -105,7 +105,7 @@ public class TransactionServlet extends HttpServlet {
                 if (transactionDTO != null) {
                     printWriter.write(objectMapper.writeValueAsString(transactionDTO));
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

@@ -12,12 +12,10 @@ import org.example.annotation.Loggable;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.service.TransactionCategoryService;
 import org.example.servlet.dto.TransactionCategoryDTO;
-import org.example.servlet.dto.TransactionDTO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +58,7 @@ public class TransactionCategoryServlet extends HttpServlet {
 
                 List<TransactionCategoryDTO> goalDTOS = transactionCategoryService.findAllGoalsWithUserId(userId);
 
-                if (goalDTOS != null) {
+                if (goalDTOS != null && !goalDTOS.isEmpty()) {
                     printWriter.write(objectMapper.writeValueAsString(goalDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -86,7 +84,7 @@ public class TransactionCategoryServlet extends HttpServlet {
             try {
                 List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId());
 
-                if (transactionCategoryDTOS != null) {
+                if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
                     printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -112,7 +110,7 @@ public class TransactionCategoryServlet extends HttpServlet {
                 if (transactionCategoryDTO != null) {
                     printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

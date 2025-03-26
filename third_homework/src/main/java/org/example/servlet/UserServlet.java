@@ -55,7 +55,7 @@ public class UserServlet extends HttpServlet {
             try {
                 List<UserDTO> userDTOS = userService.findAll();
 
-                if (userDTOS != null) {
+                if (userDTOS != null && !userDTOS.isEmpty()) {
                     printWriter.write(objectMapper.writeValueAsString(userDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -81,7 +81,7 @@ public class UserServlet extends HttpServlet {
                 if (userDTO != null) {
                     printWriter.write(objectMapper.writeValueAsString(userDTO));
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

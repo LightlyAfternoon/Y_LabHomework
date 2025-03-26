@@ -73,7 +73,7 @@ public class MonthlyBudgetServlet extends HttpServlet {
             try {
                 List<MonthlyBudgetDTO> monthlyBudgetDTOS = monthlyBudgetService.findAll();
 
-                if (monthlyBudgetDTOS != null) {
+                if (monthlyBudgetDTOS != null && !monthlyBudgetDTOS.isEmpty()) {
                     printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTOS));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -100,7 +100,7 @@ public class MonthlyBudgetServlet extends HttpServlet {
                 if (monthlyBudgetDTO != null) {
                     printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

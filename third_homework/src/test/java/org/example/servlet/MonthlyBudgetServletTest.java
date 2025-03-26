@@ -44,8 +44,9 @@ class MonthlyBudgetServletTest {
 
     @Test
     void doGetTest() throws SQLException, LiquibaseException, IOException, ServletException {
+        Date date = new Date(System.currentTimeMillis());
         MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
-                id(1).date(new Date(System.currentTimeMillis())).build();
+                id(1).date(date).build();
 
         Mockito.when(monthlyBudgetRepository.findById(1)).thenReturn(monthlyBudget);
         Mockito.when(request.getPathInfo()).thenReturn("/1");
@@ -53,7 +54,7 @@ class MonthlyBudgetServletTest {
 
         monthlyBudgetServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), stringWriter.toString());
 
         stringWriter = new StringWriter();
         MonthlyBudgetEntity monthlyBudget2 = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
@@ -65,7 +66,31 @@ class MonthlyBudgetServletTest {
 
         monthlyBudgetServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(List.of(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget), monthlyBudgetDTOMapper.mapToDTO(monthlyBudget2))));
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget), monthlyBudgetDTOMapper.mapToDTO(monthlyBudget2))), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(monthlyBudgetRepository.findByDateAndUserId(monthlyBudget.getDate(), 1)).thenReturn(monthlyBudget);
+        Mockito.when(request.getPathInfo()).thenReturn(null);
+        Mockito.when(request.getParameter("date")).thenReturn(monthlyBudget.getDate().toString());
+        Mockito.when(request.getParameter("user")).thenReturn(String.valueOf(1));
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        monthlyBudgetServlet.doGet(request, response);
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(monthlyBudget);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(request.getParameter("date")).thenReturn(null);
+        Mockito.when(request.getParameter("user")).thenReturn(null);
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        monthlyBudgetServlet.doGet(request, response);
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), stringWriter.toString());
     }
 
     @Test
@@ -99,23 +124,46 @@ class MonthlyBudgetServletTest {
         monthlyBudgetServlet.doPut(request, response);
 
         Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+
+        stringWriter = new StringWriter();
+
+        MonthlyBudgetEntity monthlyBudget2 = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
+                id(50).date(new Date(System.currentTimeMillis())).build();
+        stringReader = new StringReader(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+
+        Mockito.doNothing().when(monthlyBudgetRepository).update(monthlyBudget2);
+        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(null);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(request.getReader()).thenReturn(new BufferedReader(stringReader));
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        monthlyBudgetServlet.doPut(request, response);
+
+        Assertions.assertEquals("", stringWriter.toString());
     }
 
     @Test
     void doDeleteTest() throws SQLException, LiquibaseException, IOException, ServletException {
         MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
                 id(1).date(new Date(System.currentTimeMillis())).build();
-        StringReader stringReader = new StringReader(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
 
-        Mockito.doNothing().when(monthlyBudgetRepository).update(monthlyBudget);
         Mockito.when(monthlyBudgetRepository.findById(1)).thenReturn(monthlyBudget);
         Mockito.when(monthlyBudgetRepository.delete(monthlyBudget)).thenReturn(true);
         Mockito.when(request.getPathInfo()).thenReturn("/1");
-        Mockito.when(request.getReader()).thenReturn(new BufferedReader(stringReader));
         Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
         monthlyBudgetServlet.doDelete(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), "MonthlyBudget deleted!");
+        Assertions.assertEquals("MonthlyBudget deleted!", stringWriter.toString());
+
+        stringWriter = new StringWriter();
+
+        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(null);
+        Mockito.when(request.getPathInfo()).thenReturn("/50");
+        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
+        monthlyBudgetServlet.doDelete(request, response);
+
+        Assertions.assertEquals("MonthlyBudget NOT found!", stringWriter.toString());
     }
 }
