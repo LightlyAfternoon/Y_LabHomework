@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.annotation.Loggable;
 import org.example.repository.MonthlyBudgetRepository;
 import org.example.service.MonthlyBudgetService;
 import org.example.servlet.dto.MonthlyBudgetDTO;
@@ -20,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Loggable
 @WebServlet("/budget/*")
 public class MonthlyBudgetServlet extends HttpServlet {
     MonthlyBudgetService monthlyBudgetService;

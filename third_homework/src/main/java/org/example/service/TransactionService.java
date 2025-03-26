@@ -1,6 +1,7 @@
 package org.example.service;
 
 import liquibase.exception.LiquibaseException;
+import org.example.annotation.Loggable;
 import org.example.model.TransactionEntity;
 import org.example.repository.TransactionRepository;
 import org.example.servlet.dto.TransactionDTO;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Loggable
 public class TransactionService {
     TransactionRepository transactionRepository;
     TransactionDTOMapper transactionDTOMapper = TransactionDTOMapper.INSTANCE;

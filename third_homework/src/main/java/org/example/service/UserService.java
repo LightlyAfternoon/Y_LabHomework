@@ -1,6 +1,7 @@
 package org.example.service;
 
 import liquibase.exception.LiquibaseException;
+import org.example.annotation.Loggable;
 import org.example.model.UserEntity;
 import org.example.repository.UserRepository;
 import org.example.servlet.dto.UserDTO;
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Loggable
 public class UserService {
     UserRepository userRepository;
     UserDTOMapper userDTOMapper = UserDTOMapper.INSTANCE;

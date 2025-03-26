@@ -26,7 +26,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/login");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/login");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -70,7 +70,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/user");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/user");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -106,7 +106,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/user");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/user");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -150,7 +150,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/budget");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/budget");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -201,7 +201,7 @@ public class HttpRequestsClass {
             MonthlyBudgetDTO budgetDTO = new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), BigDecimal.valueOf(0)).build();
             SimpleDateFormat yearAndMonthDateFormat = new SimpleDateFormat("yyyy-MM");
             Date date = new Date(yearAndMonthDateFormat.parse(budgetDTO.getDate().toString()).getTime());
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/budget?date="+date+"&user="+CurrentUser.currentUser.getId());
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/budget?date="+date+"&user="+CurrentUser.currentUser.getId());
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -236,7 +236,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/category");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/category");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -281,7 +281,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/transaction");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/transaction");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -324,7 +324,7 @@ public class HttpRequestsClass {
         HttpURLConnection httpURLConnection;
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/user/"+id);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/user/"+id);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -345,7 +345,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/transaction");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/transaction");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -381,7 +381,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/transaction?date="+date+"&category="+categoryId+"&type="+type+"&user="+userId);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/transaction?date="+date+"&category="+categoryId+"&type="+type+"&user="+userId);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -416,7 +416,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/transaction/"+id);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/transaction/"+id);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
@@ -444,7 +444,7 @@ public class HttpRequestsClass {
         HttpURLConnection httpURLConnection;
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/transaction/"+id);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/transaction/"+id);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -465,7 +465,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/category?user="+userId);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/category?user="+userId);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -501,7 +501,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/category");
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/category");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -537,7 +537,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/category?name="+name);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/category?name="+name);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -573,7 +573,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/second_homework-1.0-SNAPSHOT/category/"+id);
+            URL url = new URL("http://localhost:8080/third_homework-1.0-SNAPSHOT/category/"+id);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);

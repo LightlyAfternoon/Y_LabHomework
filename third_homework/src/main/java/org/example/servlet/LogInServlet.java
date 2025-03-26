@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.annotation.Loggable;
 import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.example.servlet.dto.LogInDTO;
@@ -17,6 +18,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
+@Loggable
 @WebServlet("/login")
 public class LogInServlet extends HttpServlet {
     UserService userService;

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
+import org.example.annotation.Loggable;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.service.TransactionCategoryService;
 import org.example.servlet.dto.TransactionCategoryDTO;
@@ -20,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Loggable
 @WebServlet("/category/*")
 public class TransactionCategoryServlet extends HttpServlet {
     TransactionCategoryService transactionCategoryService;

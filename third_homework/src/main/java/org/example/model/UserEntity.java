@@ -1,6 +1,6 @@
 package org.example.model;
 
-import org.example.servlet.dto.Default;
+import org.example.annotation.Default;
 
 public class UserEntity {
     private int id;

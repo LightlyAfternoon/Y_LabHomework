@@ -1,6 +1,7 @@
 package org.example.service;
 
 import liquibase.exception.LiquibaseException;
+import org.example.annotation.Loggable;
 import org.example.model.MonthlyBudgetEntity;
 import org.example.repository.MonthlyBudgetRepository;
 import org.example.servlet.dto.MonthlyBudgetDTO;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Loggable
 public class MonthlyBudgetService {
     MonthlyBudgetRepository monthlyBudgetRepository;
     MonthlyBudgetDTOMapper monthlyBudgetDTOMapper = MonthlyBudgetDTOMapper.INSTANCE;

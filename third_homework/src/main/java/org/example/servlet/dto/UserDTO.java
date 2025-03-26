@@ -1,5 +1,6 @@
 package org.example.servlet.dto;
 
+import org.example.annotation.Default;
 import org.example.model.UserRole;
 
 public class UserDTO {
