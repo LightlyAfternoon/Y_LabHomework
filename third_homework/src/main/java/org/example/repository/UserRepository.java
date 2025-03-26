@@ -24,7 +24,7 @@ public class UserRepository implements Repository<UserEntity> {
             }
 
             try (Connection connection = ConnectionClass.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement("insert into \"user\"(name, email, password, role_id, is_blocked)" +
+                 PreparedStatement preparedStatement = connection.prepareStatement("insert into service.\"user\"(name, email, password, role_id, is_blocked)" +
                          "values(?, ?, ?, ?, ?::bit)")) {
                 preparedStatement.setString(1, entity.getName());
                 preparedStatement.setString(2, entity.getEmail());
@@ -48,7 +48,7 @@ public class UserRepository implements Repository<UserEntity> {
 
     private int getId(UserEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select id from \"user\" " +
+             PreparedStatement preparedStatement = connection.prepareStatement("select id from service.\"user\" " +
                      "where name = ? and email = ? and password = ? and role_id = ? and is_blocked = ?::bit")) {
             preparedStatement.setString(1, entity.getName());
             preparedStatement.setString(2, entity.getEmail());
@@ -69,7 +69,7 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public UserEntity findById(int id) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from service.\"user\" where id = ?")) {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -92,7 +92,7 @@ public class UserRepository implements Repository<UserEntity> {
         List<UserEntity> userEntities = new ArrayList<>();
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\"")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from service.\"user\"")) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -113,7 +113,7 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public void update(UserEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("update \"user\" " +
+             PreparedStatement preparedStatement = connection.prepareStatement("update service.\"user\" " +
                      "set name = ?, email = ?, password = ?, role_id = ?, is_blocked = ?::bit where id = ?")) {
             preparedStatement.setString(1, entity.getName());
             preparedStatement.setString(2, entity.getEmail());
@@ -129,7 +129,7 @@ public class UserRepository implements Repository<UserEntity> {
     @Override
     public boolean delete(UserEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("delete from \"user\" where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("delete from service.\"user\" where id = ?")) {
             preparedStatement.setInt(1, entity.getId());
 
             if (preparedStatement.executeUpdate() > 0) {
@@ -142,7 +142,7 @@ public class UserRepository implements Repository<UserEntity> {
 
     private boolean emailExists(String email) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where email = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from service.\"user\" where email = ?")) {
             preparedStatement.setString(1, email);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -153,7 +153,7 @@ public class UserRepository implements Repository<UserEntity> {
 
     public UserEntity findUserWithEmailAndPassword(String email, String password) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from \"user\" where email = ? and password = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from service.\"user\" where email = ? and password = ?")) {
             preparedStatement.setString(1, email);
             preparedStatement.setString(2, password);
 

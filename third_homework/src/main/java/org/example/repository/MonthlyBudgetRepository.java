@@ -20,7 +20,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
         }
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("insert into monthly_budget(date, sum, user_id) values (?, ?, ?)")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into not_public.monthly_budget(date, sum, user_id) values (?, ?, ?)")) {
             preparedStatement.setDate(1, entity.getDate());
             preparedStatement.setBigDecimal(2, entity.getSum());
             preparedStatement.setInt(3, entity.getUserId());
@@ -40,7 +40,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
 
     private int getId(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select id from monthly_budget " +
+             PreparedStatement preparedStatement = connection.prepareStatement("select id from not_public.monthly_budget " +
                      "where date = ? and sum = ? and user_id = ?")) {
             preparedStatement.setDate(1, entity.getDate());
             preparedStatement.setBigDecimal(2, entity.getSum());
@@ -59,7 +59,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     @Override
     public MonthlyBudgetEntity findById(int id) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.monthly_budget where id = ?")) {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -78,7 +78,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
 
     public MonthlyBudgetEntity findByDateAndUserId(Date date, int userId) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget where date = ? and user_id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.monthly_budget where date = ? and user_id = ?")) {
             preparedStatement.setDate(1, date);
             preparedStatement.setInt(2, userId);
 
@@ -100,7 +100,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
         List<MonthlyBudgetEntity> budgetEntities = new ArrayList<>();
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from monthly_budget")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.monthly_budget")) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -121,7 +121,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     @Override
     public void update(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("update monthly_budget " +
+             PreparedStatement preparedStatement = connection.prepareStatement("update not_public.monthly_budget " +
                      "set sum = ? where id = ?")) {
             preparedStatement.setBigDecimal(1, entity.getSum());
             preparedStatement.setInt(2, entity.getId());
@@ -133,7 +133,7 @@ public class MonthlyBudgetRepository implements Repository<MonthlyBudgetEntity> 
     @Override
     public boolean delete(MonthlyBudgetEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("delete from monthly_budget where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("delete from not_public.monthly_budget where id = ?")) {
             preparedStatement.setInt(1, entity.getId());
 
             if (preparedStatement.executeUpdate() > 0) {

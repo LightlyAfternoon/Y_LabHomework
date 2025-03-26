@@ -19,7 +19,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         }
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("insert into transaction_category(name, needed_sum, user_id) values (?, ?, ?)")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into not_public.transaction_category(name, needed_sum, user_id) values (?, ?, ?)")) {
             preparedStatement.setString(1, entity.getName());
             preparedStatement.setBigDecimal(2, entity.getNeededSum());
             if (entity.getUserId() != 0) {
@@ -43,7 +43,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
 
     private int getId(TransactionCategoryEntity entity) throws SQLException, LiquibaseException {
         int parameterIndex = 1;
-        String sql = "select id from transaction_category where name = ?";
+        String sql = "select id from not_public.transaction_category where name = ?";
 
         if (entity.getNeededSum() != null) {
             sql += " and needed_sum = ?";
@@ -80,7 +80,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public TransactionCategoryEntity findById(int id) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction_category where id = ?")) {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -99,7 +99,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
 
     public TransactionCategoryEntity findByName(String name) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category where name = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction_category where name = ?")) {
             preparedStatement.setString(1, name);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -120,7 +120,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         List<TransactionCategoryEntity> categoryEntities = new ArrayList<>();
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction_category")) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -142,7 +142,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         List<TransactionCategoryEntity> categoryEntities = new ArrayList<>();
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category where user_id = ? or user_id is null")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction_category where user_id = ? or user_id is null")) {
             preparedStatement.setInt(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -164,7 +164,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
         List<TransactionCategoryEntity> categoryEntities = new ArrayList<>();
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction_category where user_id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction_category where user_id = ?")) {
             preparedStatement.setInt(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -185,7 +185,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public void update(TransactionCategoryEntity entity) throws SQLException, LiquibaseException {
         int parameterIndex = 1;
-        String sql = "update transaction_category set name = ?";
+        String sql = "update not_public.transaction_category set name = ?";
 
         if (entity.getNeededSum() != null) {
             sql += ", needed_sum = ?";
@@ -208,7 +208,7 @@ public class TransactionCategoryRepository implements Repository<TransactionCate
     @Override
     public boolean delete(TransactionCategoryEntity entity) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("delete from transaction_category where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("delete from not_public.transaction_category where id = ?")) {
             preparedStatement.setInt(1, entity.getId());
 
             if (preparedStatement.executeUpdate() > 0) {

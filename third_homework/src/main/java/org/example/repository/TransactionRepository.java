@@ -20,7 +20,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
         }
 
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("insert into transaction(sum, date, description, category_id, user_id) " +
+             PreparedStatement preparedStatement = connection.prepareStatement("insert into not_public.transaction(sum, date, description, category_id, user_id) " +
                      "values (?, ?, ?, ?, ?)")) {
             preparedStatement.setBigDecimal(1, entity.getSum());
             preparedStatement.setDate(2, entity.getDate());
@@ -51,7 +51,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
 
     private int getId(TransactionEntity entity) throws SQLException, LiquibaseException {
         int parameterIndex = 1;
-        String sql = "select id from transaction " +
+        String sql = "select id from not_public.transaction " +
                 "where sum = ? and date = ? and description = ?";
 
         if (entity.getCategoryId() != 0) {
@@ -85,7 +85,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public TransactionEntity findById(int id) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction where id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction where id = ?")) {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -105,7 +105,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public List<TransactionEntity> findAll() throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction")) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -127,7 +127,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
 
     public List<TransactionEntity> findAllWithUser(int userId) throws SQLException, LiquibaseException {
         try (Connection connection = ConnectionClass.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("select * from transaction where user_id = ?")) {
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from not_public.transaction where user_id = ?")) {
             preparedStatement.setInt(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -183,7 +183,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     }
 
     private static String getFilteredSql(Date date, int categoryId, String type) {
-        String sql = "select * from transaction where";
+        String sql = "select * from not_public.transaction where";
         boolean moreThanOneParameters = false;
 
         if (date != null) {
@@ -224,7 +224,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     @Override
     public void update(TransactionEntity entity) throws SQLException, LiquibaseException {
         int parameterIndex = 1;
-        String sql = "update transaction " +
+        String sql = "update not_public.transaction " +
                 "set sum = ?, date = ?, description = ?";
 
         if (entity.getCategoryId() != 0) {
@@ -251,7 +251,7 @@ public class TransactionRepository implements Repository<TransactionEntity> {
     public boolean delete(TransactionEntity entity) throws SQLException, LiquibaseException {
         if (entity != null) {
             try (Connection connection = ConnectionClass.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement("delete from transaction where id = ?")) {
+                 PreparedStatement preparedStatement = connection.prepareStatement("delete from not_public.transaction where id = ?")) {
                 preparedStatement.setInt(1, entity.getId());
 
                 if (preparedStatement.executeUpdate() > 0) {
