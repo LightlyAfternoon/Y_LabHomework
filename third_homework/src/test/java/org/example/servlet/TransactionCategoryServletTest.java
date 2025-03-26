@@ -4,7 +4,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.CurrentUser;
 import org.example.model.TransactionCategoryEntity;
+import org.example.model.UserEntity;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.service.TransactionCategoryService;
 import org.example.servlet.mapper.TransactionCategoryDTOMapper;
@@ -40,6 +42,7 @@ class TransactionCategoryServletTest {
         stringWriter = new StringWriter();
         objectMapper = new ObjectMapper();
         transactionCategoryDTOMapper = TransactionCategoryDTOMapper.INSTANCE;
+        CurrentUser.currentUser = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
     }
 
     @Test
@@ -59,7 +62,7 @@ class TransactionCategoryServletTest {
         TransactionCategoryEntity transactionCategory2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").
                 id(2).neededSum(BigDecimal.valueOf(20)).userId(1).build();
 
-        Mockito.when(transactionCategoryRepository.findAll()).thenReturn(List.of(transactionCategory, transactionCategory2));
+        Mockito.when(transactionCategoryRepository.findCommonCategoriesOrGoalsWithUserId(1)).thenReturn(List.of(transactionCategory, transactionCategory2));
         Mockito.when(request.getPathInfo()).thenReturn(null);
         Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 

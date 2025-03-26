@@ -4,11 +4,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import liquibase.exception.LiquibaseException;
+import org.example.CurrentUser;
 import org.example.model.TransactionEntity;
+import org.example.model.UserEntity;
 import org.example.repository.TransactionRepository;
 import org.example.service.TransactionService;
 import org.example.servlet.dto.TransactionDTO;
 import org.example.servlet.mapper.TransactionDTOMapper;
+import org.example.servlet.mapper.UserDTOMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,7 @@ class TransactionServletTest {
         stringWriter = new StringWriter();
         objectMapper = new ObjectMapper();
         transactionDTOMapper = TransactionDTOMapper.INSTANCE;
+        CurrentUser.currentUser = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
     }
 
     @Test
@@ -54,19 +58,19 @@ class TransactionServletTest {
 
         transactionServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)), stringWriter.toString());
 
         stringWriter = new StringWriter();
         TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(20), 1).
                 id(2).description("t2").build();
 
-        Mockito.when(transactionRepository.findAll()).thenReturn(List.of(transaction, transaction2));
+        Mockito.when(transactionRepository.findAllWithUser(1)).thenReturn(List.of(transaction, transaction2));
         Mockito.when(request.getPathInfo()).thenReturn(null);
         Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
         transactionServlet.doGet(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(List.of(transactionDTOMapper.mapToDTO(transaction), transactionDTOMapper.mapToDTO(transaction2))));
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transactionDTOMapper.mapToDTO(transaction), transactionDTOMapper.mapToDTO(transaction2))), stringWriter.toString());
     }
 
     @Test
@@ -82,7 +86,7 @@ class TransactionServletTest {
 
         transactionServlet.doPost(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)), stringWriter.toString());
     }
 
     @Test
@@ -99,7 +103,7 @@ class TransactionServletTest {
 
         transactionServlet.doPut(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(transactionDTOMapper.mapToDTO(transaction)), stringWriter.toString());
     }
 
     @Test
@@ -117,6 +121,6 @@ class TransactionServletTest {
 
         transactionServlet.doDelete(request, response);
 
-        Assertions.assertEquals(stringWriter.toString(), "Transaction deleted!");
+        Assertions.assertEquals("Transaction deleted!", stringWriter.toString());
     }
 }
