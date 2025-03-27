@@ -100,10 +100,15 @@ public class TransactionServlet extends HttpServlet {
         if (!transactionString.isBlank()) {
             try {
                 TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
-                transactionDTO = transactionService.add(transactionDTO);
 
-                if (transactionDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                if (TransactionDTO.isValid(transactionDTO)) {
+                    transactionDTO = transactionService.add(transactionDTO);
+
+                    if (transactionDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
@@ -127,12 +132,17 @@ public class TransactionServlet extends HttpServlet {
 
             try {
                 TransactionDTO transactionDTO = objectMapper.readValue(transactionString, TransactionDTO.class);
-                transactionDTO = transactionService.update(transactionDTO, id);
 
-                if (transactionDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                if (TransactionDTO.isValid(transactionDTO)) {
+                    transactionDTO = transactionService.update(transactionDTO, id);
+
+                    if (transactionDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(transactionDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    }
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

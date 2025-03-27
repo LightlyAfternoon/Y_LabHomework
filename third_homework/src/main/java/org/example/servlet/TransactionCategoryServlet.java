@@ -105,10 +105,15 @@ public class TransactionCategoryServlet extends HttpServlet {
         if (!transactionCategoryString.isBlank()) {
             try {
                 TransactionCategoryDTO transactionCategoryDTO = objectMapper.readValue(transactionCategoryString, TransactionCategoryDTO.class);
-                transactionCategoryDTO = transactionCategoryService.add(transactionCategoryDTO);
 
-                if (transactionCategoryDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
+                if (TransactionCategoryDTO.isValid(transactionCategoryDTO)) {
+                    transactionCategoryDTO = transactionCategoryService.add(transactionCategoryDTO);
+
+                    if (transactionCategoryDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
@@ -131,10 +136,15 @@ public class TransactionCategoryServlet extends HttpServlet {
 
             try {
                 TransactionCategoryDTO transactionCategoryDTO = objectMapper.readValue(transactionCategoryString, TransactionCategoryDTO.class);
-                transactionCategoryDTO = transactionCategoryService.update(transactionCategoryDTO, id);
 
-                if (transactionCategoryDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
+                if (TransactionCategoryDTO.isValid(transactionCategoryDTO)) {
+                    transactionCategoryDTO = transactionCategoryService.update(transactionCategoryDTO, id);
+
+                    if (transactionCategoryDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(transactionCategoryDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }

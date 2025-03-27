@@ -95,10 +95,15 @@ public class MonthlyBudgetServlet extends HttpServlet {
         if (!monthlyBudgetString.isBlank()) {
             try {
                 MonthlyBudgetDTO monthlyBudgetDTO = objectMapper.readValue(monthlyBudgetString, MonthlyBudgetDTO.class);
-                monthlyBudgetDTO = monthlyBudgetService.add(monthlyBudgetDTO);
 
-                if (monthlyBudgetDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
+                if (MonthlyBudgetDTO.isValid(monthlyBudgetDTO)) {
+                    monthlyBudgetDTO = monthlyBudgetService.add(monthlyBudgetDTO);
+
+                    if (monthlyBudgetDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
@@ -122,10 +127,15 @@ public class MonthlyBudgetServlet extends HttpServlet {
 
             try {
                 MonthlyBudgetDTO monthlyBudgetDTO = objectMapper.readValue(monthlyBudgetString, MonthlyBudgetDTO.class);
-                monthlyBudgetDTO = monthlyBudgetService.update(monthlyBudgetDTO, id);
 
-                if (monthlyBudgetDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
+                if (MonthlyBudgetDTO.isValid(monthlyBudgetDTO)) {
+                    monthlyBudgetDTO = monthlyBudgetService.update(monthlyBudgetDTO, id);
+
+                    if (monthlyBudgetDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(monthlyBudgetDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }

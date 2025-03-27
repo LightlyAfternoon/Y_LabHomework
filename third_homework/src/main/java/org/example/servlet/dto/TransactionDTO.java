@@ -190,4 +190,10 @@ public class TransactionDTO {
     public String toString() {
         return "Дата:" + this.getDate() + " Сумма: " + this.getSum() + " id категории/цели: " + (this.getCategoryId() != 0? this.getCategoryId() : "none") + " id: " + this.getId() + " Описание: " + (this.getDescription() != null? this.getDescription() : "");
     }
+
+    public static boolean isValid(TransactionDTO transactionDTO) {
+        return (transactionDTO.getSum() != null && transactionDTO.getSum().compareTo(BigDecimal.valueOf(0)) > 0) &&
+                (transactionDTO.getDate() != null) &&
+                (transactionDTO.getUserId() != 0);
+    }
 }

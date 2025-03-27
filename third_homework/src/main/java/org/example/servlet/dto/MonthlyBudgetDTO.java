@@ -145,4 +145,10 @@ public class MonthlyBudgetDTO {
 
         return result;
     }
+
+    public static boolean isValid(MonthlyBudgetDTO monthlyBudgetDTO) {
+        return (monthlyBudgetDTO.getUserId() != 0) &&
+                (monthlyBudgetDTO.getDate() != null) &&
+                (monthlyBudgetDTO.getSum() != null && monthlyBudgetDTO.getSum().compareTo(BigDecimal.valueOf(0)) > 0);
+    }
 }

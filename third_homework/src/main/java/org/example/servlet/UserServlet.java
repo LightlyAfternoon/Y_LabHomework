@@ -76,10 +76,15 @@ public class UserServlet extends HttpServlet {
         if (!userString.isBlank()) {
             try {
                 UserDTO userDTO = objectMapper.readValue(userString, UserDTO.class);
-                userDTO = userService.add(userDTO);
 
-                if (userDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTO));
+                if (UserDTO.isValid(userDTO)) {
+                    userDTO = userService.add(userDTO);
+
+                    if (userDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(userDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
@@ -102,12 +107,17 @@ public class UserServlet extends HttpServlet {
 
             try {
                 UserDTO userDTO = objectMapper.readValue(userString, UserDTO.class);
-                userDTO = userService.update(userDTO, id);
 
-                if (userDTO != null) {
-                    printWriter.write(objectMapper.writeValueAsString(userDTO));
+                if (UserDTO.isValid(userDTO)) {
+                    userDTO = userService.update(userDTO, id);
+
+                    if (userDTO != null) {
+                        printWriter.write(objectMapper.writeValueAsString(userDTO));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    }
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             } catch (SQLException | LiquibaseException e) {
                 throw new RuntimeException(e);

@@ -152,4 +152,10 @@ public class UserDTO {
     public String toString() {
         return "id: " + this.getId() + " Имя: " + this.getName() + " Email: " + this.getEmail() + " Роль: " + this.getRole();
     }
+
+    public static boolean isValid(UserDTO userDTO) {
+        return (userDTO.getEmail() != null && !userDTO.getEmail().isBlank()) &&
+                (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) &&
+                (userDTO.getName() != null && !userDTO.getName().isBlank());
+    }
 }
