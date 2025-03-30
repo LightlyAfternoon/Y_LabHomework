@@ -206,7 +206,7 @@ class TransactionCategoryRepositoryTest {
     }
 
     @Test
-    void findCommonCategoriesOrGoalsWithUserIdTest() {
+    void findCommonCategoriesOrGoalsByUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
 
         categoryEntity.setName("t");
@@ -235,13 +235,13 @@ class TransactionCategoryRepositoryTest {
         categoryRepository.save(categoryEntity3);
         categoryRepository.save(categoryEntity4);
 
-        transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId());
+        transactionCategoryEntitiesReturned = categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
     @Test
-    void findAllGoalsWithUserIdTest() {
+    void findAllGoalsByUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
 
         categoryEntity.setName("t");
@@ -270,7 +270,7 @@ class TransactionCategoryRepositoryTest {
         categoryRepository.save(categoryEntity3);
         categoryRepository.save(categoryEntity4);
 
-        transactionCategoryEntitiesReturned = categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId());
+        transactionCategoryEntitiesReturned = categoryRepository.findAllGoalsByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }

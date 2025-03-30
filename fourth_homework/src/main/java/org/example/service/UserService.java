@@ -15,5 +15,5 @@ public interface UserService {
 
     boolean delete(int id);
 
-    UserDTO findUserWithEmailAndPassword(String email, String password);
+    UserDTO findUserByEmailAndPassword(String email, String password);
 }

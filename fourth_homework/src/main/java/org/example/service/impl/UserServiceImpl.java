@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         return user == null;
     }
 
-    public UserDTO findUserWithEmailAndPassword(String email, String password) {
+    public UserDTO findUserByEmailAndPassword(String email, String password) {
         return userDTOMapper.mapToDTO(userRepository.findByEmailAndPassword(email, password));
     }
 }

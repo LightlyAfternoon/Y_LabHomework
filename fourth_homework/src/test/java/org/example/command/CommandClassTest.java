@@ -251,7 +251,7 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("s");
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
@@ -392,7 +392,7 @@ class CommandClassTest {
         transactionEntity4.setDate(date2);
         transactionEntity4.setDescription(null);
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
 
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
@@ -475,7 +475,7 @@ class CommandClassTest {
         transactionEntity.setDate(null);
         transactionEntity.setDescription("s");
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
         Mockito.when(httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()).thenReturn(Stream.of(category, category2).map(transactionCategoryDTOMapper::mapToDTO).toList());
@@ -504,7 +504,7 @@ class CommandClassTest {
         transactionEntity.setDescription(" ");
 
         Mockito.when(transactionRepository.findById(id)).thenReturn(transactionEntity);
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
         Mockito.doNothing().when(transactionRepository).save(transactionEntity);
         Mockito.when(httpRequestsClass.editTransaction(id, BigDecimal.valueOf(12.2), 0, date, " ")).thenReturn(true);
 
@@ -600,7 +600,7 @@ class CommandClassTest {
 
         List<TransactionCategoryEntity> categoryEntities = List.of(goalEntity, goalEntity2);
 
-        Mockito.when(categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(categoryEntities);
+        Mockito.when(categoryRepository.findAllGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(categoryEntities);
         Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(new ArrayList<>());
         Mockito.when(httpRequestsClass.getAllUserGoals(CurrentUser.currentUser.getId())).thenReturn(categoryEntities.stream().map(transactionCategoryDTOMapper::mapToDTO).toList());
 
@@ -642,7 +642,7 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("s");
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
@@ -703,7 +703,7 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("s");
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
 
@@ -787,7 +787,7 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("s");
 
-        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
         Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));

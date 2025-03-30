@@ -15,9 +15,9 @@ public interface TransactionCategoryService {
 
     boolean delete(int id);
 
-    List<TransactionCategoryDTO> findAllGoalsWithUserId(int userId) ;
+    List<TransactionCategoryDTO> findAllGoalsByUserId(int userId) ;
 
-    List<TransactionCategoryDTO> findCommonCategoriesOrGoalsWithUserId(int userId);
+    List<TransactionCategoryDTO> findCommonCategoriesOrGoalsByUserId(int userId);
 
     TransactionCategoryDTO findByName(String name);
 }

@@ -16,7 +16,7 @@ public interface TransactionService {
 
     boolean delete(int id);
 
-    List<TransactionDTO> findAllWithUser(int userId);
+    List<TransactionDTO> findAllByUserId(int userId);
 
-    List<TransactionDTO> findAllWithDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId);
+    List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId);
 }

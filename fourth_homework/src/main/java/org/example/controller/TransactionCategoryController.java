@@ -24,7 +24,7 @@ public class TransactionCategoryController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategories() {
-        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId());
+        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId());
 
         if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionCategoryDTOS);
@@ -35,7 +35,7 @@ public class TransactionCategoryController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategoriesByUserId(@RequestAttribute(name = "user") int userId) {
-        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAllGoalsWithUserId(userId);
+        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAllGoalsByUserId(userId);
 
         if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionCategoryDTOS);

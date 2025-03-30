@@ -23,7 +23,7 @@ public class LogInController {
 
     @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> getLoggedInUser(@RequestBody LogInDTO logInDTO) {
-        UserDTO userDTO = userService.findUserWithEmailAndPassword(logInDTO.getEmail(), logInDTO.getPassword());
+        UserDTO userDTO = userService.findUserByEmailAndPassword(logInDTO.getEmail(), logInDTO.getPassword());
 
         if (userDTO != null) {
             return ResponseEntity.ok(userDTO);

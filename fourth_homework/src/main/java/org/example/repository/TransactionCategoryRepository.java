@@ -14,9 +14,9 @@ public interface TransactionCategoryRepository extends Repository<TransactionCat
 
     List<TransactionCategoryEntity> findAll();
 
-    List<TransactionCategoryEntity> findCommonCategoriesOrGoalsWithUserId(int userId);
+    List<TransactionCategoryEntity> findCommonCategoriesOrGoalsByUserId(int userId);
 
-    List<TransactionCategoryEntity> findAllGoalsWithUserId(int userId);
+    List<TransactionCategoryEntity> findAllGoalsByUserId(int userId);
 
     @Modifying
     TransactionCategoryEntity save(TransactionCategoryEntity entity);

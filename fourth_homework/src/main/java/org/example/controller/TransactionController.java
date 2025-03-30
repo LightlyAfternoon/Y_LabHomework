@@ -25,7 +25,7 @@ public class TransactionController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactions() {
-        List<TransactionDTO> transactionDTOS = transactionService.findAllWithUser(CurrentUser.currentUser.getId());
+        List<TransactionDTO> transactionDTOS = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
 
         if (transactionDTOS != null && !transactionDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionDTOS);
@@ -38,7 +38,7 @@ public class TransactionController {
     public ResponseEntity<List<TransactionDTO>> getAllTransactionsByDateAndCategoryAndTypeAndUserId(
             @RequestAttribute(name = "date") Date date, @RequestAttribute(name = "category") int categoryId,
             @RequestAttribute(name = "type") String type, @RequestAttribute(name = "user") int userId) {
-        List<TransactionDTO> transactionDTOS = transactionService.findAllWithDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId);
+        List<TransactionDTO> transactionDTOS = transactionService.findAllByDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId);
 
         if (transactionDTOS != null && !transactionDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionDTOS);

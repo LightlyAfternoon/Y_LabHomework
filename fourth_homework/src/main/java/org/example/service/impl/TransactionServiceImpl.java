@@ -52,12 +52,12 @@ public class TransactionServiceImpl implements TransactionService {
         return transaction == null;
     }
 
-    public List<TransactionDTO> findAllWithUser(int userId) {
+    public List<TransactionDTO> findAllByUserId(int userId) {
 
         return transactionRepository.findAllByUserId(userId).stream().map(transactionDTOMapper::mapToDTO).toList();
     }
 
-    public List<TransactionDTO> findAllWithDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId) {
+    public List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId) {
         return transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId).
                 stream().map(transactionDTOMapper::mapToDTO).toList();
     }

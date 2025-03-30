@@ -1,15 +1,12 @@
 package org.example.controller;
 
-import org.example.model.MonthlyBudgetEntity;
-import org.example.repository.MonthlyBudgetRepository;
+import org.example.controller.dto.MonthlyBudgetDTO;
 import org.example.service.MonthlyBudgetService;
-import org.example.controller.mapper.MonthlyBudgetDTOMapper;
-import org.example.service.impl.MonthlyBudgetServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
@@ -18,92 +15,90 @@ import java.sql.Date;
 import java.util.List;
 
 class MonthlyBudgetControllerTest {
-    MonthlyBudgetRepository monthlyBudgetRepository;
     MonthlyBudgetService monthlyBudgetService;
-    MonthlyBudgetController monthlyBudgetServlet;
+    MonthlyBudgetController monthlyBudgetController;
     ObjectMapper objectMapper;
-    @Autowired
-    MonthlyBudgetDTOMapper monthlyBudgetDTOMapper;
 
     @BeforeEach
     void setUp() {
-        monthlyBudgetRepository = Mockito.mock(MonthlyBudgetRepository.class);
-        monthlyBudgetService = new MonthlyBudgetServiceImpl(monthlyBudgetRepository, monthlyBudgetDTOMapper);
-        monthlyBudgetServlet = new MonthlyBudgetController(monthlyBudgetService);
+        monthlyBudgetService = Mockito.mock(MonthlyBudgetService.class);
+        monthlyBudgetController = new MonthlyBudgetController(monthlyBudgetService);
         objectMapper = new ObjectMapper();
     }
 
     @Test
     void doGetTest() throws IOException {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
+        MonthlyBudgetDTO monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
                 id(1).date(date).build();
 
-        Mockito.when(monthlyBudgetRepository.findById(1)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.findById(1)).thenReturn(monthlyBudget);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), monthlyBudgetServlet.getMonthlyBudgetById(1));
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudget),
+                objectMapper.writeValueAsString(monthlyBudgetController.getMonthlyBudgetById(1).getBody()));
 
-        MonthlyBudgetEntity monthlyBudget2 = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
+        MonthlyBudgetDTO monthlyBudget2 = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
                 id(2).date(new Date(System.currentTimeMillis())).build();
 
-        Mockito.when(monthlyBudgetRepository.findAll()).thenReturn(List.of(monthlyBudget, monthlyBudget2));
+        Mockito.when(monthlyBudgetService.findAll()).thenReturn(List.of(monthlyBudget, monthlyBudget2));
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget), monthlyBudgetDTOMapper.mapToDTO(monthlyBudget2))),
-                monthlyBudgetServlet.getAllMonthlyBudgets());
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(monthlyBudget, monthlyBudget2)),
+                objectMapper.writeValueAsString(monthlyBudgetController.getAllMonthlyBudgets().getBody()));
 
-        Mockito.when(monthlyBudgetRepository.findByDateAndUserId(monthlyBudget.getDate(), 1)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.findByDateAndUserId(monthlyBudget.getDate(), 1)).thenReturn(monthlyBudget);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)),
-                monthlyBudgetServlet.getAllMonthlyBudgetsByDateAndUserId(monthlyBudget.getDate(), 1));
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudget),
+                objectMapper.writeValueAsString(monthlyBudgetController.getAllMonthlyBudgetsByDateAndUserId(monthlyBudget.getDate(), 1).getBody()));
 
-        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.findById(50)).thenReturn(null);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), monthlyBudgetServlet.getAllMonthlyBudgetsByDateAndUserId(null, 0));
+        Assertions.assertEquals("null",
+                objectMapper.writeValueAsString(monthlyBudgetController.getMonthlyBudgetById(50).getBody()));
     }
 
     @Test
     void doPostTest() throws IOException {
-        MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
+        MonthlyBudgetDTO monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
                 id(1).date(new Date(System.currentTimeMillis())).build();
-        monthlyBudget = monthlyBudgetDTOMapper.mapToEntity(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget));
 
-        Mockito.when(monthlyBudgetRepository.save(monthlyBudget)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.add(monthlyBudget)).thenReturn(monthlyBudget);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)), monthlyBudgetServlet.createMonthlyBudget(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudget),
+                objectMapper.writeValueAsString(monthlyBudgetController.createMonthlyBudget(monthlyBudget).getBody()));
     }
 
     @Test
     void doPutTest() throws IOException {
-        MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
+        MonthlyBudgetDTO monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
                 id(1).date(new Date(System.currentTimeMillis())).build();
 
-        Mockito.doNothing().when(monthlyBudgetRepository).save(monthlyBudget);
-        Mockito.when(monthlyBudgetRepository.findById(1)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.update(monthlyBudget, 1)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.findById(1)).thenReturn(monthlyBudget);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)),
-                monthlyBudgetServlet.updateMonthlyBudget(1, monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+        Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudget),
+                objectMapper.writeValueAsString(monthlyBudgetController.updateMonthlyBudget(1, monthlyBudget).getBody()));
 
-        MonthlyBudgetEntity monthlyBudget2 = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
+        MonthlyBudgetDTO monthlyBudget2 = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(20)).
                 id(50).date(new Date(System.currentTimeMillis())).build();
 
-        Mockito.doNothing().when(monthlyBudgetRepository).save(monthlyBudget2);
-        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(null);
+        Mockito.when(monthlyBudgetService.update(monthlyBudget2, 50)).thenReturn(null);
+        Mockito.when(monthlyBudgetService.findById(50)).thenReturn(null);
 
-        Assertions.assertEquals("", monthlyBudgetServlet.updateMonthlyBudget(50, monthlyBudgetDTOMapper.mapToDTO(monthlyBudget)));
+        Assertions.assertEquals("null", objectMapper.writeValueAsString(monthlyBudgetController.updateMonthlyBudget(50, monthlyBudget).getBody()));
     }
 
     @Test
     void doDeleteTest() {
-        MonthlyBudgetEntity monthlyBudget = new MonthlyBudgetEntity.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
+        MonthlyBudgetDTO monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(1, BigDecimal.valueOf(10.10)).
                 id(1).date(new Date(System.currentTimeMillis())).build();
 
-        Mockito.when(monthlyBudgetRepository.findById(1)).thenReturn(monthlyBudget);
-        Mockito.doNothing().when(monthlyBudgetRepository).delete(monthlyBudget);
+        Mockito.when(monthlyBudgetService.findById(1)).thenReturn(monthlyBudget);
+        Mockito.when(monthlyBudgetService.delete(1)).thenReturn(true);
 
-        Assertions.assertEquals("MonthlyBudget deleted!", monthlyBudgetServlet.deleteMonthlyBudgetById(1));
+        Assertions.assertEquals(HttpStatusCode.valueOf(204), monthlyBudgetController.deleteMonthlyBudgetById(1).getStatusCode());
 
-        Mockito.when(monthlyBudgetRepository.findById(50)).thenReturn(null);
+        Mockito.when(monthlyBudgetService.findById(50)).thenReturn(null);
 
-        Assertions.assertEquals("MonthlyBudget NOT found!", monthlyBudgetServlet.deleteMonthlyBudgetById(50));
+        Assertions.assertEquals(HttpStatusCode.valueOf(404), monthlyBudgetController.deleteMonthlyBudgetById(50).getStatusCode());
     }
 }

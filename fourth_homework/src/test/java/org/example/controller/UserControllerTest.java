@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatusCode;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
@@ -76,7 +75,7 @@ class UserControllerTest {
     }
 
     @Test
-    void doDeleteTest() throws JsonProcessingException {
+    void doDeleteTest() {
         UserDTO user = new UserDTO.UserBuilder("t", "t", "t").id(99).build();
 
         Mockito.when(userService.findById(1)).thenReturn(user);

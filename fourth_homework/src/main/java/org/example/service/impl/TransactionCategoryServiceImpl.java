@@ -51,12 +51,12 @@ public class TransactionCategoryServiceImpl implements TransactionCategoryServic
         return transactionCategory == null;
     }
 
-    public List<TransactionCategoryDTO> findAllGoalsWithUserId(int userId) {
-        return transactionCategoryRepository.findAllGoalsWithUserId(userId).stream().map(transactionCategoryDTOMapper::mapToDTO).toList();
+    public List<TransactionCategoryDTO> findAllGoalsByUserId(int userId) {
+        return transactionCategoryRepository.findAllGoalsByUserId(userId).stream().map(transactionCategoryDTOMapper::mapToDTO).toList();
     }
 
-    public List<TransactionCategoryDTO> findCommonCategoriesOrGoalsWithUserId(int userId) {
-        return transactionCategoryRepository.findCommonCategoriesOrGoalsWithUserId(userId).stream().map(transactionCategoryDTOMapper::mapToDTO).toList();
+    public List<TransactionCategoryDTO> findCommonCategoriesOrGoalsByUserId(int userId) {
+        return transactionCategoryRepository.findCommonCategoriesOrGoalsByUserId(userId).stream().map(transactionCategoryDTOMapper::mapToDTO).toList();
     }
 
     public TransactionCategoryDTO findByName(String name) {
