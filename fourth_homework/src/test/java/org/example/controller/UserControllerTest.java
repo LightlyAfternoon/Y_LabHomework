@@ -55,7 +55,7 @@ class UserControllerTest {
 
         Mockito.when(userService.add(user)).thenReturn(user);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(user), objectMapper.writeValueAsString(objectMapper.writeValueAsString(userController.createUser(user).getBody())));
+        Assertions.assertEquals(objectMapper.writeValueAsString(user), objectMapper.writeValueAsString(userController.createUser(user).getBody()));
     }
 
     @Test
@@ -72,7 +72,7 @@ class UserControllerTest {
         Mockito.when(userService.update(user2, 50)).thenReturn(null);
         Mockito.when(userService.findById(50)).thenReturn(null);
 
-        Assertions.assertEquals("", objectMapper.writeValueAsString(userController.updateUser(50, user2).getBody()));
+        Assertions.assertEquals("null", objectMapper.writeValueAsString(userController.updateUser(50, user2).getBody()));
     }
 
     @Test
@@ -82,10 +82,10 @@ class UserControllerTest {
         Mockito.when(userService.findById(1)).thenReturn(user);
         Mockito.when(userService.delete(1)).thenReturn(true);
 
-        Assertions.assertEquals(HttpStatusCode.valueOf(200), objectMapper.writeValueAsString(userController.deleteUserById(1).getStatusCode()));
+        Assertions.assertEquals(HttpStatusCode.valueOf(204), userController.deleteUserById(1).getStatusCode());
 
         Mockito.when(userService.findById(50)).thenReturn(null);
 
-        Assertions.assertEquals(HttpStatusCode.valueOf(404), objectMapper.writeValueAsString(userController.deleteUserById(50).getStatusCode()));
+        Assertions.assertEquals(HttpStatusCode.valueOf(404), userController.deleteUserById(50).getStatusCode());
     }
 }
