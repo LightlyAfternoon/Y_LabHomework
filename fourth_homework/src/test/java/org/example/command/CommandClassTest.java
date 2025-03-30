@@ -1,27 +1,26 @@
 package org.example.command;
 
-import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.model.*;
 import org.example.repository.MonthlyBudgetRepository;
 import org.example.repository.TransactionCategoryRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
-import org.example.servlet.dto.UserDTO;
-import org.example.servlet.mapper.MonthlyBudgetDTOMapper;
-import org.example.servlet.mapper.TransactionCategoryDTOMapper;
-import org.example.servlet.mapper.TransactionDTOMapper;
-import org.example.servlet.mapper.UserDTOMapper;
+import org.example.controller.dto.UserDTO;
+import org.example.controller.mapper.MonthlyBudgetDTOMapper;
+import org.example.controller.mapper.TransactionCategoryDTOMapper;
+import org.example.controller.mapper.TransactionDTOMapper;
+import org.example.controller.mapper.UserDTOMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,9 +35,17 @@ class CommandClassTest {
     TransactionRepository transactionRepository;
     CommandClass commandClass;
     HttpRequestsClass httpRequestsClass;
+    @Autowired
+    UserDTOMapper userDTOMapper;
+    @Autowired
+    private MonthlyBudgetDTOMapper monthlyBudgetDTOMapper;
+    @Autowired
+    private TransactionCategoryDTOMapper transactionCategoryDTOMapper;
+    @Autowired
+    private TransactionDTOMapper transactionDTOMapper;
 
     @BeforeEach
-    void setUp() throws SQLException, LiquibaseException {
+    void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
         monthlyBudgetRepository = Mockito.mock(MonthlyBudgetRepository.class);
         categoryRepository = Mockito.mock(TransactionCategoryRepository.class);
@@ -55,20 +62,20 @@ class CommandClassTest {
         user.setRole(UserRole.USER);
         user.setBlocked(false);
 
-        Mockito.when(userRepository.add(user)).thenReturn(user);
+        Mockito.when(userRepository.save(user)).thenReturn(user);
 
-        user = userRepository.add(user);
+        user = userRepository.save(user);
 
         CurrentUser.currentUser = user;
     }
 
     @Test
-    void getLoggedInUserRoleTest() throws SQLException, LiquibaseException {
+    void getLoggedInUserRoleTest() {
         String emailAndPassword = "t\nt";
         InputStream in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
-        Mockito.when(userRepository.findUserWithEmailAndPassword("t", "t")).thenReturn(CurrentUser.currentUser);
+        Mockito.when(userRepository.findByEmailAndPassword("t", "t")).thenReturn(CurrentUser.currentUser);
         Mockito.when(httpRequestsClass.getLoggedInUser("t", "t")).thenReturn(new UserDTO.UserBuilder("t", "t", "t").id(1).build());
 
         Assertions.assertEquals(UserRole.USER, commandClass.getLoggedInUserRole());
@@ -77,7 +84,7 @@ class CommandClassTest {
         in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
-        Mockito.when(userRepository.findUserWithEmailAndPassword("t2", "t")).thenReturn(null);
+        Mockito.when(userRepository.findByEmailAndPassword("t2", "t")).thenReturn(null);
         Mockito.when(httpRequestsClass.getLoggedInUser("t2", "t")).thenReturn(null);
 
         Assertions.assertNull(commandClass.getLoggedInUserRole());
@@ -86,29 +93,29 @@ class CommandClassTest {
         in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
 
-        Mockito.when(userRepository.findUserWithEmailAndPassword("t", "t2")).thenReturn(null);
+        Mockito.when(userRepository.findByEmailAndPassword("t", "t2")).thenReturn(null);
         Mockito.when(httpRequestsClass.getLoggedInUser("t", "t2")).thenReturn(null);
 
         Assertions.assertNull(commandClass.getLoggedInUserRole());
     }
 
     @Test
-    void getAllUsersTest() throws SQLException, LiquibaseException {
+    void getAllUsersTest() {
         List<UserEntity> userEntities = List.of(CurrentUser.currentUser);
         StringBuilder output = new StringBuilder();
 
-        for (UserEntity userEntity : userEntities){
+        for (UserEntity userEntity : userEntities) {
             output.append(userEntity).append("\n");
         }
 
         Mockito.when(userRepository.findAll()).thenReturn(userEntities);
-        Mockito.when(httpRequestsClass.getAllUsers()).thenReturn(userEntities.stream().map(UserDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(httpRequestsClass.getAllUsers()).thenReturn(userEntities.stream().map(userDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(output.toString(), commandClass.getAllUsers());
     }
 
     @Test
-    void getRegisteredUserTest() throws SQLException, LiquibaseException {
+    void getRegisteredUserTest() {
         String emailAndPassword = "t\nt\nt";
         InputStream in = new ByteArrayInputStream(emailAndPassword.getBytes());
         System.setIn(in);
@@ -120,7 +127,7 @@ class CommandClassTest {
         user2.setRole(UserRole.USER);
         user2.setBlocked(false);
 
-        Mockito.when(userRepository.add(user2)).thenReturn(null);
+        Mockito.when(userRepository.save(user2)).thenReturn(null);
         Mockito.when(httpRequestsClass.getRegisteredUser("t", "t", "t")).thenReturn(null);
 
         Assertions.assertNull(commandClass.getRegisteredUser());
@@ -136,14 +143,14 @@ class CommandClassTest {
         user2.setRole(UserRole.USER);
         user2.setBlocked(false);
 
-        Mockito.when(userRepository.add(user2)).thenReturn(user2);
-        Mockito.when(httpRequestsClass.getRegisteredUser("t2", "t", "t2")).thenReturn(UserDTOMapper.INSTANCE.mapToDTO(user2));
+        Mockito.when(userRepository.save(user2)).thenReturn(user2);
+        Mockito.when(httpRequestsClass.getRegisteredUser("t2", "t", "t2")).thenReturn(userDTOMapper.mapToDTO(user2));
 
         Assertions.assertEquals(user2, commandClass.getRegisteredUser());
     }
 
     @Test
-    void addBudgetTest() throws SQLException, LiquibaseException {
+    void addBudgetTest() {
         String budget = "10,2";
         InputStream in = new ByteArrayInputStream(budget.getBytes());
         System.setIn(in);
@@ -152,8 +159,8 @@ class CommandClassTest {
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.2));
 
         Mockito.when(monthlyBudgetRepository.findByDateAndUserId(monthlyBudgetEntity.getDate(), CurrentUser.currentUser.getId())).thenReturn(monthlyBudgetEntity);
-        Mockito.when(httpRequestsClass.getBudget()).thenReturn(MonthlyBudgetDTOMapper.INSTANCE.mapToDTO(monthlyBudgetEntity));
-        Mockito.when(httpRequestsClass.addBudget(BigDecimal.valueOf(10.2))).thenReturn(MonthlyBudgetDTOMapper.INSTANCE.mapToDTO(monthlyBudgetEntity));
+        Mockito.when(httpRequestsClass.getBudget()).thenReturn(monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetEntity));
+        Mockito.when(httpRequestsClass.addBudget(BigDecimal.valueOf(10.2))).thenReturn(monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetEntity));
 
         monthlyBudgetEntity = commandClass.addBudget();
 
@@ -167,8 +174,8 @@ class CommandClassTest {
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(312.5));
 
         Mockito.when(monthlyBudgetRepository.findByDateAndUserId(monthlyBudgetEntity.getDate(), CurrentUser.currentUser.getId())).thenReturn(monthlyBudgetEntity);
-        Mockito.when(httpRequestsClass.getBudget()).thenReturn(MonthlyBudgetDTOMapper.INSTANCE.mapToDTO(monthlyBudgetEntity));
-        Mockito.when(httpRequestsClass.addBudget(BigDecimal.valueOf(312.5))).thenReturn(MonthlyBudgetDTOMapper.INSTANCE.mapToDTO(monthlyBudgetEntity));
+        Mockito.when(httpRequestsClass.getBudget()).thenReturn(monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetEntity));
+        Mockito.when(httpRequestsClass.addBudget(BigDecimal.valueOf(312.5))).thenReturn(monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetEntity));
 
         monthlyBudgetEntity = commandClass.addBudget();
         int id2 = monthlyBudgetEntity.getId();
@@ -179,7 +186,7 @@ class CommandClassTest {
     }
 
     @Test
-    void addGoalTest() throws SQLException, LiquibaseException {
+    void addGoalTest() {
         String goal = "t\n10,2";
         InputStream in = new ByteArrayInputStream(goal.getBytes());
         System.setIn(in);
@@ -188,8 +195,8 @@ class CommandClassTest {
         category.setName("t");
         category.setNeededSum(BigDecimal.valueOf(10.2));
 
-        Mockito.when(categoryRepository.add(category)).thenReturn(category);
-        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category));
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(transactionCategoryDTOMapper.mapToDTO(category));
 
         category = commandClass.addGoal();
 
@@ -202,7 +209,7 @@ class CommandClassTest {
 
         category.setNeededSum(BigDecimal.valueOf(312.5));
 
-        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(312.5))).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category));
+        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(312.5))).thenReturn(transactionCategoryDTOMapper.mapToDTO(category));
 
         category = commandClass.addGoal();
 
@@ -215,7 +222,7 @@ class CommandClassTest {
 
         category.setNeededSum(BigDecimal.valueOf(10.2));
 
-        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category));
+        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(transactionCategoryDTOMapper.mapToDTO(category));
 
         category = commandClass.addGoal();
 
@@ -225,15 +232,12 @@ class CommandClassTest {
     }
 
     @Test
-    void addTransactionTest() throws SQLException, LiquibaseException, ParseException {
+    void addTransactionTest() throws ParseException {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n2021-02-10\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -249,8 +253,8 @@ class CommandClassTest {
 
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         transactionEntity = commandClass.addTransaction();
 
@@ -267,8 +271,8 @@ class CommandClassTest {
         transactionEntity.setDate(null);
         transactionEntity.setDescription(" ");
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(12.2), 0, null, " ")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(12.2), 0, null, " ")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         transactionEntity = commandClass.addTransaction();
 
@@ -285,8 +289,8 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("s");
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         transactionEntity = commandClass.addTransaction();
         int id2 = transactionEntity.getId();
@@ -295,15 +299,15 @@ class CommandClassTest {
     }
 
     @Test
-    void deleteAccountTest() throws SQLException, LiquibaseException {
-        Mockito.when(userRepository.delete(CurrentUser.currentUser)).thenReturn(true);
+    void deleteAccountTest() {
+        Mockito.doNothing().when(userRepository).delete(CurrentUser.currentUser);
         Mockito.when(httpRequestsClass.deleteAccount(CurrentUser.currentUser.getId())).thenReturn(true);
 
         Assertions.assertTrue(commandClass.deleteAccount());
     }
 
     @Test
-    void getTransactionsTest() throws SQLException, LiquibaseException {
+    void getTransactionsTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         Date date = new Date(System.currentTimeMillis());
 
@@ -312,40 +316,32 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
 
-            transactionEntity = transactionRepository.add(transactionEntity);
-            Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.1), 0, date, "t")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity = transactionRepository.save(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.1), 0, date, "t")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         List<TransactionEntity> transactionEntities = List.of(transactionEntity);
         StringBuilder output = new StringBuilder();
 
-        for (TransactionEntity transaction : transactionEntities){
+        for (TransactionEntity transaction : transactionEntities) {
             output.append(transaction).append("\n");
         }
 
-        Mockito.when(transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
-        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(transactionEntities.stream().map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(transactionEntities.stream().map(transactionDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(output.toString(), commandClass.getTransactions());
     }
 
     @Test
-    void filterTransactionsTest() throws SQLException, LiquibaseException {
+    void filterTransactionsTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
 
         category.setName("tt");
 
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+        categoryRepository.save(category);
 
         Date date = new Date(System.currentTimeMillis());
         Date date2 = new Date(System.currentTimeMillis() + 86_400_000);
@@ -399,24 +395,20 @@ class CommandClassTest {
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-            Mockito.when(transactionRepository.add(transactionEntity2)).thenReturn(transactionEntity2);
-            Mockito.when(transactionRepository.add(transactionEntity3)).thenReturn(transactionEntity3);
-            Mockito.when(transactionRepository.add(transactionEntity4)).thenReturn(transactionEntity4);
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(transactionRepository.save(transactionEntity2)).thenReturn(transactionEntity2);
+        Mockito.when(transactionRepository.save(transactionEntity3)).thenReturn(transactionEntity3);
+        Mockito.when(transactionRepository.save(transactionEntity4)).thenReturn(transactionEntity4);
 
-            transactionEntity = transactionRepository.add(transactionEntity);
-            transactionEntity2 = transactionRepository.add(transactionEntity2);
-            transactionEntity3 = transactionRepository.add(transactionEntity3);
-            transactionEntity4 = transactionRepository.add(transactionEntity4);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity = transactionRepository.save(transactionEntity);
+        transactionEntity2 = transactionRepository.save(transactionEntity2);
+        transactionEntity3 = transactionRepository.save(transactionEntity3);
+        transactionEntity4 = transactionRepository.save(transactionEntity4);
 
         List<TransactionEntity> transactionEntities = List.of(transactionEntity);
 
-        Mockito.when(transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, category.getId(), "Pos", CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
-        Mockito.when(httpRequestsClass.filterTransactions(date, category.getId(), "Pos", CurrentUser.currentUser.getId())).thenReturn(transactionEntities.stream().map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date, category.getId(), "Pos", CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
+        Mockito.when(httpRequestsClass.filterTransactions(date, category.getId(), "Pos", CurrentUser.currentUser.getId())).thenReturn(transactionEntities.stream().map(transactionDTOMapper::mapToDTO).toList());
 
         String outputReturned = commandClass.filterTransactions();
 
@@ -434,8 +426,8 @@ class CommandClassTest {
 
         transactionEntities = List.of(transactionEntity2, transactionEntity4);
 
-        Mockito.when(transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date2, 0, " ", CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
-        Mockito.when(httpRequestsClass.filterTransactions(date2, 0, " ", CurrentUser.currentUser.getId())).thenReturn(transactionEntities.stream().map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date2, 0, " ", CurrentUser.currentUser.getId())).thenReturn(transactionEntities);
+        Mockito.when(httpRequestsClass.filterTransactions(date2, 0, " ", CurrentUser.currentUser.getId())).thenReturn(transactionEntities.stream().map(transactionDTOMapper::mapToDTO).toList());
 
         outputReturned = commandClass.filterTransactions();
 
@@ -449,38 +441,28 @@ class CommandClassTest {
     }
 
     @Test
-    void editTransactionTest() throws SQLException, LiquibaseException {
+    void editTransactionTest() {
         MonthlyBudgetEntity budget = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());
 
         budget.setSum(BigDecimal.valueOf(12));
 
-        try {
-            Mockito.when(monthlyBudgetRepository.add(budget)).thenReturn(budget);
+        Mockito.when(monthlyBudgetRepository.save(budget)).thenReturn(budget);
 
-            monthlyBudgetRepository.add(budget);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        monthlyBudgetRepository.save(budget);
 
         TransactionCategoryEntity category = new TransactionCategoryEntity(1, 0);
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         TransactionCategoryEntity category2 = new TransactionCategoryEntity(2, 0);
         category2.setName("tt2");
-        try {
-            Mockito.when(categoryRepository.add(category2)).thenReturn(category2);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category2)).thenReturn(category2);
+
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -495,11 +477,11 @@ class CommandClassTest {
 
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()).thenReturn(Stream.of(category, category2).map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList());
-        Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category.getName())).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category));
-        Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category2.getName())).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(category2));
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), null, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()).thenReturn(Stream.of(category, category2).map(transactionCategoryDTOMapper::mapToDTO).toList());
+        Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category.getName())).thenReturn(transactionCategoryDTOMapper.mapToDTO(category));
+        Mockito.when(httpRequestsClass.getCategoryOrGoalWithName(category2.getName())).thenReturn(transactionCategoryDTOMapper.mapToDTO(category2));
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), null, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         transactionEntity = commandClass.addTransaction();
         int id = transactionEntity.getId();
@@ -523,7 +505,7 @@ class CommandClassTest {
 
         Mockito.when(transactionRepository.findById(id)).thenReturn(transactionEntity);
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category, category2));
-        Mockito.doNothing().when(transactionRepository).update(transactionEntity);
+        Mockito.doNothing().when(transactionRepository).save(transactionEntity);
         Mockito.when(httpRequestsClass.editTransaction(id, BigDecimal.valueOf(12.2), 0, date, " ")).thenReturn(true);
 
         Assertions.assertTrue(commandClass.editTransaction());
@@ -542,16 +524,13 @@ class CommandClassTest {
     }
 
     @Test
-    void deleteTransactionTest() throws SQLException, LiquibaseException {
+    void deleteTransactionTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -572,7 +551,7 @@ class CommandClassTest {
         transactionEntity.setDescription("s");
 
         Mockito.when(transactionRepository.findById(1)).thenReturn(transactionEntity);
-        Mockito.when(transactionRepository.delete(transactionEntity)).thenReturn(true);
+        Mockito.doNothing().when(transactionRepository).delete(transactionEntity);
         Mockito.when(httpRequestsClass.deleteTransaction(1)).thenReturn(true);
 
         transaction = String.valueOf(1);
@@ -592,7 +571,7 @@ class CommandClassTest {
     }
 
     @Test
-    void getAllUserGoalsTest() throws SQLException, LiquibaseException {
+    void getAllUserGoalsTest() {
         String goal = "t\n10,2";
         InputStream in = new ByteArrayInputStream(goal.getBytes());
         System.setIn(in);
@@ -601,8 +580,8 @@ class CommandClassTest {
         goalEntity.setName("t");
         goalEntity.setNeededSum(BigDecimal.valueOf(10.2));
 
-        Mockito.when(categoryRepository.add(goalEntity)).thenReturn(goalEntity);
-        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(goalEntity));
+        Mockito.when(categoryRepository.save(goalEntity)).thenReturn(goalEntity);
+        Mockito.when(httpRequestsClass.addGoal("t", BigDecimal.valueOf(10.2))).thenReturn(transactionCategoryDTOMapper.mapToDTO(goalEntity));
 
         goalEntity = commandClass.addGoal();
 
@@ -614,16 +593,16 @@ class CommandClassTest {
         goalEntity2.setName("t2");
         goalEntity2.setNeededSum(BigDecimal.valueOf(312.5));
 
-        Mockito.when(categoryRepository.add(goalEntity2)).thenReturn(goalEntity2);
-        Mockito.when(httpRequestsClass.addGoal("t2", BigDecimal.valueOf(312.5))).thenReturn(TransactionCategoryDTOMapper.INSTANCE.mapToDTO(goalEntity2));
+        Mockito.when(categoryRepository.save(goalEntity2)).thenReturn(goalEntity2);
+        Mockito.when(httpRequestsClass.addGoal("t2", BigDecimal.valueOf(312.5))).thenReturn(transactionCategoryDTOMapper.mapToDTO(goalEntity2));
 
         goalEntity2 = commandClass.addGoal();
 
         List<TransactionCategoryEntity> categoryEntities = List.of(goalEntity, goalEntity2);
 
         Mockito.when(categoryRepository.findAllGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(categoryEntities);
-        Mockito.when(transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())).thenReturn(new ArrayList<>());
-        Mockito.when(httpRequestsClass.getAllUserGoals(CurrentUser.currentUser.getId())).thenReturn(categoryEntities.stream().map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(new ArrayList<>());
+        Mockito.when(httpRequestsClass.getAllUserGoals(CurrentUser.currentUser.getId())).thenReturn(categoryEntities.stream().map(transactionCategoryDTOMapper::mapToDTO).toList());
 
         String outputReturned = commandClass.getAllUserGoals();
 
@@ -637,16 +616,13 @@ class CommandClassTest {
     }
 
     @Test
-    void getCurrentBalanceTest() throws SQLException, LiquibaseException {
+    void getCurrentBalanceTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n2021-02-10\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -668,8 +644,8 @@ class CommandClassTest {
 
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
@@ -689,28 +665,25 @@ class CommandClassTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription(" ");
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(32.5), 0, date, " ")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(32.5), 0, date, " ")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
-        Mockito.when(transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
-        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(transactionDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(BigDecimal.valueOf(42.7), commandClass.getCurrentBalance());
     }
 
     @Test
-    void getIncomeForPeriodTest() throws SQLException, LiquibaseException {
+    void getIncomeForPeriodTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n2021-02-10\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -732,10 +705,10 @@ class CommandClassTest {
 
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
@@ -755,8 +728,8 @@ class CommandClassTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription(" ");
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(-32.5), 0, date, " ")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(-32.5), 0, date, " ")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
@@ -781,23 +754,20 @@ class CommandClassTest {
             throw new RuntimeException(e);
         }
 
-        Mockito.when(transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
-        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(transactionDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(BigDecimal.valueOf(10.2), commandClass.getIncomeForPeriod(from, to));
     }
 
     @Test
-    void getExpenseForPeriodTest() throws SQLException, LiquibaseException {
+    void getExpenseForPeriodTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         String transaction = "10,2\ntt\n2021-02-10\ns";
         InputStream in = new ByteArrayInputStream(transaction.getBytes());
@@ -819,8 +789,8 @@ class CommandClassTest {
 
         Mockito.when(categoryRepository.findCommonCategoriesOrGoalsWithUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category));
         Mockito.when(categoryRepository.findByName("tt")).thenReturn(category);
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), category.getId(), date, "s")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
@@ -840,8 +810,8 @@ class CommandClassTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription(" ");
 
-        Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
-        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(-32.5), 0, date, " ")).thenReturn(TransactionDTOMapper.INSTANCE.mapToDTO(transactionEntity));
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(-32.5), 0, date, " ")).thenReturn(transactionDTOMapper.mapToDTO(transactionEntity));
 
         commandClass.addTransaction();
 
@@ -866,23 +836,20 @@ class CommandClassTest {
             throw new RuntimeException(e);
         }
 
-        Mockito.when(transactionRepository.findAllWithUser(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
-        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2));
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(Stream.of(transactionEntity, transactionEntity2).map(transactionDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(BigDecimal.valueOf(32.5), commandClass.getExpenseForPeriod(from, to));
     }
 
     @Test
-    void getCategoryExpensesTest() throws SQLException, LiquibaseException {
+    void getCategoryExpensesTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
         category.setName("tt");
-        try {
-            Mockito.when(categoryRepository.add(category)).thenReturn(category);
 
-            categoryRepository.add(category);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(categoryRepository.save(category)).thenReturn(category);
+
+        categoryRepository.save(category);
 
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         Date date = new Date(System.currentTimeMillis());
@@ -892,13 +859,9 @@ class CommandClassTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity)).thenReturn(transactionEntity);
+        Mockito.when(transactionRepository.save(transactionEntity)).thenReturn(transactionEntity);
 
-            transactionRepository.add(transactionEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity);
 
         TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
 
@@ -907,13 +870,9 @@ class CommandClassTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity2)).thenReturn(transactionEntity2);
+        Mockito.when(transactionRepository.save(transactionEntity2)).thenReturn(transactionEntity2);
 
-            transactionRepository.add(transactionEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity2);
 
         TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
 
@@ -922,13 +881,9 @@ class CommandClassTest {
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t3");
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity3)).thenReturn(transactionEntity3);
+        Mockito.when(transactionRepository.save(transactionEntity3)).thenReturn(transactionEntity3);
 
-            transactionRepository.add(transactionEntity3);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity3);
 
         TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser.getId());
 
@@ -937,18 +892,14 @@ class CommandClassTest {
         transactionEntity4.setDate(date);
         transactionEntity4.setDescription("t4");
 
-        try {
-            Mockito.when(transactionRepository.add(transactionEntity4)).thenReturn(transactionEntity4);
+        Mockito.when(transactionRepository.save(transactionEntity4)).thenReturn(transactionEntity4);
 
-            transactionRepository.add(transactionEntity4);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity4);
 
         Mockito.when(categoryRepository.findAll()).thenReturn(List.of(category));
-        Mockito.when(transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, category.getId(), "Neg", CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2, transactionEntity4));
-        Mockito.when(httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()).thenReturn(Stream.of(category).map(TransactionCategoryDTOMapper.INSTANCE::mapToDTO).toList());
-        Mockito.when(httpRequestsClass.filterTransactions(null, category.getId(), "Neg", CurrentUser.currentUser.getId())).thenReturn(Stream.of(transactionEntity, transactionEntity2, transactionEntity4).map(TransactionDTOMapper.INSTANCE::mapToDTO).toList());
+        Mockito.when(transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, category.getId(), "Neg", CurrentUser.currentUser.getId())).thenReturn(List.of(transactionEntity, transactionEntity2, transactionEntity4));
+        Mockito.when(httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()).thenReturn(Stream.of(category).map(transactionCategoryDTOMapper::mapToDTO).toList());
+        Mockito.when(httpRequestsClass.filterTransactions(null, category.getId(), "Neg", CurrentUser.currentUser.getId())).thenReturn(Stream.of(transactionEntity, transactionEntity2, transactionEntity4).map(transactionDTOMapper::mapToDTO).toList());
 
         Assertions.assertEquals(category.getName() + ": 51.3\n", commandClass.getCategoryExpenses());
     }

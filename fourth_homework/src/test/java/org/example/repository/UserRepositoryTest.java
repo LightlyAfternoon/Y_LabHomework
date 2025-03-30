@@ -1,41 +1,40 @@
 package org.example.repository;
 
 import liquibase.exception.LiquibaseException;
-import org.example.db.ConnectionClass;
+import org.example.config.MyTestConfig;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.sql.SQLException;
 import java.util.List;
 
 class UserRepositoryTest {
-    UserRepository userRepository = new UserRepository();
+    UserRepository userRepository;
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
+    AnnotationConfigApplicationContext context;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws SQLException, LiquibaseException {
         container.start();
 
-        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
-
-        ConnectionClass.nullConnection();
     }
 
     @BeforeEach
     void setUp() {
-        try {
-            for (UserEntity user : userRepository.findAll()) {
-                userRepository.delete(user);
-            }
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+        context = new AnnotationConfigApplicationContext(MyTestConfig.class);
+        userRepository = context.getBean(UserRepository.class);
+
+        for (UserEntity user : userRepository.findAll()) {
+            userRepository.delete(user);
         }
     }
 
@@ -49,11 +48,7 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        try {
-            userEntity = userRepository.add(userEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity = userRepository.save(userEntity);
 
         Assertions.assertNotEquals(0, userEntity.getId());
 
@@ -65,11 +60,8 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
-        try {
-            userEntity2 = userRepository.add(userEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity2 = userRepository.save(userEntity2);
+
         Assertions.assertNull(userEntity2);
 
         UserEntity userEntity3 = new UserEntity();
@@ -80,11 +72,7 @@ class UserRepositoryTest {
         userEntity3.setRole(UserRole.USER);
         userEntity3.setBlocked(true);
 
-        try {
-            userEntity3 = userRepository.add(userEntity3);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity3 = userRepository.save(userEntity3);
 
         Assertions.assertNull(userEntity3);
     }
@@ -99,31 +87,15 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        try {
-            userEntity = userRepository.add(userEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity = userRepository.save(userEntity);
 
-        try {
-            Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity);
 
         userEntity.setRole(UserRole.ADMIN);
 
-        try {
-            Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity);
 
-        try {
-            Assertions.assertNull(userRepository.findById(50));
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertNull(userRepository.findById(50));
     }
 
     @Test
@@ -155,15 +127,12 @@ class UserRepositoryTest {
         List<UserEntity> userEntities = List.of(userEntity, userEntity2, userEntity3);
 
         List<UserEntity> userEntitiesReturned;
-        try {
-            userRepository.add(userEntity);
-            userRepository.add(userEntity2);
-            userRepository.add(userEntity3);
 
-            userEntitiesReturned = userRepository.findAll();
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(userEntity);
+        userRepository.save(userEntity2);
+        userRepository.save(userEntity3);
+
+        userEntitiesReturned = userRepository.findAll();
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
@@ -176,13 +145,10 @@ class UserRepositoryTest {
         userEntity4.setBlocked(false);
 
         userEntities = List.of(userEntity, userEntity2, userEntity3, userEntity4);
-        try {
-            userRepository.add(userEntity4);
 
-            userEntitiesReturned = userRepository.findAll();
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(userEntity4);
+
+        userEntitiesReturned = userRepository.findAll();
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
@@ -201,11 +167,7 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        try {
-            userEntity = userRepository.add(userEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity = userRepository.save(userEntity);
 
         UserEntity userEntity2 = new UserEntity(userEntity.getId());
 
@@ -215,22 +177,13 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
-        try {
-            userRepository.update(userEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(userEntity2);
 
-        try {
-            Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity2);
+        Assertions.assertEquals(userRepository.findById(userEntity.getId()), userEntity2);
 
-            userEntity2.setRole(UserRole.ADMIN);
+        userEntity2.setRole(UserRole.ADMIN);
 
-            Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
-
+        Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity2);
     }
 
     @Test
@@ -261,25 +214,19 @@ class UserRepositoryTest {
 
         List<UserEntity> userEntities = List.of(userEntity, userEntity2, userEntity3);
 
-        try {
-            userEntity = userRepository.add(userEntity);
-            userRepository.add(userEntity2);
-            userRepository.add(userEntity3);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        userEntity = userRepository.save(userEntity);
+        userRepository.save(userEntity2);
+        userRepository.save(userEntity3);
 
         List<UserEntity> userEntitiesReturned;
-        try {
-            userEntitiesReturned = userRepository.findAll();
 
-            Assertions.assertEquals(userEntities, userEntitiesReturned);
+        userEntitiesReturned = userRepository.findAll();
 
-            userRepository.delete(userEntity);
-            userEntitiesReturned = userRepository.findAll();
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertEquals(userEntities, userEntitiesReturned);
+
+        userRepository.delete(userEntity);
+        userEntitiesReturned = userRepository.findAll();
+
 
         Assertions.assertNotEquals(userEntities, userEntitiesReturned);
 
@@ -289,7 +236,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findUserWithEmailAndPasswordTest() throws SQLException, LiquibaseException {
+    void findByEmailAndPasswordTest() {
         UserEntity userEntity = new UserEntity();
 
         userEntity.setEmail("te");
@@ -298,9 +245,9 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        userRepository.add(userEntity);
+        userRepository.save(userEntity);
 
-        Assertions.assertEquals(userRepository.findUserWithEmailAndPassword("te", "tp"), userEntity);
+        Assertions.assertEquals(userRepository.findByEmailAndPassword("te", "tp"), userEntity);
 
         UserEntity userEntity2 = new UserEntity();
 
@@ -310,12 +257,12 @@ class UserRepositoryTest {
         userEntity2.setRole(UserRole.USER);
         userEntity2.setBlocked(false);
 
-        userRepository.add(userEntity2);
+        userRepository.save(userEntity2);
 
-        Assertions.assertEquals(userRepository.findUserWithEmailAndPassword("te2", "tp2"), userEntity2);
-        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("te", "tp2"), userEntity2);
-        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("te2", "tp"), userEntity2);
-        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("tE2", "tp2"), userEntity2);
-        Assertions.assertNotEquals(userRepository.findUserWithEmailAndPassword("tE2", "tP2"), userEntity2);
+        Assertions.assertEquals(userRepository.findByEmailAndPassword("te2", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findByEmailAndPassword("te", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findByEmailAndPassword("te2", "tp"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findByEmailAndPassword("tE2", "tp2"), userEntity2);
+        Assertions.assertNotEquals(userRepository.findByEmailAndPassword("tE2", "tP2"), userEntity2);
     }
 }

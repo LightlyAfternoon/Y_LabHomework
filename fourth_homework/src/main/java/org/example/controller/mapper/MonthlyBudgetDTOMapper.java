@@ -1,14 +1,11 @@
-package org.example.servlet.mapper;
+package org.example.controller.mapper;
 
+import org.example.controller.dto.MonthlyBudgetDTO;
 import org.example.model.MonthlyBudgetEntity;
-import org.example.servlet.dto.MonthlyBudgetDTO;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface MonthlyBudgetDTOMapper {
-    MonthlyBudgetDTOMapper INSTANCE = Mappers.getMapper(MonthlyBudgetDTOMapper.class);
-
     MonthlyBudgetDTO mapToDTO(MonthlyBudgetEntity monthlyBudget);
 
     MonthlyBudgetEntity mapToEntity(MonthlyBudgetDTO monthlyBudgetDTO);

@@ -3,7 +3,7 @@ package org.example.command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.CurrentUser;
-import org.example.servlet.dto.*;
+import org.example.controller.dto.*;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

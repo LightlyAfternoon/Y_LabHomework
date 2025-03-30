@@ -1,16 +1,24 @@
 package org.example.model;
 
+import jakarta.persistence.*;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "transaction_category", schema = "not_public")
 public class TransactionCategoryEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transaction_category_id")
+    @SequenceGenerator(name = "seq_transaction_category_id", allocationSize = 1)
     private int id;
     private String name;
+    @Column(name = "needed_sum")
     private BigDecimal neededSum;
     /**
      * Fields user and neededSum are meant for users goals
      */
+    @Column(name = "user_id")
     private int userId;
 
     private TransactionCategoryEntity(TransactionCategoryBuilder builder) {

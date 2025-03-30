@@ -1,5 +1,6 @@
 package org.example.model;
 
+import jakarta.persistence.*;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
@@ -7,12 +8,19 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+@Entity
+@Table(name = "monthly_budget", schema = "not_public")
 public class MonthlyBudgetEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_monthly_budget_id")
+    @SequenceGenerator(name = "seq_monthly_budget_id", allocationSize = 1)
     private int id;
+    @Column(name = "user_id")
     private final int userId;
     private final Date date;
     private BigDecimal sum;
 
+    @Transient
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
 
     private MonthlyBudgetEntity(MonthlyBudgetBuilder builder) {

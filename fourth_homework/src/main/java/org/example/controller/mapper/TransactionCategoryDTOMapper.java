@@ -1,14 +1,11 @@
-package org.example.servlet.mapper;
+package org.example.controller.mapper;
 
+import org.example.controller.dto.TransactionCategoryDTO;
 import org.example.model.TransactionCategoryEntity;
-import org.example.servlet.dto.TransactionCategoryDTO;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TransactionCategoryDTOMapper {
-    TransactionCategoryDTOMapper INSTANCE = Mappers.getMapper(TransactionCategoryDTOMapper.class);
-
     TransactionCategoryDTO mapToDTO(TransactionCategoryEntity transactionCategory);
 
     TransactionCategoryEntity mapToEntity(TransactionCategoryDTO transactionCategoryDTO);

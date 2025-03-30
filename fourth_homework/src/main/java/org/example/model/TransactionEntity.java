@@ -1,5 +1,6 @@
 package org.example.model;
 
+import jakarta.persistence.*;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
@@ -8,7 +9,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+@Entity
+@Table(name = "transaction", schema = "not_public")
 public class TransactionEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transaction_id")
+    @SequenceGenerator(name = "seq_transaction_id", allocationSize = 1)
     private int id;
     /**
      * Field sum can be positive number as money arriving or negative number as money spending
@@ -19,7 +25,9 @@ public class TransactionEntity {
     /**
      * Field category is meant for a category or a goal of money spent
      */
+    @Column(name = "category_id")
     private int categoryId;
+    @Column(name = "user_id")
     private final int userId;
 
     private TransactionEntity(TransactionBuilder builder) {

@@ -1,4 +1,4 @@
-package org.example.servlet.dto;
+package org.example.controller.dto;
 
 import org.example.annotation.Default;
 import org.example.model.UserRole;

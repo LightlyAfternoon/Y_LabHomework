@@ -1,4 +1,4 @@
-package org.example.servlet.dto;
+package org.example.controller.dto;
 
 public class LogInDTO {
     private String email;

@@ -1,18 +1,18 @@
 package org.example.repository;
 
-import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
+import org.example.config.MyTestConfig;
 import org.example.db.ConnectionClass;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.TransactionEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -20,8 +20,10 @@ import java.util.List;
 class TransactionRepositoryTest {
     UserEntity userEntity;
     TransactionCategoryEntity categoryEntity;
-    TransactionRepository transactionRepository = new TransactionRepository();
+    TransactionRepository transactionRepository;
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
+    UserRepository userRepository;
+    AnnotationConfigApplicationContext context;
 
     @BeforeAll
     static void beforeAll() {
@@ -39,42 +41,38 @@ class TransactionRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        UserRepository userRepository = new UserRepository();
-        TransactionCategoryRepository categoryRepository = new TransactionCategoryRepository();
+        context = new AnnotationConfigApplicationContext(MyTestConfig.class);
+        TransactionCategoryRepository categoryRepository = context.getBean(TransactionCategoryRepository.class);
 
-        try {
-            for (TransactionEntity transaction : transactionRepository.findAll()) {
-                transactionRepository.delete(transaction);
-            }
-
-            for (UserEntity user : userRepository.findAll()) {
-                userRepository.delete(user);
-            }
-
-            for (TransactionCategoryEntity category : categoryRepository.findAll()) {
-                categoryRepository.delete(category);
-            }
-
-            userEntity = new UserEntity();
-
-            userEntity.setEmail("t");
-            userEntity.setPassword("t");
-            userEntity.setName("t");
-            userEntity.setRole(UserRole.USER);
-            userEntity.setBlocked(false);
-
-            userEntity = userRepository.add(userEntity);
-
-            CurrentUser.currentUser = userEntity;
-
-            categoryEntity = new TransactionCategoryEntity();
-
-            categoryEntity.setName("t");
-
-            categoryEntity = categoryRepository.add(categoryEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+        for (TransactionEntity transaction : transactionRepository.findAll()) {
+            transactionRepository.delete(transaction);
         }
+
+        for (UserEntity user : userRepository.findAll()) {
+            userRepository.delete(user);
+        }
+
+        for (TransactionCategoryEntity category : categoryRepository.findAll()) {
+            categoryRepository.delete(category);
+        }
+
+        userEntity = new UserEntity();
+
+        userEntity.setEmail("t");
+        userEntity.setPassword("t");
+        userEntity.setName("t");
+        userEntity.setRole(UserRole.USER);
+        userEntity.setBlocked(false);
+
+        userEntity = userRepository.save(userEntity);
+
+        CurrentUser.currentUser = userEntity;
+
+        categoryEntity = new TransactionCategoryEntity();
+
+        categoryEntity.setName("t");
+
+        categoryEntity = categoryRepository.save(categoryEntity);
     }
 
     @Test
@@ -93,11 +91,7 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            transactionEntity = transactionRepository.add(transactionEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity = transactionRepository.save(transactionEntity);
 
         TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
         transactionEntity2.setSum(BigDecimal.valueOf(10.10));
@@ -105,11 +99,7 @@ class TransactionRepositoryTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t");
 
-        try {
-            transactionEntity2 = transactionRepository.add(transactionEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity2 = transactionRepository.save(transactionEntity2);
 
         Assertions.assertEquals(transactionEntity, transactionEntity2);
         Assertions.assertEquals(transactionEntity.getId(), transactionEntity2.getId());
@@ -125,11 +115,7 @@ class TransactionRepositoryTest {
         transactionEntity3.setDate(date);
         transactionEntity3.setDescription("t2");
 
-        try {
-            transactionEntity3 = transactionRepository.add(transactionEntity3);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity3 = transactionRepository.save(transactionEntity3);
 
         Assertions.assertNotEquals(transactionEntity, transactionEntity3);
     }
@@ -150,19 +136,15 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            transactionEntity = transactionRepository.add(transactionEntity);
+        transactionEntity = transactionRepository.save(transactionEntity);
 
-            Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
+        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
 
-            transactionEntity.setSum(BigDecimal.valueOf(1.5));
+        transactionEntity.setSum(BigDecimal.valueOf(1.5));
 
-            Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
+        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity);
 
-            Assertions.assertNull(transactionRepository.findById(10));
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertNull(transactionRepository.findById(10));
     }
 
     @Test
@@ -198,15 +180,12 @@ class TransactionRepositoryTest {
         List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3);
 
         List<TransactionEntity> transactionEntitiesReturned;
-        try {
-            transactionRepository.add(transactionEntity);
-            transactionRepository.add(transactionEntity2);
-            transactionRepository.add(transactionEntity3);
 
-            transactionEntitiesReturned = transactionRepository.findAll();
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity);
+        transactionRepository.save(transactionEntity2);
+        transactionRepository.save(transactionEntity3);
+
+        transactionEntitiesReturned = transactionRepository.findAll();
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -223,12 +202,9 @@ class TransactionRepositoryTest {
         transactionEntity4.setDescription("t4");
 
         transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3, transactionEntity4);
-        try {
-            transactionRepository.add(transactionEntity4);
-            transactionEntitiesReturned = transactionRepository.findAll();
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+
+        transactionRepository.save(transactionEntity4);
+        transactionEntitiesReturned = transactionRepository.findAll();
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -238,7 +214,7 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    void findAllWithUserTest() {
+    void findAllByUserIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
@@ -270,15 +246,12 @@ class TransactionRepositoryTest {
         List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3);
 
         List<TransactionEntity> transactionEntitiesReturned;
-        try {
-            transactionRepository.add(transactionEntity);
-            transactionRepository.add(transactionEntity2);
-            transactionRepository.add(transactionEntity3);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.save(transactionEntity);
+        transactionRepository.save(transactionEntity2);
+        transactionRepository.save(transactionEntity3);
+
+        transactionEntitiesReturned = transactionRepository.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -295,12 +268,9 @@ class TransactionRepositoryTest {
         transactionEntity4.setDescription("t4");
 
         transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3, transactionEntity4);
-        try {
-            transactionRepository.add(transactionEntity4);
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+
+        transactionRepository.save(transactionEntity4);
+        transactionEntitiesReturned = transactionRepository.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -311,13 +281,9 @@ class TransactionRepositoryTest {
         user.setName("t2");
         user.setBlocked(false);
 
-        try {
-            user = new UserRepository().add(user);
+        user = userRepository.save(user);
 
-            transactionRepository.delete(transactionEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionRepository.delete(transactionEntity);
 
         transactionEntity = new TransactionEntity(user.getId());
 
@@ -326,13 +292,9 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            transactionRepository.add(transactionEntity);
+        transactionRepository.save(transactionEntity);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntitiesReturned = transactionRepository.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -343,19 +305,15 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            transactionRepository.add(transactionEntity);
+        transactionRepository.save(transactionEntity);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithUser(CurrentUser.currentUser.getId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntitiesReturned = transactionRepository.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
     @Test
-    void findAllWithDateAndCategoryIdAndTypeAndUserIdTest() {
+    void findAllByDateAndCategoryIdAndTypeAndUserIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
@@ -390,11 +348,7 @@ class TransactionRepositoryTest {
         user.setName("t2");
         user.setBlocked(false);
 
-        try {
-            user = new UserRepository().add(user);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        user = userRepository.save(user);
 
         TransactionEntity transactionEntity3 = new TransactionEntity(user.getId());
 
@@ -413,16 +367,12 @@ class TransactionRepositoryTest {
         List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity4);
         List<TransactionEntity> transactionEntitiesReturned;
 
-        try {
-            transactionRepository.add(transactionEntity);
-            transactionRepository.add(transactionEntity2);
-            transactionRepository.add(transactionEntity3);
-            transactionRepository.add(transactionEntity4);
+        transactionRepository.save(transactionEntity);
+        transactionRepository.save(transactionEntity2);
+        transactionRepository.save(transactionEntity3);
+        transactionRepository.save(transactionEntity4);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, 0, null, CurrentUser.currentUser.getId());
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, 0, null, CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -430,25 +380,21 @@ class TransactionRepositoryTest {
 
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
 
-        try {
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(date, 0, null, CurrentUser.currentUser.getId());
+        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date, 0, null, CurrentUser.currentUser.getId());
 
-            transactionEntities = List.of(transactionEntity);
+        transactionEntities = List.of(transactionEntity);
 
-            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, categoryEntity.getId(), null, CurrentUser.currentUser.getId());
-            transactionEntities = List.of(transactionEntity, transactionEntity2);
+        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, categoryEntity.getId(), null, CurrentUser.currentUser.getId());
+        transactionEntities = List.of(transactionEntity, transactionEntity2);
 
-            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionEntitiesReturned = transactionRepository.findAllWithDateAndCategoryIdAndTypeAndUserId(null, 0, "Pos", user.getId());
-            transactionEntities = List.of(transactionEntity3);
+        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, 0, "Pos", user.getId());
+        transactionEntities = List.of(transactionEntity3);
 
-            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
     }
 
     @Test
@@ -467,11 +413,7 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        try {
-            transactionEntity = transactionRepository.add(transactionEntity);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        transactionEntity = transactionRepository.save(transactionEntity);
 
         TransactionEntity transactionEntity2 = new TransactionEntity(transactionEntity.getId(), CurrentUser.currentUser.getId());
 
@@ -485,17 +427,13 @@ class TransactionRepositoryTest {
         transactionEntity2.setDate(date);
         transactionEntity2.setDescription("t2");
 
-        try {
-            transactionRepository.update(transactionEntity2);
+        transactionRepository.save(transactionEntity2);
 
-            Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
+        Assertions.assertEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
 
-            transactionEntity2.setSum(BigDecimal.valueOf(2.2));
+        transactionEntity2.setSum(BigDecimal.valueOf(2.2));
 
-            Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
     }
 
     @Test
@@ -535,25 +473,21 @@ class TransactionRepositoryTest {
 
         List<TransactionEntity> transactionEntities = List.of(transactionEntity, transactionEntity2, transactionEntity3);
 
-        try {
-            transactionEntity = transactionRepository.add(transactionEntity);
-            transactionRepository.add(transactionEntity2);
-            transactionRepository.add(transactionEntity3);
+        transactionEntity = transactionRepository.save(transactionEntity);
+        transactionRepository.save(transactionEntity2);
+        transactionRepository.save(transactionEntity3);
 
-            List<TransactionEntity> transactionEntitiesReturned = transactionRepository.findAll();
+        List<TransactionEntity> transactionEntitiesReturned = transactionRepository.findAll();
 
-            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionRepository.delete(transactionEntity);
-            transactionEntitiesReturned = transactionRepository.findAll();
+        transactionRepository.delete(transactionEntity);
+        transactionEntitiesReturned = transactionRepository.findAll();
 
-            Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
+        Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
 
-            transactionEntities = List.of(transactionEntity2, transactionEntity3);
+        transactionEntities = List.of(transactionEntity2, transactionEntity3);
 
-            Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-        } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
-        }
+        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
     }
 }

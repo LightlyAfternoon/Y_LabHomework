@@ -1,13 +1,21 @@
 package org.example.model;
 
+import jakarta.persistence.*;
 import org.example.annotation.Default;
 
+@Entity
+@Table(name = "user", schema = "service")
 public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
+    @SequenceGenerator(name = "seq_user_id", allocationSize = 1)
     private int id;
     private String name;
     private String email;
     private String password;
+    @Column(name = "role_id")
     private UserRole role;
+    @Column(name = "is_blocked")
     private boolean isBlocked;
 
     private UserEntity(UserBuilder builder) {

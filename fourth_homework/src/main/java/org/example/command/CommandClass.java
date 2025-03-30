@@ -1,14 +1,15 @@
 package org.example.command;
 
 import org.example.CurrentUser;
+import org.example.controller.dto.TransactionCategoryDTO;
+import org.example.controller.dto.TransactionDTO;
+import org.example.controller.dto.UserDTO;
+import org.example.controller.mapper.MonthlyBudgetDTOMapper;
+import org.example.controller.mapper.TransactionCategoryDTOMapper;
+import org.example.controller.mapper.TransactionDTOMapper;
+import org.example.controller.mapper.UserDTOMapper;
 import org.example.model.*;
-import org.example.servlet.dto.TransactionCategoryDTO;
-import org.example.servlet.dto.TransactionDTO;
-import org.example.servlet.dto.UserDTO;
-import org.example.servlet.mapper.MonthlyBudgetDTOMapper;
-import org.example.servlet.mapper.TransactionCategoryDTOMapper;
-import org.example.servlet.mapper.TransactionDTOMapper;
-import org.example.servlet.mapper.UserDTOMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -20,6 +21,14 @@ public class CommandClass {
     private Scanner scanner;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final HttpRequestsClass httpRequestsClass;
+    @Autowired
+    private UserDTOMapper userDTOMapper;
+    @Autowired
+    private MonthlyBudgetDTOMapper monthlyBudgetDTOMapper;
+    @Autowired
+    private TransactionCategoryDTOMapper transactionCategoryDTOMapper;
+    @Autowired
+    private TransactionDTOMapper transactionDTOMapper;
 
     public CommandClass(HttpRequestsClass httpRequestsClass) {
         this.httpRequestsClass = httpRequestsClass;
@@ -46,7 +55,7 @@ public class CommandClass {
     }
 
     public UserRole getLoggedInUserRole() {
-        UserEntity user = UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getLoggedInUser(sendEmail(), sendPassword()));
+        UserEntity user = userDTOMapper.mapToEntity(httpRequestsClass.getLoggedInUser(sendEmail(), sendPassword()));
 
         if (user != null) {
             CurrentUser.currentUser = user;
@@ -61,14 +70,14 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
             for (UserDTO userDTO : httpRequestsClass.getAllUsers()){
-                output.append(UserDTOMapper.INSTANCE.mapToEntity(userDTO)).append("\n");
+                output.append(userDTOMapper.mapToEntity(userDTO)).append("\n");
             }
 
         return output.toString();
     }
 
     public UserEntity getRegisteredUser() {
-        return UserDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getRegisteredUser(sendEmail(), sendPassword(), sendUserName()));
+        return userDTOMapper.mapToEntity(httpRequestsClass.getRegisteredUser(sendEmail(), sendPassword(), sendUserName()));
     }
 
     private BigDecimal sendBudgetSum() {
@@ -80,7 +89,7 @@ public class CommandClass {
     }
 
     public MonthlyBudgetEntity addBudget() {
-        return MonthlyBudgetDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addBudget(sendBudgetSum()));
+        return monthlyBudgetDTOMapper.mapToEntity(httpRequestsClass.addBudget(sendBudgetSum()));
     }
 
     private String sendGoalName() {
@@ -98,7 +107,7 @@ public class CommandClass {
     }
 
     public TransactionCategoryEntity addGoal() {
-        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addGoal(sendGoalName(), sendGoalSum()));
+        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.addGoal(sendGoalName(), sendGoalSum()));
     }
 
     private BigDecimal sendTransactionSum() {
@@ -119,7 +128,7 @@ public class CommandClass {
         scanner.nextLine();
         String categoryName = scanner.nextLine();
 
-        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private Date sendDate() {
@@ -150,7 +159,7 @@ public class CommandClass {
         Date date = sendDate();
         String description = sendDescription();
 
-        TransactionEntity transaction = TransactionDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), date, description));
+        TransactionEntity transaction = transactionDTOMapper.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), date, description));
 
         checkIfSpendMoreThanBudget();
 
@@ -165,7 +174,7 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()){
-            output.append(TransactionDTOMapper.INSTANCE.mapToEntity(transactionDTO)).append("\n");
+            output.append(transactionDTOMapper.mapToEntity(transactionDTO)).append("\n");
         }
 
         return output.toString();
@@ -198,7 +207,7 @@ public class CommandClass {
 
         String categoryName = scanner.nextLine();
 
-        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private String sendFilterSumType() {
@@ -214,7 +223,7 @@ public class CommandClass {
         String type = sendFilterSumType();
 
         for (TransactionDTO transactionDTO : httpRequestsClass.filterTransactions(date, category != null ? category.getId() : 0, type, CurrentUser.currentUser.getId())){
-            output.append(TransactionDTOMapper.INSTANCE.mapToEntity(transactionDTO)).append("\n");
+            output.append(transactionDTOMapper.mapToEntity(transactionDTO)).append("\n");
         }
 
         return output.toString();
@@ -244,7 +253,7 @@ public class CommandClass {
         scanner.nextLine();
         String categoryName = scanner.nextLine();
 
-        return TransactionCategoryDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
     }
 
     private Date sendNewTransactionDate() {
@@ -312,7 +321,7 @@ public class CommandClass {
     }
 
     private void checkIfSpendMoreThanBudget() {
-        MonthlyBudgetEntity monthlyBudgetEntity = MonthlyBudgetDTOMapper.INSTANCE.mapToEntity(httpRequestsClass.getBudget());
+        MonthlyBudgetEntity monthlyBudgetEntity = monthlyBudgetDTOMapper.mapToEntity(httpRequestsClass.getBudget());
 
         if (monthlyBudgetEntity != null) {
             BigDecimal totalSpentSum = BigDecimal.valueOf(0);
