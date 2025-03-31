@@ -32,7 +32,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "org.example.repository")
-//@ComponentScan("org.example.service.impl")
+@ComponentScan({"org.example.service.impl", "org.example.controller"})
 @WebAppConfiguration
 public class MyTestConfig implements WebMvcConfigurer {
     static DataSource dataSourceTest;

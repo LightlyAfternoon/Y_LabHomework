@@ -20,8 +20,8 @@ public class TransactionSpecification {
         }
     }
 
-    public static Specification<TransactionEntity> categoryIdIs(int categoryId) {
-        if (categoryId > 0) {
+    public static Specification<TransactionEntity> categoryIdIs(Integer categoryId) {
+        if (categoryId != null && categoryId > 0) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("categoryId"), categoryId);
         } else {
             return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
@@ -29,10 +29,10 @@ public class TransactionSpecification {
     }
 
     public static Specification<TransactionEntity> sumType(String type) {
-        if (type.equals("Pos")) {
+        if (type != null && type.equals("Pos")) {
             return (root, query, criteriaBuilder) ->
                     criteriaBuilder.greaterThan(root.get("sum"), BigDecimal.valueOf(0));
-        } else if (type.equals("Neg")) {
+        } else if (type != null && type.equals("Neg")) {
             return (root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThan(root.get("sum"), BigDecimal.valueOf(0));
         } else {

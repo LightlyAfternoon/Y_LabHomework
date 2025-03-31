@@ -19,7 +19,7 @@ public class TransactionDTO {
     /**
      * Field category is meant for a category or a goal of money spent
      */
-    private int categoryId;
+    private Integer categoryId;
     private int userId;
 
     private TransactionDTO(TransactionBuilder builder) {
@@ -36,7 +36,7 @@ public class TransactionDTO {
         private BigDecimal sum;
         private Date date;
         private String description;
-        private int categoryId;
+        private Integer categoryId;
         private int userId;
 
         public TransactionBuilder(BigDecimal sum, int userId) {
@@ -76,7 +76,7 @@ public class TransactionDTO {
             return this;
         }
 
-        public TransactionBuilder categoryId(int categoryId) {
+        public TransactionBuilder categoryId(Integer categoryId) {
             this.categoryId = categoryId;
 
             return this;
@@ -111,11 +111,11 @@ public class TransactionDTO {
         this.sum = sum;
     }
 
-    public int getCategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -168,7 +168,8 @@ public class TransactionDTO {
         TransactionDTO transaction = (TransactionDTO) obj;
 
         return this.sum.compareTo(transaction.sum) == 0 &&
-                ((this.categoryId == 0 && transaction.categoryId == 0) || (this.categoryId != 0 && this.categoryId == transaction.categoryId)) &&
+                (((this.categoryId == null || this.categoryId == 0) && (transaction.categoryId == null || transaction.categoryId == 0))
+                        || ((this.categoryId != null && this.categoryId != 0) && this.categoryId.equals(transaction.categoryId))) &&
                 this.date.equals(transaction.date) &&
                 ((this.description == null && transaction.description == null) || (this.description != null && this.description.equals(transaction.description))) &&
                 this.userId == transaction.userId;

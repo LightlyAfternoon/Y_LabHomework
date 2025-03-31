@@ -18,5 +18,5 @@ public interface TransactionService {
 
     List<TransactionDTO> findAllByUserId(int userId);
 
-    List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId);
+    List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, Integer categoryId, String type, int userId);
 }

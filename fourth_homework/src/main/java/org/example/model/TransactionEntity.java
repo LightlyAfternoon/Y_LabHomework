@@ -44,7 +44,7 @@ public class TransactionEntity {
         private BigDecimal sum;
         private Date date;
         private String description;
-        private int categoryId;
+        private Integer categoryId;
         private int userId;
 
         public TransactionBuilder(BigDecimal sum, int userId) {
@@ -84,7 +84,7 @@ public class TransactionEntity {
             return this;
         }
 
-        public TransactionBuilder categoryId(int categoryId) {
+        public TransactionBuilder categoryId(Integer categoryId) {
             this.categoryId = categoryId;
 
             return this;
@@ -119,11 +119,11 @@ public class TransactionEntity {
         this.sum = sum;
     }
 
-    public int getCategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
 

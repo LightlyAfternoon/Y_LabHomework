@@ -81,7 +81,7 @@ public class TransactionCategoryEntity {
         this.name = name;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 

@@ -24,7 +24,7 @@ public class TransactionCategoryDTO {
         private int id;
         private String name;
         private BigDecimal neededSum;
-        private int userId;
+        private Integer userId;
 
         public TransactionCategoryBuilder(String name) {
             this.name = name;
@@ -42,7 +42,7 @@ public class TransactionCategoryDTO {
             return this;
         }
 
-        public TransactionCategoryBuilder userId(int userId) {
+        public TransactionCategoryBuilder userId(Integer userId) {
             this.userId = userId;
 
             return this;
@@ -73,7 +73,7 @@ public class TransactionCategoryDTO {
         this.name = name;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
