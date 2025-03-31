@@ -24,7 +24,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDTO add(UserDTO userDTO) {
-        return userDTOMapper.mapToDTO(userRepository.save(userDTOMapper.mapToEntity(userDTO)));
+        if (userRepository.findByEmail(userDTO.getEmail()) == null) {
+            return userDTOMapper.mapToDTO(userRepository.save(userDTOMapper.mapToEntity(userDTO)));
+        } else {
+            return null;
+        }
     }
 
     public UserDTO findById(int id) {
@@ -39,9 +43,16 @@ public class UserServiceImpl implements UserService {
     public UserDTO update(UserDTO userDTO, int id) {
         UserDTO dto = new UserDTO.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
                 id(id).role(userDTO.getRole()).isBlocked(userDTO.getBlocked()).build();
-        userRepository.save(userDTOMapper.mapToEntity(dto));
 
-        return userDTOMapper.mapToDTO(userRepository.findById(id));
+        UserEntity userWithEmail = userRepository.findByEmail(userDTO.getEmail());
+
+        if (userWithEmail == null || userWithEmail.getId() == id) {
+            userRepository.save(userDTOMapper.mapToEntity(dto));
+
+            return userDTOMapper.mapToDTO(userRepository.findById(id));
+        } else {
+            return null;
+        }
     }
 
     public boolean delete(int id) {

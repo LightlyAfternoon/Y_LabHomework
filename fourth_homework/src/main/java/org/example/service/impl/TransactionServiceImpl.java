@@ -6,7 +6,9 @@ import org.example.controller.mapper.TransactionDTOMapper;
 import org.example.model.TransactionEntity;
 import org.example.repository.TransactionRepository;
 import org.example.service.TransactionService;
+import org.example.service.specification.TransactionSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -53,12 +55,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public List<TransactionDTO> findAllByUserId(int userId) {
-
         return transactionRepository.findAllByUserId(userId).stream().map(transactionDTOMapper::mapToDTO).toList();
     }
 
     public List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, int categoryId, String type, int userId) {
-        return transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date, categoryId, type, userId).
-                stream().map(transactionDTOMapper::mapToDTO).toList();
+        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(categoryId)).and(TransactionSpecification.sumType(type)).and(TransactionSpecification.userIdIs(userId));
+
+        return transactionRepository.findAll(filters).stream().map(transactionDTOMapper::mapToDTO).toList();
     }
 }

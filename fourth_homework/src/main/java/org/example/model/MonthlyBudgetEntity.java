@@ -16,8 +16,8 @@ public class MonthlyBudgetEntity {
     @SequenceGenerator(name = "seq_monthly_budget_id", allocationSize = 1)
     private int id;
     @Column(name = "user_id")
-    private final int userId;
-    private final Date date;
+    private int userId;
+    private Date date;
     private BigDecimal sum;
 
     @Transient
@@ -102,6 +102,8 @@ public class MonthlyBudgetEntity {
             throw new RuntimeException(e);
         }
     }
+
+    public MonthlyBudgetEntity() {}
 
     public int getId() {
         return id;

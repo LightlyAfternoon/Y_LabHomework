@@ -1,18 +1,21 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
-import org.example.db.ConnectionClass;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.TransactionEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
+import org.example.service.specification.TransactionSpecification;
 import org.junit.jupiter.api.*;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.data.jpa.domain.Specification;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -26,22 +29,22 @@ class TransactionRepositoryTest {
     AnnotationConfigApplicationContext context;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws SQLException, LiquibaseException {
         container.start();
 
-        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
-
-        ConnectionClass.nullConnection();
     }
 
     @BeforeEach
     void setUp() {
         context = new AnnotationConfigApplicationContext(MyTestConfig.class);
+        transactionRepository = context.getBean(TransactionRepository.class);
+        userRepository = context.getBean(UserRepository.class);
         TransactionCategoryRepository categoryRepository = context.getBean(TransactionCategoryRepository.class);
 
         for (TransactionEntity transaction : transactionRepository.findAll()) {
@@ -91,33 +94,21 @@ class TransactionRepositoryTest {
         transactionEntity.setDate(date);
         transactionEntity.setDescription("t");
 
-        transactionEntity = transactionRepository.save(transactionEntity);
+        TransactionEntity savedTransactionEntity = transactionRepository.save(transactionEntity);
+
+        Assertions.assertNotEquals(0, savedTransactionEntity.getId());
+        Assertions.assertEquals(transactionEntity, savedTransactionEntity);
 
         TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
-        transactionEntity2.setSum(BigDecimal.valueOf(10.10));
+
+        transactionEntity2.setSum(BigDecimal.valueOf(10.0));
         transactionEntity2.setCategoryId(categoryEntity.getId());
         transactionEntity2.setDate(date);
-        transactionEntity2.setDescription("t");
+        transactionEntity2.setDescription("t2");
 
         transactionEntity2 = transactionRepository.save(transactionEntity2);
 
-        Assertions.assertEquals(transactionEntity, transactionEntity2);
-        Assertions.assertEquals(transactionEntity.getId(), transactionEntity2.getId());
-
-        transactionEntity.setSum(BigDecimal.valueOf(20.0));
-
         Assertions.assertNotEquals(transactionEntity, transactionEntity2);
-
-        TransactionEntity transactionEntity3 = new TransactionEntity(CurrentUser.currentUser.getId());
-
-        transactionEntity3.setSum(BigDecimal.valueOf(10.0));
-        transactionEntity3.setCategoryId(categoryEntity.getId());
-        transactionEntity3.setDate(date);
-        transactionEntity3.setDescription("t2");
-
-        transactionEntity3 = transactionRepository.save(transactionEntity3);
-
-        Assertions.assertNotEquals(transactionEntity, transactionEntity3);
     }
 
     @Test
@@ -294,6 +285,7 @@ class TransactionRepositoryTest {
 
         transactionRepository.save(transactionEntity);
 
+        transactionEntities = List.of(transactionEntity2, transactionEntity3, transactionEntity4);
         transactionEntitiesReturned = transactionRepository.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
@@ -360,7 +352,6 @@ class TransactionRepositoryTest {
         TransactionEntity transactionEntity4 = new TransactionEntity(CurrentUser.currentUser.getId());
 
         transactionEntity4.setSum(BigDecimal.valueOf(-10.10));
-        transactionEntity4.setCategoryId(0);
         transactionEntity4.setDate(date2);
         transactionEntity4.setDescription(null);
 
@@ -372,7 +363,8 @@ class TransactionRepositoryTest {
         transactionRepository.save(transactionEntity3);
         transactionRepository.save(transactionEntity4);
 
-        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, 0, null, CurrentUser.currentUser.getId());
+        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(null).and(TransactionSpecification.categoryIdIs(0)).and(TransactionSpecification.userIdIs(CurrentUser.currentUser.getId()));
+        transactionEntitiesReturned = transactionRepository.findAll(filters);
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
@@ -380,18 +372,21 @@ class TransactionRepositoryTest {
 
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(date, 0, null, CurrentUser.currentUser.getId());
+        filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(0)).and(TransactionSpecification.userIdIs(CurrentUser.currentUser.getId()));
+        transactionEntitiesReturned = transactionRepository.findAll(filters);
 
         transactionEntities = List.of(transactionEntity);
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, categoryEntity.getId(), null, CurrentUser.currentUser.getId());
+        filters = TransactionSpecification.dateIs(null).and(TransactionSpecification.categoryIdIs(categoryEntity.getId())).and(TransactionSpecification.userIdIs(CurrentUser.currentUser.getId()));
+        transactionEntitiesReturned = transactionRepository.findAll(filters);
         transactionEntities = List.of(transactionEntity, transactionEntity2);
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionEntitiesReturned = transactionRepository.findAllByDateAndCategoryIdAndTypeAndUserId(null, 0, "Pos", user.getId());
+        filters = TransactionSpecification.dateIs(null).and(TransactionSpecification.categoryIdIs(0)).and(TransactionSpecification.sumType("Pos")).and(TransactionSpecification.userIdIs(user.getId()));
+        transactionEntitiesReturned = transactionRepository.findAll(filters);
         transactionEntities = List.of(transactionEntity3);
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);

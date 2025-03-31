@@ -26,7 +26,11 @@ public class MonthlyBudgetServiceImpl implements MonthlyBudgetService {
     }
 
     public MonthlyBudgetDTO add(MonthlyBudgetDTO monthlyBudgetDTO) {
-        return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(monthlyBudgetDTO)));
+        if (monthlyBudgetRepository.findByDateAndUserId(monthlyBudgetDTO.getDate(), monthlyBudgetDTO.getUserId()) == null) {
+            return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(monthlyBudgetDTO)));
+        } else {
+            return null;
+        }
     }
 
     public MonthlyBudgetDTO findById(int id) {

@@ -1,13 +1,10 @@
 package org.example.command;
 
 import org.example.CurrentUser;
+import org.example.controller.dto.MonthlyBudgetDTO;
 import org.example.controller.dto.TransactionCategoryDTO;
 import org.example.controller.dto.TransactionDTO;
 import org.example.controller.dto.UserDTO;
-import org.example.controller.mapper.MonthlyBudgetDTOMapper;
-import org.example.controller.mapper.TransactionCategoryDTOMapper;
-import org.example.controller.mapper.TransactionDTOMapper;
-import org.example.controller.mapper.UserDTOMapper;
 import org.example.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,15 +18,8 @@ public class CommandClass {
     private Scanner scanner;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final HttpRequestsClass httpRequestsClass;
-    @Autowired
-    private UserDTOMapper userDTOMapper;
-    @Autowired
-    private MonthlyBudgetDTOMapper monthlyBudgetDTOMapper;
-    @Autowired
-    private TransactionCategoryDTOMapper transactionCategoryDTOMapper;
-    @Autowired
-    private TransactionDTOMapper transactionDTOMapper;
 
+    @Autowired
     public CommandClass(HttpRequestsClass httpRequestsClass) {
         this.httpRequestsClass = httpRequestsClass;
     }
@@ -55,10 +45,11 @@ public class CommandClass {
     }
 
     public UserRole getLoggedInUserRole() {
-        UserEntity user = userDTOMapper.mapToEntity(httpRequestsClass.getLoggedInUser(sendEmail(), sendPassword()));
+        UserDTO userDTO = httpRequestsClass.getLoggedInUser(sendEmail(), sendPassword());
 
-        if (user != null) {
-            CurrentUser.currentUser = user;
+        if (userDTO != null) {
+            CurrentUser.currentUser = new UserEntity.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
+                    id(userDTO.getId()).role(userDTO.getRole()).isBlocked(userDTO.getBlocked()).build();
 
             return CurrentUser.currentUser.getRole();
         }
@@ -70,14 +61,14 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
             for (UserDTO userDTO : httpRequestsClass.getAllUsers()){
-                output.append(userDTOMapper.mapToEntity(userDTO)).append("\n");
+                output.append(userDTO).append("\n");
             }
 
         return output.toString();
     }
 
-    public UserEntity getRegisteredUser() {
-        return userDTOMapper.mapToEntity(httpRequestsClass.getRegisteredUser(sendEmail(), sendPassword(), sendUserName()));
+    public UserDTO getRegisteredUser() {
+        return httpRequestsClass.getRegisteredUser(sendEmail(), sendPassword(), sendUserName());
     }
 
     private BigDecimal sendBudgetSum() {
@@ -88,8 +79,8 @@ public class CommandClass {
         return scanner.nextBigDecimal();
     }
 
-    public MonthlyBudgetEntity addBudget() {
-        return monthlyBudgetDTOMapper.mapToEntity(httpRequestsClass.addBudget(sendBudgetSum()));
+    public MonthlyBudgetDTO addBudget() {
+        return httpRequestsClass.addBudget(sendBudgetSum());
     }
 
     private String sendGoalName() {
@@ -106,8 +97,8 @@ public class CommandClass {
         return scanner.nextBigDecimal();
     }
 
-    public TransactionCategoryEntity addGoal() {
-        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.addGoal(sendGoalName(), sendGoalSum()));
+    public TransactionCategoryDTO addGoal() {
+        return httpRequestsClass.addGoal(sendGoalName(), sendGoalSum());
     }
 
     private BigDecimal sendTransactionSum() {
@@ -118,7 +109,7 @@ public class CommandClass {
         return scanner.nextBigDecimal();
     }
 
-    private TransactionCategoryEntity sendCategory() {
+    private TransactionCategoryDTO sendCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
 
         for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
@@ -128,7 +119,7 @@ public class CommandClass {
         scanner.nextLine();
         String categoryName = scanner.nextLine();
 
-        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return httpRequestsClass.getCategoryOrGoalWithName(categoryName);
     }
 
     private Date sendDate() {
@@ -153,17 +144,17 @@ public class CommandClass {
         return scanner.nextLine();
     }
 
-    public TransactionEntity addTransaction() {
+    public TransactionDTO addTransaction() {
         BigDecimal sum = sendTransactionSum();
-        TransactionCategoryEntity category = sendCategory();
+        TransactionCategoryDTO categoryDTO = sendCategory();
         Date date = sendDate();
         String description = sendDescription();
 
-        TransactionEntity transaction = transactionDTOMapper.mapToEntity(httpRequestsClass.addTransaction(sum, (category != null ? category.getId() : 0), date, description));
+        TransactionDTO transactionDTO = httpRequestsClass.addTransaction(sum, (categoryDTO != null ? categoryDTO.getId() : 0), date, description);
 
         checkIfSpendMoreThanBudget();
 
-        return transaction;
+        return transactionDTO;
     }
 
     public boolean deleteAccount() {
@@ -174,7 +165,7 @@ public class CommandClass {
         StringBuilder output = new StringBuilder();
 
         for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()){
-            output.append(transactionDTOMapper.mapToEntity(transactionDTO)).append("\n");
+            output.append(transactionDTO).append("\n");
         }
 
         return output.toString();
@@ -198,7 +189,7 @@ public class CommandClass {
         return date;
     }
 
-    private TransactionCategoryEntity sendFilterCategory() {
+    private TransactionCategoryDTO sendFilterCategory() {
         System.out.println("Введите имя категории/цели из списка ниже или оставьте поле пустым:");
 
         for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
@@ -207,7 +198,7 @@ public class CommandClass {
 
         String categoryName = scanner.nextLine();
 
-        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return httpRequestsClass.getCategoryOrGoalWithName(categoryName);
     }
 
     private String sendFilterSumType() {
@@ -219,11 +210,11 @@ public class CommandClass {
     public String filterTransactions() {
         StringBuilder output = new StringBuilder();
         Date date = sendFilterDate();
-        TransactionCategoryEntity category = sendFilterCategory();
+        TransactionCategoryDTO categoryDTO = sendFilterCategory();
         String type = sendFilterSumType();
 
-        for (TransactionDTO transactionDTO : httpRequestsClass.filterTransactions(date, category != null ? category.getId() : 0, type, CurrentUser.currentUser.getId())){
-            output.append(transactionDTOMapper.mapToEntity(transactionDTO)).append("\n");
+        for (TransactionDTO transactionDTO : httpRequestsClass.filterTransactions(date, categoryDTO != null ? categoryDTO.getId() : 0, type, CurrentUser.currentUser.getId())){
+            output.append(transactionDTO).append("\n");
         }
 
         return output.toString();
@@ -243,7 +234,7 @@ public class CommandClass {
         return scanner.nextBigDecimal();
     }
 
-    private TransactionCategoryEntity sendNewTransactionCategory() {
+    private TransactionCategoryDTO sendNewTransactionCategory() {
         System.out.println("Введите имя новой категории/цели из списка ниже или оставьте поле пустым:");
 
         for (TransactionCategoryDTO categoryDTO : httpRequestsClass.getAllCommonCategoriesOrGoalsWithCurrentUser()) {
@@ -253,7 +244,7 @@ public class CommandClass {
         scanner.nextLine();
         String categoryName = scanner.nextLine();
 
-        return transactionCategoryDTOMapper.mapToEntity(httpRequestsClass.getCategoryOrGoalWithName(categoryName));
+        return httpRequestsClass.getCategoryOrGoalWithName(categoryName);
     }
 
     private Date sendNewTransactionDate() {
@@ -280,11 +271,11 @@ public class CommandClass {
     public boolean editTransaction() {
         int id = sendTransactionId();
         BigDecimal sum = sendNewTransactionSum();
-        TransactionCategoryEntity category = sendNewTransactionCategory();
+        TransactionCategoryDTO categoryDTO = sendNewTransactionCategory();
         Date date = sendNewTransactionDate();
         String description = sendNewTransactionDescription();
 
-        if (httpRequestsClass.editTransaction(id, sum, (category != null ? category.getId() : 0), date, description)) {
+        if (httpRequestsClass.editTransaction(id, sum, (categoryDTO != null ? categoryDTO.getId() : 0), date, description)) {
             checkIfSpendMoreThanBudget();
 
             return true;
@@ -321,9 +312,9 @@ public class CommandClass {
     }
 
     private void checkIfSpendMoreThanBudget() {
-        MonthlyBudgetEntity monthlyBudgetEntity = monthlyBudgetDTOMapper.mapToEntity(httpRequestsClass.getBudget());
+        MonthlyBudgetDTO monthlyBudgetDTO = httpRequestsClass.getBudget();
 
-        if (monthlyBudgetEntity != null) {
+        if (monthlyBudgetDTO != null) {
             BigDecimal totalSpentSum = BigDecimal.valueOf(0);
 
             for (TransactionDTO transactionDTO : httpRequestsClass.getTransactions()) {
@@ -332,7 +323,7 @@ public class CommandClass {
                 }
             }
 
-            if (totalSpentSum.compareTo(monthlyBudgetEntity.getSum()) > 0) {
+            if (totalSpentSum.compareTo(monthlyBudgetDTO.getSum()) > 0) {
                 System.out.println("!Вы превысили свой месячный бюджет!");
 
                 sendNotificationEmail(CurrentUser.currentUser);
@@ -410,17 +401,19 @@ public class CommandClass {
         String command = "";
 
         while (true) {
-            System.out.println("Введите желаемое действие:\n" +
-                    "/budget - установить месячный бюджет\n" +
-                    "/goal - установить цель\n" +
-                    "/add_transaction - создать транзакцию\n" +
-                    "/delete_account - удалить аккаунт\n" +
-                    "/show_transactions - вывести все транзакции\n" +
-                    "/show_goals - вывести все цели\n" +
-                    "/balance - вывести текущий баланс\n" +
-                    "/balance_for_period - вывести доход и расход за период\n" +
-                    "/category_expenses - вывести расходы по категориям\n" +
-                    "/exit - выйти из приложения\n");
+            System.out.println("""
+                    Введите желаемое действие:
+                    /budget - установить месячный бюджет
+                    /goal - установить цель
+                    /add_transaction - создать транзакцию
+                    /delete_account - удалить аккаунт
+                    /show_transactions - вывести все транзакции
+                    /show_goals - вывести все цели
+                    /balance - вывести текущий баланс
+                    /balance_for_period - вывести доход и расход за период
+                    /category_expenses - вывести расходы по категориям
+                    /exit - выйти из приложения
+                    """);
 
             if (scanner.hasNext()) {
                 command = scanner.next();
@@ -428,7 +421,7 @@ public class CommandClass {
 
             switch (command) {
                 case "/budget" -> {
-                    MonthlyBudgetEntity monthlyBudgetEntity = addBudget();
+                    MonthlyBudgetDTO monthlyBudgetEntity = addBudget();
 
                     System.out.println("Бюджет на " + monthlyBudgetEntity.getDate() + " теперь составляет " + monthlyBudgetEntity.getSum() + "\n");
                 }
@@ -492,11 +485,13 @@ public class CommandClass {
         String command = "";
 
         while (true) {
-            System.out.println("Введите желаемое действие:\n" +
-                    "/filter_transactions - отфильтровать список транзакций\n" +
-                    "/edit_transaction - изменить транзакцию\n" +
-                    "/delete_transaction - удалить транзакцию\n" +
-                    "/menu - вернуться в меню\n");
+            System.out.println("""
+                    Введите желаемое действие:
+                    /filter_transactions - отфильтровать список транзакций
+                    /edit_transaction - изменить транзакцию
+                    /delete_transaction - удалить транзакцию
+                    /menu - вернуться в меню
+                    """);
 
             if (scanner.hasNext()) {
                 command = scanner.next();
@@ -553,9 +548,11 @@ public class CommandClass {
         String command = "";
 
         while (true) {
-            System.out.println("Введите желаемое действие:\n" +
-                    "/users - вывести список всех пользователей приложения\n" +
-                    "/exit - выйти из приложения\n");
+            System.out.println("""
+                    Введите желаемое действие:
+                    /users - вывести список всех пользователей приложения
+                    /exit - выйти из приложения
+                    """);
 
             if (scanner.hasNext()) {
                 command = scanner.next();

@@ -19,7 +19,7 @@ public class TransactionCategoryEntity {
      * Fields user and neededSum are meant for users goals
      */
     @Column(name = "user_id")
-    private int userId;
+    private Integer userId;
 
     private TransactionCategoryEntity(TransactionCategoryBuilder builder) {
         this.id = builder.id;
@@ -64,7 +64,7 @@ public class TransactionCategoryEntity {
     public TransactionCategoryEntity() {}
 
     @Default
-    public TransactionCategoryEntity(int id, int userId) {
+    public TransactionCategoryEntity(int id, Integer userId) {
         this.id = id;
         this.userId = userId;
     }
@@ -108,7 +108,8 @@ public class TransactionCategoryEntity {
         TransactionCategoryEntity transactionCategory = (TransactionCategoryEntity) obj;
 
         return this.name.equals(transactionCategory.name) &&
-                ((this.userId == 0 && transactionCategory.userId == 0) || (this.userId != 0 && this.userId == transactionCategory.userId)) &&
+                (((this.userId == null || this.userId == 0) && (transactionCategory.userId == null || transactionCategory.userId == 0))
+                        || (this.userId != null && this.userId != 0 && this.userId.equals(transactionCategory.userId))) &&
                 ((this.neededSum == null && transactionCategory.neededSum == null) || (this.neededSum != null && this.neededSum.compareTo(transactionCategory.neededSum) == 0));
     }
 
@@ -124,6 +125,6 @@ public class TransactionCategoryEntity {
 
     @Override
     public String toString() {
-        return this.getName() + " id: " + this.getId() + (this.getUserId() != 0 ? " id пользователя: " + this.getUserId() : "");
+        return this.getName() + " id: " + this.getId() + (userId != null && this.getUserId() != 0 ? " id пользователя: " + this.getUserId() : "");
     }
 }

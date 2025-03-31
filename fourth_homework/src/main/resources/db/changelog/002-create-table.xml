@@ -6,7 +6,7 @@
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
         logicalFilePath="db/changelog.xml">
     <changeSet id="create-id-sequence" author="Afternoon">
-        <createSequence sequenceName="seq_role_id" dataType="int" incrementBy="1" startValue="1"/>
+        <createSequence sequenceName="seq_role_id" dataType="int" incrementBy="1" startValue="0" minValue="0"/>
         <createSequence sequenceName="seq_user_id" dataType="int" incrementBy="1" startValue="1"/>
         <createSequence sequenceName="seq_transaction_category_id" dataType="int" incrementBy="1" startValue="1"/>
         <createSequence sequenceName="seq_transaction_id" dataType="int" incrementBy="1" startValue="1"/>

@@ -48,33 +48,23 @@ class UserRepositoryTest {
         userEntity.setRole(UserRole.USER);
         userEntity.setBlocked(false);
 
-        userEntity = userRepository.save(userEntity);
+        UserEntity savedUserEntity = userRepository.save(userEntity);
 
-        Assertions.assertNotEquals(0, userEntity.getId());
+        Assertions.assertNotEquals(0, savedUserEntity.getId());
+        Assertions.assertEquals(userEntity, savedUserEntity);
 
-        UserEntity userEntity2 = new UserEntity();
+        userEntity = new UserEntity();
 
-        userEntity2.setEmail("t");
-        userEntity2.setPassword("t");
-        userEntity2.setName("t");
-        userEntity2.setRole(UserRole.USER);
-        userEntity2.setBlocked(false);
+        userEntity.setEmail("t2");
+        userEntity.setPassword("t2");
+        userEntity.setName("t2");
+        userEntity.setRole(UserRole.ADMIN);
+        userEntity.setBlocked(true);
 
-        userEntity2 = userRepository.save(userEntity2);
+        savedUserEntity = userRepository.save(userEntity);
 
-        Assertions.assertNull(userEntity2);
-
-        UserEntity userEntity3 = new UserEntity();
-
-        userEntity3.setEmail("t");
-        userEntity3.setPassword("t2");
-        userEntity3.setName("t2");
-        userEntity3.setRole(UserRole.USER);
-        userEntity3.setBlocked(true);
-
-        userEntity3 = userRepository.save(userEntity3);
-
-        Assertions.assertNull(userEntity3);
+        Assertions.assertNotEquals(0, savedUserEntity.getId());
+        Assertions.assertEquals(userEntity, savedUserEntity);
     }
 
     @Test

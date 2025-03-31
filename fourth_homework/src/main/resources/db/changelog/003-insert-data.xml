@@ -24,7 +24,7 @@
             <column name="email" value="admin@example.com"/>
             <column name="password" value="p"/>
             <column name="is_blocked" value="0"/>
-            <column name="role_id" value="1"/>
+            <column name="role_id" value="0"/>
         </insert>
     </changeSet>
 

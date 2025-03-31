@@ -1,8 +1,8 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
-import org.example.db.ConnectionClass;
 import org.example.model.TransactionCategoryEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
@@ -11,6 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 
 class TransactionCategoryRepositoryTest {
@@ -21,17 +22,15 @@ class TransactionCategoryRepositoryTest {
     AnnotationConfigApplicationContext context;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws SQLException, LiquibaseException {
         container.start();
 
-        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
-
-        ConnectionClass.nullConnection();
     }
 
     @BeforeEach
@@ -69,26 +68,18 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity = categoryRepository.save(categoryEntity);
 
+        TransactionCategoryEntity savedCategoryEntity = categoryRepository.save(categoryEntity);
+
+        Assertions.assertNotEquals(0, savedCategoryEntity.getId());
+        Assertions.assertEquals(categoryEntity, savedCategoryEntity);
+
         TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
 
-        categoryEntity2.setName("t");
+        categoryEntity2.setName("t2");
 
         categoryEntity2 = categoryRepository.save(categoryEntity2);
 
-        Assertions.assertEquals(categoryEntity, categoryEntity2);
-        Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
-
-        categoryEntity.setName("t0");
-
         Assertions.assertNotEquals(categoryEntity, categoryEntity2);
-
-        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity();
-
-        categoryEntity3.setName("t3");
-
-        categoryEntity3 = categoryRepository.save(categoryEntity3);
-
-        Assertions.assertNotEquals(categoryEntity, categoryEntity3);
     }
 
     @Test
@@ -100,28 +91,19 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity = categoryRepository.save(categoryEntity);
 
+        TransactionCategoryEntity savedCategoryEntity = categoryRepository.save(categoryEntity);
+
+        Assertions.assertNotEquals(0, savedCategoryEntity.getId());
+        Assertions.assertEquals(categoryEntity, savedCategoryEntity);
+
         TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
-        categoryEntity2.setName("t");
-        categoryEntity2.setNeededSum(BigDecimal.valueOf(10.00));
+        categoryEntity2.setName("t3");
+        categoryEntity2.setNeededSum(BigDecimal.valueOf(30.3));
 
         categoryEntity2 = categoryRepository.save(categoryEntity2);
 
-        Assertions.assertEquals(categoryEntity, categoryEntity2);
-        Assertions.assertEquals(categoryEntity.getId(), categoryEntity2.getId());
-
-        categoryEntity.setName("t0");
-
         Assertions.assertNotEquals(categoryEntity, categoryEntity2);
-
-        TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
-
-        categoryEntity3.setName("t3");
-        categoryEntity2.setNeededSum(BigDecimal.valueOf(30.3));
-
-        categoryEntity3 = categoryRepository.save(categoryEntity3);
-
-        Assertions.assertNotEquals(categoryEntity, categoryEntity3);
     }
 
     @Test
@@ -225,7 +207,7 @@ class TransactionCategoryRepositoryTest {
         categoryEntity4.setName("t4");
         categoryEntity4.setNeededSum(BigDecimal.valueOf(40.4));
 
-        List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity, categoryEntity2, categoryEntity3, categoryEntity4);
+        List<TransactionCategoryEntity> categoryEntities = List.of(categoryEntity2, categoryEntity4);
 
 
         List<TransactionCategoryEntity> transactionCategoryEntitiesReturned;
@@ -283,7 +265,7 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity = categoryRepository.save(categoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId(), 0);
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(categoryEntity.getId(), null);
 
         categoryEntity2.setName("t2");
 
@@ -302,9 +284,10 @@ class TransactionCategoryRepositoryTest {
 
         categoryEntity.setName("t");
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, categoryEntity.getId());
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
 
         categoryEntity2.setName("t2");
+        categoryEntity2.setNeededSum(BigDecimal.valueOf(203));
 
         TransactionCategoryEntity categoryEntity3 = new TransactionCategoryEntity();
 

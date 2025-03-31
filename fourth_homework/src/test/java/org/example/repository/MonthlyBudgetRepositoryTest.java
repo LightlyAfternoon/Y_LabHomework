@@ -1,8 +1,8 @@
 package org.example.repository;
 
+import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
-import org.example.db.ConnectionClass;
 import org.example.model.*;
 import org.junit.jupiter.api.*;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -10,6 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
 class MonthlyBudgetRepositoryTest {
@@ -20,17 +21,15 @@ class MonthlyBudgetRepositoryTest {
     AnnotationConfigApplicationContext context;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws SQLException, LiquibaseException {
         container.start();
 
-        ConnectionClass.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
     }
 
     @AfterAll
     static void afterAll() {
         container.stop();
-
-        ConnectionClass.nullConnection();
     }
 
     @BeforeEach
@@ -67,28 +66,18 @@ class MonthlyBudgetRepositoryTest {
 
         monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
 
-        monthlyBudgetEntity = monthlyBudgetRepository.save(monthlyBudgetEntity);
+        MonthlyBudgetEntity savedMonthlyBudgetEntity = monthlyBudgetRepository.save(monthlyBudgetEntity);
+
+        Assertions.assertNotEquals(0, savedMonthlyBudgetEntity.getId());
+        Assertions.assertEquals(monthlyBudgetEntity, savedMonthlyBudgetEntity);
 
         MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
 
-        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(10.10));
+        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(10.0));
 
         monthlyBudgetEntity2 = monthlyBudgetRepository.save(monthlyBudgetEntity2);
 
-        Assertions.assertEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
-        Assertions.assertEquals(monthlyBudgetEntity.getId(), monthlyBudgetEntity2.getId());
-
-        monthlyBudgetEntity.setSum(BigDecimal.valueOf(20.0));
-
         Assertions.assertNotEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
-
-        MonthlyBudgetEntity monthlyBudgetEntity3 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
-
-        monthlyBudgetEntity3.setSum(BigDecimal.valueOf(10.0));
-
-        monthlyBudgetEntity3 = monthlyBudgetRepository.save(monthlyBudgetEntity3);
-
-        Assertions.assertNotEquals(monthlyBudgetEntity, monthlyBudgetEntity3);
     }
 
     @Test

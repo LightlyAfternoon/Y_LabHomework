@@ -11,7 +11,7 @@ public class TransactionCategoryDTO {
     /**
      * Fields user and neededSum are meant for users goals
      */
-    private int userId;
+    private Integer userId;
 
     private TransactionCategoryDTO(TransactionCategoryBuilder builder) {
         this.id = builder.id;
@@ -56,7 +56,7 @@ public class TransactionCategoryDTO {
     public TransactionCategoryDTO() {}
 
     @Default
-    public TransactionCategoryDTO(int id, int userId) {
+    public TransactionCategoryDTO(int id, Integer userId) {
         this.id = id;
         this.userId = userId;
     }
@@ -100,7 +100,8 @@ public class TransactionCategoryDTO {
         TransactionCategoryDTO transactionCategory = (TransactionCategoryDTO) obj;
 
         return this.name.equals(transactionCategory.name) &&
-                ((this.userId == 0 && transactionCategory.userId == 0) || (this.userId != 0 && this.userId == transactionCategory.userId)) &&
+                (((this.userId == null || this.userId == 0) && (transactionCategory.userId == null || transactionCategory.userId == 0))
+                        || (this.userId != null && this.userId != 0 && this.userId.equals(transactionCategory.userId))) &&
                 ((this.neededSum == null && transactionCategory.neededSum == null) || (this.neededSum != null && this.neededSum.compareTo(transactionCategory.neededSum) == 0));
     }
 
@@ -116,7 +117,7 @@ public class TransactionCategoryDTO {
 
     @Override
     public String toString() {
-        return this.getName() + " id: " + this.getId() + (this.getUserId() != 0 ? " id пользователя: " + this.getUserId() : "");
+        return this.getName() + " id: " + this.getId() + (userId != null && this.getUserId() != 0 ? " id пользователя: " + this.getUserId() : "");
     }
 
     public static boolean isValid(TransactionCategoryDTO transactionCategoryDTO) {

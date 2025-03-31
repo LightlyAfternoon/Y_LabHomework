@@ -26,9 +26,9 @@ public class TransactionEntity {
      * Field category is meant for a category or a goal of money spent
      */
     @Column(name = "category_id")
-    private int categoryId;
+    private Integer categoryId;
     @Column(name = "user_id")
-    private final int userId;
+    private int userId;
 
     private TransactionEntity(TransactionBuilder builder) {
         this.id = builder.id;
@@ -105,6 +105,8 @@ public class TransactionEntity {
         this.userId = userId;
     }
 
+    public TransactionEntity() {}
+
     public int getId() {
         return id;
     }
@@ -174,7 +176,8 @@ public class TransactionEntity {
         TransactionEntity transaction = (TransactionEntity) obj;
 
         return this.sum.compareTo(transaction.sum) == 0 &&
-                ((this.categoryId == 0 && transaction.categoryId == 0) || (this.categoryId != 0 && this.categoryId == transaction.categoryId)) &&
+                (((this.categoryId == null || this.categoryId == 0) && (transaction.categoryId == null || transaction.categoryId == 0))
+                        || ((this.categoryId != null && this.categoryId != 0) && this.categoryId.equals(transaction.categoryId))) &&
                 this.date.equals(transaction.date) &&
                 ((this.description == null && transaction.description == null) || (this.description != null && this.description.equals(transaction.description))) &&
                 this.userId == transaction.userId;
