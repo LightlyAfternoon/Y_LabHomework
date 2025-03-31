@@ -2,11 +2,7 @@ package org.example;
 
 import org.example.command.CommandClass;
 import org.example.command.HttpRequestsClass;
-import org.example.model.*;
-import org.example.repository.MonthlyBudgetRepository;
-import org.example.repository.TransactionCategoryRepository;
-import org.example.repository.TransactionRepository;
-import org.example.repository.UserRepository;
+import org.example.model.UserRole;
 
 import java.util.Scanner;
 
@@ -21,10 +17,11 @@ public class App
         CommandClass commandClass = new CommandClass(new HttpRequestsClass());
 
         while (true) {
-            System.out.println("Здравствуйте! Хотите зарегистрироваться или войти в аккаунт? \n" +
-                    "/login" + " - войти в аккаунт\n" +
-                    "/register - зарегистрироваться\n" +
-                    "/exit - выход из приложения");
+            System.out.println("""
+                    Здравствуйте! Хотите зарегистрироваться или войти в аккаунт?\s
+                    /login - войти в аккаунт
+                    /register - зарегистрироваться
+                    /exit - выход из приложения""");
 
             if (scanner.hasNext()) {
                 command = scanner.next();

@@ -33,8 +33,8 @@ public class TransactionCategoryController {
         }
     }
 
-    @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategoriesByUserId(@RequestAttribute(name = "user") int userId) {
+    @GetMapping(value = {"", "/"}, params = {"user"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategoriesByUserId(@RequestParam(name = "user") int userId) {
         List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAllGoalsByUserId(userId);
 
         if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
@@ -44,8 +44,8 @@ public class TransactionCategoryController {
         }
     }
 
-    @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TransactionCategoryDTO> getAllTransactionCategoriesByName(@RequestAttribute(name = "name") String name) {
+    @GetMapping(value = {"", "/"}, params = {"user", "name"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<TransactionCategoryDTO> getAllTransactionCategoriesByName(@RequestParam(name = "name") String name) {
         TransactionCategoryDTO transactionCategoryDTO = transactionCategoryService.findByName(name);
 
         if (transactionCategoryDTO != null) {

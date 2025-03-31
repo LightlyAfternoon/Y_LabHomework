@@ -33,9 +33,9 @@ public class MonthlyBudgetController {
         }
     }
 
-    @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"", "/"}, params = {"date", "user"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MonthlyBudgetDTO> getAllMonthlyBudgetsByDateAndUserId(
-            @RequestAttribute(name = "date") Date date, @RequestAttribute(name = "user") int userId) {
+            @RequestParam(name = "date") Date date, @RequestParam(name = "user") int userId) {
         MonthlyBudgetDTO monthlyBudgetDTO = monthlyBudgetService.findByDateAndUserId(date, userId);
 
         if (monthlyBudgetDTO != null) {

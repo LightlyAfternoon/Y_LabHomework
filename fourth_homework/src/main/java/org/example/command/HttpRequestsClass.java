@@ -32,6 +32,7 @@ public class HttpRequestsClass {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 LogInDTO logInDTO = new LogInDTO.LogInBuilder(email, password).build();
@@ -75,6 +76,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -112,6 +114,7 @@ public class HttpRequestsClass {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 UserDTO userDTO = new UserDTO.UserBuilder(email, password, name).build();
@@ -160,6 +163,7 @@ public class HttpRequestsClass {
             } else {
                 httpURLConnection.setRequestMethod("PUT");
             }
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 MonthlyBudgetDTO budgetDTO = new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), budget).build();
@@ -206,6 +210,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -242,6 +247,7 @@ public class HttpRequestsClass {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 TransactionCategoryDTO goalDTO = new TransactionCategoryDTO.TransactionCategoryBuilder(name).
@@ -287,6 +293,7 @@ public class HttpRequestsClass {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 TransactionDTO transactionDTO = new TransactionDTO.TransactionBuilder(sum, CurrentUser.currentUser.getId()).
@@ -350,6 +357,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -386,6 +394,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -422,6 +431,7 @@ public class HttpRequestsClass {
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("PUT");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
                 TransactionDTO transactionDTO = new TransactionDTO.TransactionBuilder(sum, CurrentUser.currentUser.getId()).
@@ -449,6 +459,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("DELETE");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
             httpURLConnection.disconnect();
@@ -470,6 +481,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -506,6 +518,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -542,6 +555,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 
@@ -578,6 +592,7 @@ public class HttpRequestsClass {
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             httpURLConnection.connect();
 

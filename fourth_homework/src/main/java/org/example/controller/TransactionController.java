@@ -34,7 +34,7 @@ public class TransactionController {
         }
     }
 
-    @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"", "/"}, params = {"date", "category", "type", "user"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactionsByDateAndCategoryAndTypeAndUserId(
             @RequestParam(name = "date", required = false) Date date, @RequestParam(name = "category", required = false) int categoryId,
             @RequestParam(name = "type", required = false) String type, @RequestParam(name = "user", required = false) int userId) {
