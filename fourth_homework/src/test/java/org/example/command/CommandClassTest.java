@@ -14,6 +14,7 @@ import org.example.service.TransactionService;
 import org.example.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+@DisplayName("Tests of class with methods for console input")
 class CommandClassTest {
     UserService userService;
     MonthlyBudgetService monthlyBudgetService;
@@ -60,6 +62,7 @@ class CommandClassTest {
                 id(CurrentUser.currentUser.getId()).role(CurrentUser.currentUser.getRole()).isBlocked(CurrentUser.currentUser.isBlocked()).build();
     }
 
+    @DisplayName("Test of the method for getting logged in user by email and password")
     @Test
     void getLoggedInUserRoleTest() {
         String emailAndPassword = "t\nt";
@@ -90,6 +93,7 @@ class CommandClassTest {
         Assertions.assertNull(commandClass.getLoggedInUserRole());
     }
 
+    @DisplayName("Test of the method for getting all users")
     @Test
     void getAllUsersTest() {
         List<UserDTO> userDTOS = List.of(userDTO);
@@ -105,6 +109,7 @@ class CommandClassTest {
         Assertions.assertEquals(output.toString(), commandClass.getAllUsers());
     }
 
+    @DisplayName("Test of the method for getting registered user")
     @Test
     void getRegisteredUserTest() {
         String emailAndPassword = "t\nt\nt";
@@ -140,6 +145,7 @@ class CommandClassTest {
         Assertions.assertEquals(userDTO2, commandClass.getRegisteredUser());
     }
 
+    @DisplayName("Test of the method for adding monthly budget")
     @Test
     void addBudgetTest() {
         String budget = "10,2";
@@ -176,6 +182,7 @@ class CommandClassTest {
         Assertions.assertEquals(id2, id);
     }
 
+    @DisplayName("Test of the method for adding goal")
     @Test
     void addGoalTest() {
         String goal = "t\n10,2";
@@ -222,6 +229,7 @@ class CommandClassTest {
         Assertions.assertEquals(id2, id);
     }
 
+    @DisplayName("Test of the method for adding transaction")
     @Test
     void addTransactionTest() throws ParseException {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -289,6 +297,7 @@ class CommandClassTest {
         Assertions.assertEquals(id2, id);
     }
 
+    @DisplayName("Test of the method for deleting account of current user")
     @Test
     void deleteAccountTest() {
         Mockito.when(userService.delete(CurrentUser.currentUser.getId())).thenReturn(true);
@@ -297,6 +306,7 @@ class CommandClassTest {
         Assertions.assertTrue(commandClass.deleteAccount());
     }
 
+    @DisplayName("Test of the method for getting transactions of current user")
     @Test
     void getTransactionsTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
@@ -325,6 +335,7 @@ class CommandClassTest {
         Assertions.assertEquals(output.toString(), commandClass.getTransactions());
     }
 
+    @DisplayName("Test of the method for filtering transactions")
     @Test
     void filterTransactionsTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO(1, null);
@@ -429,6 +440,7 @@ class CommandClassTest {
         Assertions.assertEquals(output.toString(), outputReturned);
     }
 
+    @DisplayName("Test of the method for editing transaction")
     @Test
     void editTransactionTest() {
         MonthlyBudgetDTO budgetDTO = new MonthlyBudgetDTO(CurrentUser.currentUser.getId());
@@ -512,6 +524,7 @@ class CommandClassTest {
         Assertions.assertFalse(commandClass.editTransaction());
     }
 
+    @DisplayName("Test of the method for deleting transaction")
     @Test
     void deleteTransactionTest() {
         TransactionCategoryEntity category = new TransactionCategoryEntity();
@@ -555,6 +568,7 @@ class CommandClassTest {
         Assertions.assertFalse(commandClass.deleteTransaction());
     }
 
+    @DisplayName("Test of the method for getting all goals of current user")
     @Test
     void getAllUserGoalsTest() {
         String goal = "t\n10,2";
@@ -596,6 +610,7 @@ class CommandClassTest {
         Assertions.assertEquals(output.toString(), outputReturned);
     }
 
+    @DisplayName("Test of the method for getting current balance (sum of all transactions positive sum) of current user")
     @Test
     void getCurrentBalanceTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -653,6 +668,7 @@ class CommandClassTest {
         Assertions.assertEquals(BigDecimal.valueOf(42.7), commandClass.getCurrentBalance());
     }
 
+    @DisplayName("Test of the method for getting income for period of current user")
     @Test
     void getIncomeForPeriodTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO(1, null);
@@ -733,6 +749,7 @@ class CommandClassTest {
         Assertions.assertEquals(BigDecimal.valueOf(10.2), commandClass.getIncomeForPeriod(from, to));
     }
 
+    @DisplayName("Test of the method for getting expense for period of current user")
     @Test
     void getExpenseForPeriodTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO(1, null);
@@ -811,6 +828,7 @@ class CommandClassTest {
         Assertions.assertEquals(BigDecimal.valueOf(32.5), commandClass.getExpenseForPeriod(from, to));
     }
 
+    @DisplayName("Test of the method for getting expense of current user for category")
     @Test
     void getCategoryExpensesTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO(1, null);
