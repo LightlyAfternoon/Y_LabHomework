@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
+@DisplayName("Tests of transaction category repository methods")
 class TransactionCategoryRepositoryTest {
     UserEntity userEntity;
     TransactionCategoryRepository categoryRepository;
@@ -60,6 +61,7 @@ class TransactionCategoryRepositoryTest {
         CurrentUser.currentUser = userEntity;
     }
 
+    @DisplayName("Test of the method for adding category")
     @Test
     void addTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -82,6 +84,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(categoryEntity, categoryEntity2);
     }
 
+    @DisplayName("Test of the method for adding goal")
     @Test
     void addGoalTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
@@ -106,6 +109,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(categoryEntity, categoryEntity2);
     }
 
+    @DisplayName("Test of the method for finding category by id")
     @Test
     void findByIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -123,6 +127,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNull(categoryRepository.findById(10));
     }
 
+    @DisplayName("Test of the method for finding category by name")
     @Test
     void findByNameTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -144,6 +149,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNull(categoryRepository.findByName("t2"));
     }
 
+    @DisplayName("Test of the method for finding all categories")
     @Test
     void findAllTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -187,6 +193,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all categories and goals with user id")
     @Test
     void findCommonCategoriesOrGoalsByUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -222,6 +229,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all goals with user id")
     @Test
     void findAllGoalsByUserIdTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -257,6 +265,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating category")
     @Test
     void updateTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
@@ -278,6 +287,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(categoryRepository.findById(categoryEntity.getId()), categoryEntity2);
     }
 
+    @DisplayName("Test of the method for deleting category")
     @Test
     void deleteTest() {
         TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();

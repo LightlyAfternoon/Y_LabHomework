@@ -13,6 +13,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
+@DisplayName("Tests of monthly budget repository methods")
 class MonthlyBudgetRepositoryTest {
     UserEntity userEntity;
     MonthlyBudgetRepository monthlyBudgetRepository;
@@ -59,6 +60,7 @@ class MonthlyBudgetRepositoryTest {
         CurrentUser.currentUser = userEntity;
     }
 
+    @DisplayName("Test of the method for adding monthly budget")
     @Test
     void addTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -80,6 +82,7 @@ class MonthlyBudgetRepositoryTest {
         Assertions.assertNotEquals(monthlyBudgetEntity, monthlyBudgetEntity2);
     }
 
+    @DisplayName("Test of the method for finding monthly budget by id")
     @Test
     void findByIdTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -98,6 +101,7 @@ class MonthlyBudgetRepositoryTest {
         Assertions.assertNull(monthlyBudgetRepository.findById(20));
     }
 
+    @DisplayName("Test of the method for finding monthly budget by date and user id")
     @Test
     void findByDateAndUserIdTest() {
         Date date = Date.valueOf("2000-01-01");
@@ -122,6 +126,7 @@ class MonthlyBudgetRepositoryTest {
         Assertions.assertNull(monthlyBudgetRepository.findByDateAndUserId(Date.valueOf("2001-01-01"), CurrentUser.currentUser.getId()));
     }
 
+    @DisplayName("Test of the method for finding all monthly budgets")
     @Test
     void findAllTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -166,6 +171,7 @@ class MonthlyBudgetRepositoryTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating monthly budget")
     @Test
     void updateTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -188,6 +194,7 @@ class MonthlyBudgetRepositoryTest {
         Assertions.assertNotEquals(monthlyBudgetRepository.findById(monthlyBudgetEntity.getId()), monthlyBudgetEntity2);
     }
 
+    @DisplayName("Test of the method for deleting monthly budget")
     @Test
     void deleteTest() {
         MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId());

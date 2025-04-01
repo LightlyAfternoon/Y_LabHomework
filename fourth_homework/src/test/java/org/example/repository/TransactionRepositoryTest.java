@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+@DisplayName("Tests of transaction repository methods")
 class TransactionRepositoryTest {
     UserEntity userEntity;
     TransactionCategoryEntity categoryEntity;
@@ -78,6 +79,7 @@ class TransactionRepositoryTest {
         categoryEntity = categoryRepository.save(categoryEntity);
     }
 
+    @DisplayName("Test of the method for adding transaction")
     @Test
     void addTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -111,6 +113,7 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionEntity, transactionEntity2);
     }
 
+    @DisplayName("Test of the method for finding transaction by id")
     @Test
     void findByIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -138,6 +141,7 @@ class TransactionRepositoryTest {
         Assertions.assertNull(transactionRepository.findById(10));
     }
 
+    @DisplayName("Test of the method for finding all transactions")
     @Test
     void findAllTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -204,6 +208,7 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all transactions by user id")
     @Test
     void findAllByUserIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -304,6 +309,7 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all transactions by user id")
     @Test
     void findAllByDateAndCategoryIdAndTypeAndUserIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -392,6 +398,7 @@ class TransactionRepositoryTest {
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating transaction")
     @Test
     void updateTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
@@ -431,6 +438,7 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionRepository.findById(transactionEntity.getId()), transactionEntity2);
     }
 
+    @DisplayName("Test of the method for deleting transaction")
     @Test
     void deleteTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());

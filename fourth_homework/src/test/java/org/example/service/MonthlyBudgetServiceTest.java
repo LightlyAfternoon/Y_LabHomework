@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@DisplayName("Tests of monthly budget service methods")
 class MonthlyBudgetServiceTest {
     MonthlyBudgetService monthlyBudgetService;
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
@@ -64,6 +65,7 @@ class MonthlyBudgetServiceTest {
         CurrentUser.currentUser = user;
     }
 
+    @DisplayName("Test of the method for adding monthly budget")
     @Test
     void addTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -85,6 +87,7 @@ class MonthlyBudgetServiceTest {
         Assertions.assertNotEquals(monthlyBudgetDTO, monthlyBudgetDTO3);
     }
 
+    @DisplayName("Test of the method for finding monthly budget by id")
     @Test
     void findByIdTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -103,6 +106,7 @@ class MonthlyBudgetServiceTest {
         Assertions.assertNull(monthlyBudgetService.findById(20));
     }
 
+    @DisplayName("Test of the method for finding monthly budget by date and user id")
     @Test
     void findByDateAndUserIdTest() {
         Date date = Date.valueOf("2000-01-01");
@@ -127,6 +131,7 @@ class MonthlyBudgetServiceTest {
         Assertions.assertNull(monthlyBudgetService.findByDateAndUserId(Date.valueOf("2001-01-01"), CurrentUser.currentUser.getId()));
     }
 
+    @DisplayName("Test of the method for finding all monthly budgets")
     @Test
     void findAllTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -172,6 +177,7 @@ class MonthlyBudgetServiceTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating monthly budget")
     @Test
     void updateTest() {
         Date date = new Date(System.currentTimeMillis());
@@ -194,6 +200,7 @@ class MonthlyBudgetServiceTest {
         Assertions.assertNotEquals(monthlyBudgetService.findById(monthlyBudgetDTO.getId()), monthlyBudgetDTO2);
     }
 
+    @DisplayName("Test of the method for deleting monthly budget")
     @Test
     void deleteTest() {
         MonthlyBudgetDTO monthlyBudgetDTO = new MonthlyBudgetDTO(CurrentUser.currentUser.getId());

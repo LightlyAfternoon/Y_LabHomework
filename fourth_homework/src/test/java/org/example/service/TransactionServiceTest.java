@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+@DisplayName("Tests of transaction service methods")
 class TransactionServiceTest {
     UserService userService;
     TransactionCategoryEntity category;
@@ -81,6 +82,7 @@ class TransactionServiceTest {
         category = categoryRepository.save(category);
     }
 
+    @DisplayName("Test of the method for adding transaction")
     @Test
     void addTest() throws ParseException {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
@@ -117,6 +119,7 @@ class TransactionServiceTest {
         Assertions.assertNotEquals(transactionDTO, transactionDTO3);
     }
 
+    @DisplayName("Test of the method for finding transaction by id")
     @Test
     void findByIdTest() throws ParseException {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
@@ -139,6 +142,7 @@ class TransactionServiceTest {
         Assertions.assertNull(transactionService.findById(10));
     }
 
+    @DisplayName("Test of the method for finding all transactions")
     @Test
     void findAllTest() throws ParseException {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
@@ -197,8 +201,9 @@ class TransactionServiceTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all transactions by user id")
     @Test
-    void findAllWithUserTest() {
+    void findAllByUserIdTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
@@ -294,8 +299,9 @@ class TransactionServiceTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all transactions by user id")
     @Test
-    void findAllWithDateAndCategoryIdAndTypeAndUserIdTest() {
+    void findAllByDateAndCategoryIdAndTypeAndUserIdTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
@@ -378,6 +384,7 @@ class TransactionServiceTest {
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating transaction")
     @Test
     void updateTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
@@ -417,6 +424,7 @@ class TransactionServiceTest {
         Assertions.assertNotEquals(transactionService.findById(transactionDTO.getId()), transactionDTO2);
     }
 
+    @DisplayName("Test of the method for deleting transaction")
     @Test
     void deleteTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());

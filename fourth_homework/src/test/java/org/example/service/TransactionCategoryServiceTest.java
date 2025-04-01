@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
+@DisplayName("Tests of transaction category service methods")
 class TransactionCategoryServiceTest {
     TransactionCategoryService categoryService;
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
@@ -59,6 +60,7 @@ class TransactionCategoryServiceTest {
         CurrentUser.currentUser = user;
     }
 
+    @DisplayName("Test of the method for adding category")
     @Test
     void addTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -81,6 +83,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertNotEquals(categoryDTO, categoryDTO3);
     }
 
+    @DisplayName("Test of the method for adding goal")
     @Test
     void addGoalTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
@@ -102,6 +105,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertNotEquals(categoryDTO, categoryDTO3);
     }
 
+    @DisplayName("Test of the method for finding category by id")
     @Test
     void findByIdTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -119,6 +123,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertNull(categoryService.findById(10));
     }
 
+    @DisplayName("Test of the method for finding category by name")
     @Test
     void findByNameTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -140,6 +145,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertNull(categoryService.findByName("t2"));
     }
 
+    @DisplayName("Test of the method for finding all categories")
     @Test
     void findAllTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -183,8 +189,9 @@ class TransactionCategoryServiceTest {
         Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all categories and goals with user id")
     @Test
-    void findCommonCategoriesOrGoalsWithUserIdTest() {
+    void findCommonCategoriesOrGoalsByUserIdTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
 
         categoryDTO.setName("t");
@@ -217,6 +224,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding all goals with user id")
     @Test
     void findAllGoalsWithUserIdTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -252,6 +260,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating category")
     @Test
     void updateTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
@@ -273,6 +282,7 @@ class TransactionCategoryServiceTest {
         Assertions.assertNotEquals(categoryService.findById(categoryDTO.getId()), categoryDTO2);
     }
 
+    @DisplayName("Test of the method for deleting category")
     @Test
     void deleteTest() {
         TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();

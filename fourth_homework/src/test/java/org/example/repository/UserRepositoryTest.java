@@ -11,6 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.sql.SQLException;
 import java.util.List;
 
+@DisplayName("Tests of user repository methods")
 class UserRepositoryTest {
     UserRepository userRepository;
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
@@ -38,6 +39,7 @@ class UserRepositoryTest {
         }
     }
 
+    @DisplayName("Test of the method for adding user")
     @Test
     void addTest() {
         UserEntity userEntity = new UserEntity();
@@ -67,6 +69,7 @@ class UserRepositoryTest {
         Assertions.assertEquals(userEntity, savedUserEntity);
     }
 
+    @DisplayName("Test of the method for finding user by id")
     @Test
     void findByIdTest() {
         UserEntity userEntity = new UserEntity();
@@ -88,6 +91,7 @@ class UserRepositoryTest {
         Assertions.assertNull(userRepository.findById(50));
     }
 
+    @DisplayName("Test of the method for finding all users")
     @Test
     void findAllTest() {
         UserEntity userEntity = new UserEntity();
@@ -147,6 +151,7 @@ class UserRepositoryTest {
         Assertions.assertNotEquals(userEntities, userEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for updating user")
     @Test
     void updateTest() {
         UserEntity userEntity = new UserEntity();
@@ -176,6 +181,7 @@ class UserRepositoryTest {
         Assertions.assertNotEquals(userRepository.findById(userEntity.getId()), userEntity2);
     }
 
+    @DisplayName("Test of the method for deleting user")
     @Test
     void deleteTest() {
         UserEntity userEntity = new UserEntity();
@@ -225,6 +231,7 @@ class UserRepositoryTest {
         Assertions.assertEquals(userEntities, userEntitiesReturned);
     }
 
+    @DisplayName("Test of the method for finding user by email and password")
     @Test
     void findByEmailAndPasswordTest() {
         UserEntity userEntity = new UserEntity();
