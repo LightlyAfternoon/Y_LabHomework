@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="insert-admin-role" author="Afternoon">
+        <insert tableName="role" schemaName="service">
+            <column name="name" value="Admin"/>
+        </insert>
+
+    </changeSet>
+
+    <changeSet id="insert-user-role" author="Afternoon">
+        <insert tableName="role" schemaName="service">
+            <column name="name" value="User"/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="insert-user" author="Afternoon">
+        <insert tableName="user" schemaName="service">
+            <column name="name" value="Admin"/>
+            <column name="email" value="admin@example.com"/>
+            <column name="password" value="p"/>
+            <column name="is_blocked" value="0"/>
+            <column name="role_id" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-transaction_category" author="Afternoon">
+        <insert tableName="transaction_category" schemaName="not_public">
+            <column name="name" value="Test"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
