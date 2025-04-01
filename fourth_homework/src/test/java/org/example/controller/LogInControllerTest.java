@@ -5,12 +5,14 @@ import org.example.service.UserService;
 import org.example.controller.dto.LogInDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 
+@DisplayName("Tests of logging in controller methods")
 class LogInControllerTest {
     UserService userService;
     LogInController logInController;
@@ -23,8 +25,9 @@ class LogInControllerTest {
         objectMapper = new ObjectMapper();
     }
 
+    @DisplayName("Test of the method for finding logged in user")
     @Test
-    void doPostTest() throws IOException {
+    void getLoggedInUserTest() throws IOException {
         UserDTO user = new UserDTO.UserBuilder("t", "t", "t").build();
         LogInDTO logInDTO = new LogInDTO.LogInBuilder("t", "t").build();
 

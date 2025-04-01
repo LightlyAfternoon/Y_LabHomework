@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import org.example.CurrentUser;
 import org.example.annotation.Loggable;
 import org.example.controller.dto.TransactionCategoryDTO;
 import org.example.service.TransactionCategoryService;
@@ -56,7 +55,7 @@ public class TransactionCategoryController {
     }
 
     @GetMapping(value = {"", "/"}, params = {"user", "name"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TransactionCategoryDTO> getAllTransactionCategoriesByName(@RequestParam(name = "name") String name) {
+    public ResponseEntity<TransactionCategoryDTO> getTransactionCategoryByName(@RequestParam(name = "name") String name) {
         TransactionCategoryDTO transactionCategoryDTO = transactionCategoryService.findByName(name);
 
         if (transactionCategoryDTO != null) {

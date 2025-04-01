@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import org.example.CurrentUser;
 import org.example.annotation.Loggable;
 import org.example.controller.dto.TransactionDTO;
 import org.example.service.TransactionService;

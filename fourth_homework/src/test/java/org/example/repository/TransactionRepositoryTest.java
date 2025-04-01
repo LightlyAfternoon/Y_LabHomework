@@ -309,7 +309,7 @@ class TransactionRepositoryTest {
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
-    @DisplayName("Test of the method for finding all transactions by user id")
+    @DisplayName("Test of the method for finding all transactions by date, category id, sum type (positive or negative) and user id")
     @Test
     void findAllByDateAndCategoryIdAndTypeAndUserIdTest() {
         TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
