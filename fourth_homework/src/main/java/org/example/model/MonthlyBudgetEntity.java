@@ -1,6 +1,8 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
@@ -8,6 +10,7 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+@Getter
 @Entity
 @Table(name = "monthly_budget", schema = "not_public")
 public class MonthlyBudgetEntity {
@@ -18,6 +21,7 @@ public class MonthlyBudgetEntity {
     @Column(name = "user_id")
     private int userId;
     private Date date;
+    @Setter
     private BigDecimal sum;
 
     @Transient
@@ -104,26 +108,6 @@ public class MonthlyBudgetEntity {
     }
 
     public MonthlyBudgetEntity() {}
-
-    public int getId() {
-        return id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public BigDecimal getSum() {
-        return sum;
-    }
-
-    public void setSum(BigDecimal sum) {
-        this.sum = sum;
-    }
 
     @Override
     public boolean equals(Object obj) {

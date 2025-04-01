@@ -1,5 +1,8 @@
 package org.example.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
@@ -7,12 +10,15 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+@Getter
 public class MonthlyBudgetDTO {
     private int id;
     private int userId;
     private Date date;
+    @Setter
     private BigDecimal sum;
 
+    @JsonIgnore
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
 
     private MonthlyBudgetDTO(MonthlyBudgetBuilder builder) {
@@ -96,26 +102,6 @@ public class MonthlyBudgetDTO {
     }
 
     public MonthlyBudgetDTO() {}
-
-    public int getId() {
-        return id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public BigDecimal getSum() {
-        return sum;
-    }
-
-    public void setSum(BigDecimal sum) {
-        this.sum = sum;
-    }
 
     @Override
     public boolean equals(Object obj) {

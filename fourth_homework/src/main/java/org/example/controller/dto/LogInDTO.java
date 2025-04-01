@@ -1,5 +1,10 @@
 package org.example.controller.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class LogInDTO {
     private String email;
     private String password;
@@ -24,22 +29,6 @@ public class LogInDTO {
     }
 
     public LogInDTO() {}
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     @Override
     public boolean equals(Object obj) {

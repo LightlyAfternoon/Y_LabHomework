@@ -1,10 +1,13 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
 
+@Getter
 @Entity
 @Table(name = "transaction_category", schema = "not_public")
 public class TransactionCategoryEntity {
@@ -12,7 +15,9 @@ public class TransactionCategoryEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transaction_category_id")
     @SequenceGenerator(name = "seq_transaction_category_id", allocationSize = 1)
     private int id;
+    @Setter
     private String name;
+    @Setter
     @Column(name = "needed_sum")
     private BigDecimal neededSum;
     /**
@@ -67,30 +72,6 @@ public class TransactionCategoryEntity {
     public TransactionCategoryEntity(int id, Integer userId) {
         this.id = id;
         this.userId = userId;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public BigDecimal getNeededSum() {
-        return neededSum;
-    }
-
-    public void setNeededSum(BigDecimal neededSum) {
-        this.neededSum = neededSum;
     }
 
     @Override

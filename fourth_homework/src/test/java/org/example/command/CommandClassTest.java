@@ -57,7 +57,7 @@ class CommandClassTest {
         CurrentUser.currentUser = user;
 
         userDTO = new UserDTO.UserBuilder(CurrentUser.currentUser.getEmail(), CurrentUser.currentUser.getPassword(), CurrentUser.currentUser.getName()).
-                id(CurrentUser.currentUser.getId()).role(CurrentUser.currentUser.getRole()).isBlocked(CurrentUser.currentUser.getBlocked()).build();
+                id(CurrentUser.currentUser.getId()).role(CurrentUser.currentUser.getRole()).isBlocked(CurrentUser.currentUser.isBlocked()).build();
     }
 
     @Test

@@ -29,6 +29,7 @@
     <lombok.version>1.18.36</lombok.version>
     <jakarta.persictence.version>3.2.0</jakarta.persictence.version>
     <hibernate.version>7.0.0.Beta5</hibernate.version>
+    <lombok-mapstruct.version>0.2.0</lombok-mapstruct.version>
   </properties>
 
   <dependencies>
@@ -55,6 +56,7 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -180,12 +182,23 @@
           <verbose>true</verbose>
           <Xlint>ignore</Xlint>
           <encoding>UTF-8</encoding>
+          <forceAjcCompile>true</forceAjcCompile>
+          <weaveDirectories>
+            <weaveDirectory>${project.build.outputDirectory}</weaveDirectory>
+          </weaveDirectories>
         </configuration>
         <executions>
           <execution>
+            <id>copy-only-aspect-files</id>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
+            <configuration>
+              <includes>
+                <include>**/*.aj</include>
+              </includes>
+            </configuration>
           </execution>
         </executions>
       </plugin>

@@ -41,7 +41,8 @@ class TransactionCategoryControllerTest {
         TransactionCategoryDTO transactionCategory2 = new TransactionCategoryDTO.TransactionCategoryBuilder("t2").
                 id(2).neededSum(BigDecimal.valueOf(20)).userId(1).build();
 
-        Mockito.when(transactionCategoryService.findCommonCategoriesOrGoalsByUserId(1)).thenReturn(List.of(transactionCategory, transactionCategory2));
+        Mockito.when(transactionCategoryService.findAll()).thenReturn(List.of(transactionCategory, transactionCategory2));
+        Mockito.when(transactionCategoryService.findCommonCategoriesOrGoalsByUserId(1)).thenReturn(List.of(transactionCategory2));
 
         Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transactionCategory, transactionCategory2)),
                 objectMapper.writeValueAsString(transactionCategoryController.getAllTransactionCategories().getBody()));
@@ -49,7 +50,7 @@ class TransactionCategoryControllerTest {
         Mockito.when(transactionCategoryService.findAllGoalsByUserId(1)).thenReturn(List.of(transactionCategory2));
 
         Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transactionCategory2)),
-                objectMapper.writeValueAsString(transactionCategoryController.getAllTransactionCategoriesByUserId(1).getBody()));
+                objectMapper.writeValueAsString(transactionCategoryController.getAllTransactionCategoriesAndGoalsByUserId(1).getBody()));
 
         Mockito.when(transactionCategoryService.findByName("t")).thenReturn(transactionCategory);
 

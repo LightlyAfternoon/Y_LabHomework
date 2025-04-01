@@ -25,7 +25,18 @@ public class TransactionController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactions() {
-        List<TransactionDTO> transactionDTOS = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
+        List<TransactionDTO> transactionDTOS = transactionService.findAll();
+
+        if (transactionDTOS != null && !transactionDTOS.isEmpty()) {
+            return ResponseEntity.ok(transactionDTOS);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(value = {"", "/"}, params = {"user"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<TransactionDTO>> getAllTransactionsByUserId(@RequestParam(name = "user") int userId) {
+        List<TransactionDTO> transactionDTOS = transactionService.findAllByUserId(userId);
 
         if (transactionDTOS != null && !transactionDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionDTOS);

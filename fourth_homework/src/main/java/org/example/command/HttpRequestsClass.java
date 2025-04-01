@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class contains methods for sending HTTP requests.
+ * DataOutputStreams represent a request body.
+ * BufferedReaders represent a response body.
+ */
 public class HttpRequestsClass {
     UserDTO getLoggedInUser(String email, String password) {
         HttpURLConnection httpURLConnection;
@@ -153,12 +158,17 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/budget");
+            String path = "http://localhost:8080/fourth_homework-1.0-SNAPSHOT/budget";
+            MonthlyBudgetDTO budgetDTO = getBudget();
+            if (budgetDTO != null) {
+                path += "/" + budgetDTO.getId();
+            }
+            URL url = new URL(path);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setReadTimeout(10000);
-            if (getBudget() == null) {
+            if (budgetDTO == null) {
                 httpURLConnection.setRequestMethod("POST");
             } else {
                 httpURLConnection.setRequestMethod("PUT");
@@ -166,15 +176,13 @@ public class HttpRequestsClass {
             httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream())) {
-                MonthlyBudgetDTO budgetDTO = new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), budget).build();
+                budgetDTO = new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), budget).build();
 
                 dataOutputStream.writeBytes(objectMapper.writeValueAsString(budgetDTO));
                 dataOutputStream.flush();
             }
 
             httpURLConnection.connect();
-
-            MonthlyBudgetDTO budgetDTO = null;
 
             if (httpURLConnection.getResponseCode() != 404) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
@@ -214,6 +222,7 @@ public class HttpRequestsClass {
 
             httpURLConnection.connect();
 
+            budgetDTO = null;
 
             if (httpURLConnection.getResponseCode() != 404) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
@@ -352,7 +361,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/transaction");
+            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/transaction?user="+CurrentUser.currentUser.getId());
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -476,7 +485,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category?user="+userId);
+            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category/goal?user="+userId);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -513,7 +522,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category");
+            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category?user="+CurrentUser.currentUser.getId());
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);
@@ -550,7 +559,7 @@ public class HttpRequestsClass {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category?name="+name);
+            URL url = new URL("http://localhost:8080/fourth_homework-1.0-SNAPSHOT/category?user=&name="+name);
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setReadTimeout(10000);

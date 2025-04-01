@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     public UserDTO update(UserDTO userDTO, int id) {
         UserDTO dto = new UserDTO.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
-                id(id).role(userDTO.getRole()).isBlocked(userDTO.getBlocked()).build();
+                id(id).role(userDTO.getRole()).isBlocked(userDTO.isBlocked()).build();
 
         UserEntity userWithEmail = userRepository.findByEmail(userDTO.getEmail());
 

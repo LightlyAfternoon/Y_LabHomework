@@ -1,12 +1,17 @@
 package org.example.controller.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
 
+@Getter
 public class TransactionCategoryDTO {
     private int id;
+    @Setter
     private String name;
+    @Setter
     private BigDecimal neededSum;
     /**
      * Fields user and neededSum are meant for users goals
@@ -59,30 +64,6 @@ public class TransactionCategoryDTO {
     public TransactionCategoryDTO(int id, Integer userId) {
         this.id = id;
         this.userId = userId;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public BigDecimal getNeededSum() {
-        return neededSum;
-    }
-
-    public void setNeededSum(BigDecimal neededSum) {
-        this.neededSum = neededSum;
     }
 
     @Override

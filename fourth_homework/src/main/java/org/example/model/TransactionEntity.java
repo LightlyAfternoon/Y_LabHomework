@@ -1,6 +1,8 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
 import java.math.BigDecimal;
@@ -9,6 +11,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+@Getter
 @Entity
 @Table(name = "transaction", schema = "not_public")
 public class TransactionEntity {
@@ -19,12 +22,15 @@ public class TransactionEntity {
     /**
      * Field sum can be positive number as money arriving or negative number as money spending
      */
+    @Setter
     private BigDecimal sum;
     private Date date;
+    @Setter
     private String description;
     /**
      * Field category is meant for a category or a goal of money spent
      */
+    @Setter
     @Column(name = "category_id")
     private Integer categoryId;
     @Column(name = "user_id")
@@ -107,30 +113,6 @@ public class TransactionEntity {
 
     public TransactionEntity() {}
 
-    public int getId() {
-        return id;
-    }
-
-    public BigDecimal getSum() {
-        return sum;
-    }
-
-    public void setSum(BigDecimal sum) {
-        this.sum = sum;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
     public void setDate(Date date) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -147,18 +129,6 @@ public class TransactionEntity {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getUserId() {
-        return userId;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class TransactionCategoryController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategories() {
-        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId());
+        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAll();
 
         if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
             return ResponseEntity.ok(transactionCategoryDTOS);
@@ -34,7 +34,18 @@ public class TransactionCategoryController {
     }
 
     @GetMapping(value = {"", "/"}, params = {"user"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategoriesByUserId(@RequestParam(name = "user") int userId) {
+    public ResponseEntity<List<TransactionCategoryDTO>> getAllTransactionCategoriesAndGoalsByUserId(@RequestParam(name = "user") int userId) {
+        List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findCommonCategoriesOrGoalsByUserId(userId);
+
+        if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {
+            return ResponseEntity.ok(transactionCategoryDTOS);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(value = {"goal", "goal/"}, params = {"user"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<TransactionCategoryDTO>> getAllGoalsByUserId(@RequestParam(name = "user") int userId) {
         List<TransactionCategoryDTO> transactionCategoryDTOS = transactionCategoryService.findAllGoalsByUserId(userId);
 
         if (transactionCategoryDTOS != null && !transactionCategoryDTOS.isEmpty()) {

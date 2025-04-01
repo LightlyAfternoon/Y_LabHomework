@@ -44,7 +44,7 @@ class TransactionControllerTest {
 
         Mockito.when(transactionService.findAllByUserId(1)).thenReturn(List.of(transaction, transaction2));
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transaction, transaction2)), objectMapper.writeValueAsString(transactionController.getAllTransactions().getBody()));
+        Assertions.assertEquals(objectMapper.writeValueAsString(List.of(transaction, transaction2)), objectMapper.writeValueAsString(transactionController.getAllTransactionsByUserId(1).getBody()));
 
         Date date = new Date(System.currentTimeMillis());
         TransactionDTO transaction3 = new TransactionDTO.TransactionBuilder(BigDecimal.valueOf(20), 1).

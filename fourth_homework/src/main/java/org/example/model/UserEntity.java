@@ -1,8 +1,11 @@
 package org.example.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.example.annotation.Default;
 
+@Getter
 @Entity
 @Table(name = "user", schema = "service")
 public class UserEntity {
@@ -10,11 +13,16 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
     @SequenceGenerator(name = "seq_user_id", allocationSize = 1)
     private int id;
+    @Setter
     private String name;
+    @Setter
     private String email;
+    @Setter
     private String password;
+    @Setter
     @Column(name = "role_id")
     private UserRole role;
+    @Setter
     @Column(name = "is_blocked")
     private boolean isBlocked;
 
@@ -76,50 +84,6 @@ public class UserEntity {
         this.id = id;
         this.role = UserRole.USER;
         this.isBlocked = false;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-
-    public boolean getBlocked() {
-        return isBlocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-        isBlocked = blocked;
     }
 
     @Override

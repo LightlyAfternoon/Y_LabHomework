@@ -49,7 +49,7 @@ public class CommandClass {
 
         if (userDTO != null) {
             CurrentUser.currentUser = new UserEntity.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
-                    id(userDTO.getId()).role(userDTO.getRole()).isBlocked(userDTO.getBlocked()).build();
+                    id(userDTO.getId()).role(userDTO.getRole()).isBlocked(userDTO.isBlocked()).build();
 
             return CurrentUser.currentUser.getRole();
         }

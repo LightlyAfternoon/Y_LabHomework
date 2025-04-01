@@ -47,6 +47,8 @@ public class WebConfigure implements WebMvcConfigurer {
     private String password;
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
+    @Value("${liquibase.changelog.path}")
+    private String liquibaseChangelogPath;
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -81,7 +83,7 @@ public class WebConfigure implements WebMvcConfigurer {
 
         Connection connection = DriverManager.getConnection(url, user, password);
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        Liquibase liquibase = new Liquibase("/db/changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
+        Liquibase liquibase = new Liquibase(liquibaseChangelogPath, new ClassLoaderResourceAccessor(), database);
         liquibase.update();
 
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
