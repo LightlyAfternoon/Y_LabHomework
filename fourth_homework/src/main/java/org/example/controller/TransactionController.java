@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.annotation.Loggable;
 import org.example.controller.dto.TransactionDTO;
 import org.example.service.TransactionService;
@@ -12,6 +14,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Loggable
+@Tag(name = "Transaction Controller")
 @RestController
 @RequestMapping("/transaction")
 public class TransactionController {
@@ -22,6 +25,7 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
+    @Operation(summary = "Get all transactions")
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactions() {
         List<TransactionDTO> transactionDTOS = transactionService.findAll();
@@ -33,6 +37,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Get all transactions by user id")
     @GetMapping(value = {"", "/"}, params = {"user"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactionsByUserId(@RequestParam(name = "user") int userId) {
         List<TransactionDTO> transactionDTOS = transactionService.findAllByUserId(userId);
@@ -44,6 +49,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Get all transactions filtered by date, category id, sum type (Pos for positive sum or Neg for negative sum) and/or user id")
     @GetMapping(value = {"", "/"}, params = {"date", "category", "type", "user"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TransactionDTO>> getAllTransactionsByDateAndCategoryAndTypeAndUserId(
             @RequestParam(name = "date", required = false) Date date, @RequestParam(name = "category", required = false) int categoryId,
@@ -57,6 +63,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Get transaction by id")
     @GetMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> getTransactionById(@PathVariable("id") int id) {
         TransactionDTO transactionDTO = transactionService.findById(id);
@@ -68,6 +75,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Add new transaction")
     @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> createTransaction(@RequestBody TransactionDTO transactionDTO) {
         if (TransactionDTO.isValid(transactionDTO)) {
@@ -83,6 +91,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Update transaction by id")
     @PutMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> updateTransaction(@PathVariable("id") int id, @RequestBody TransactionDTO transactionDTO) {
         if (TransactionDTO.isValid(transactionDTO)) {
@@ -98,6 +107,7 @@ public class TransactionController {
         }
     }
 
+    @Operation(summary = "Delete transaction by id")
     @DeleteMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> deleteTransactionById(@PathVariable("id") int id) {
         boolean isDeleted = transactionService.delete(id);

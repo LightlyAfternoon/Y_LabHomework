@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.annotation.Loggable;
 import org.example.controller.dto.LogInDTO;
 import org.example.controller.dto.UserDTO;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Loggable
+@Tag(name = "Log In Controller")
 @RestController
 @RequestMapping("/login")
 public class LogInController {
@@ -23,6 +26,7 @@ public class LogInController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Get logged in user")
     @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> getLoggedInUser(@RequestBody LogInDTO logInDTO) {
         UserDTO userDTO = userService.findUserByEmailAndPassword(logInDTO.getEmail(), logInDTO.getPassword());

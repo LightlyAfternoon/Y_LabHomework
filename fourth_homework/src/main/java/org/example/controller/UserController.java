@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.annotation.Loggable;
 import org.example.service.UserService;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Loggable
+@Tag(name = "User Controller")
 @RestController
 @RequestMapping("/user")
-@Tag(name = "User Controller")
 public class UserController {
     private final UserService userService;
 
@@ -23,6 +24,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Get all users")
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> userDTOS = userService.findAll();
@@ -34,6 +36,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Get user by id")
     @GetMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> getUserById(@PathVariable("id") int id) {
         UserDTO userDTO = userService.findById(id);
@@ -45,6 +48,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Add new user")
     @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
         if (UserDTO.isValid(userDTO)) {
@@ -60,6 +64,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Update user by id")
     @PutMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> updateUser(@PathVariable("id") int id, @RequestBody UserDTO userDTO) {
         if (UserDTO.isValid(userDTO)) {
@@ -75,6 +80,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Delete user by id")
     @DeleteMapping(value = {"/{id}", "/{id}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> deleteUserById(@PathVariable("id") int id) {
         boolean isDeleted = userService.delete(id);
