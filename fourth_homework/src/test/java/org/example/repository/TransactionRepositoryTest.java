@@ -82,7 +82,6 @@ class TransactionRepositoryTest {
     @DisplayName("Test of the method for adding transaction")
     @Test
     void addTest() {
-        TransactionEntity transactionEntity = new TransactionEntity(CurrentUser.currentUser.getId());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date;
         try {
@@ -90,23 +89,16 @@ class TransactionRepositoryTest {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
-        transactionEntity.setSum(BigDecimal.valueOf(10.10));
-        transactionEntity.setCategoryId(categoryEntity.getId());
-        transactionEntity.setDate(date);
-        transactionEntity.setDescription("t");
+        TransactionEntity transactionEntity = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId())
+                .categoryId(categoryEntity.getId()).date(date).description("t").build();
 
         TransactionEntity savedTransactionEntity = transactionRepository.save(transactionEntity);
 
         Assertions.assertNotEquals(0, savedTransactionEntity.getId());
         Assertions.assertEquals(transactionEntity, savedTransactionEntity);
 
-        TransactionEntity transactionEntity2 = new TransactionEntity(CurrentUser.currentUser.getId());
-
-        transactionEntity2.setSum(BigDecimal.valueOf(10.0));
-        transactionEntity2.setCategoryId(categoryEntity.getId());
-        transactionEntity2.setDate(date);
-        transactionEntity2.setDescription("t2");
+        TransactionEntity transactionEntity2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.0), CurrentUser.currentUser.getId())
+                .categoryId(categoryEntity.getId()).date(date).description("t2").build();
 
         transactionEntity2 = transactionRepository.save(transactionEntity2);
 

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -98,6 +99,11 @@ class MonthlyBudgetControllerTest {
 
         Assertions.assertEquals(objectMapper.writeValueAsString(monthlyBudget),
                 objectMapper.writeValueAsString(monthlyBudgetController.createMonthlyBudget(monthlyBudget).getBody()));
+
+        monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(0, BigDecimal.valueOf(10.10)).
+                id(1).date(new Date(System.currentTimeMillis())).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, monthlyBudgetController.createMonthlyBudget(monthlyBudget).getStatusCode());
     }
 
     @DisplayName("Test of the method for updating monthly budget")
@@ -119,6 +125,11 @@ class MonthlyBudgetControllerTest {
         Mockito.when(monthlyBudgetService.findById(50)).thenReturn(null);
 
         Assertions.assertEquals("null", objectMapper.writeValueAsString(monthlyBudgetController.updateMonthlyBudget(50, monthlyBudget).getBody()));
+
+        monthlyBudget = new MonthlyBudgetDTO.MonthlyBudgetBuilder(0, BigDecimal.valueOf(10.10)).
+                id(1).date(new Date(System.currentTimeMillis())).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, monthlyBudgetController.updateMonthlyBudget(1, monthlyBudget).getStatusCode());
     }
 
     @DisplayName("Test of the method for deleting monthly budget")

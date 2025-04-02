@@ -103,7 +103,7 @@ public class TransactionCategoryDTO {
 
     public static boolean isValid(TransactionCategoryDTO transactionCategoryDTO) {
         return (transactionCategoryDTO.getName() != null && !transactionCategoryDTO.getName().isBlank()) &&
-                ((transactionCategoryDTO.getUserId() == 0 && (transactionCategoryDTO.getNeededSum() == null || transactionCategoryDTO.getNeededSum().compareTo(BigDecimal.valueOf(0)) == 0))) ||
-                        (transactionCategoryDTO.getUserId() != 0 && (transactionCategoryDTO.getNeededSum() != null && transactionCategoryDTO.getNeededSum().compareTo(BigDecimal.valueOf(0)) > 0));
+                (((transactionCategoryDTO.getUserId() == null || transactionCategoryDTO.getUserId() == 0) && (transactionCategoryDTO.getNeededSum() == null || transactionCategoryDTO.getNeededSum().compareTo(BigDecimal.valueOf(0)) == 0))) ||
+                        (transactionCategoryDTO.getUserId() != null && transactionCategoryDTO.getUserId() != 0 && (transactionCategoryDTO.getNeededSum() != null && transactionCategoryDTO.getNeededSum().compareTo(BigDecimal.valueOf(0)) > 0));
     }
 }

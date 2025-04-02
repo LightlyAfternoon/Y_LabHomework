@@ -35,6 +35,13 @@ class LogInControllerTest {
 
         Assertions.assertEquals(objectMapper.writeValueAsString(user), objectMapper.writeValueAsString(logInController.getLoggedInUser(logInDTO).getBody()));
 
+        logInDTO = new LogInDTO();
+
+        logInDTO.setEmail("t");
+        logInDTO.setPassword("t");
+
+        Assertions.assertEquals(objectMapper.writeValueAsString(user), objectMapper.writeValueAsString(logInController.getLoggedInUser(logInDTO).getBody()));
+
         Mockito.when(userService.findUserByEmailAndPassword("t", "t")).thenReturn(null);
 
         Assertions.assertEquals("null", objectMapper.writeValueAsString(logInController.getLoggedInUser(logInDTO).getBody()));

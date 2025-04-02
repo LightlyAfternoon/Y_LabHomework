@@ -64,9 +64,7 @@ class TransactionCategoryRepositoryTest {
     @DisplayName("Test of the method for adding category")
     @Test
     void addTest() {
-        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity();
-
-        categoryEntity.setName("t");
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity.TransactionCategoryBuilder("t").build();
 
         categoryEntity = categoryRepository.save(categoryEntity);
 
@@ -75,9 +73,7 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(0, savedCategoryEntity.getId());
         Assertions.assertEquals(categoryEntity, savedCategoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity();
-
-        categoryEntity2.setName("t2");
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").build();
 
         categoryEntity2 = categoryRepository.save(categoryEntity2);
 
@@ -87,10 +83,8 @@ class TransactionCategoryRepositoryTest {
     @DisplayName("Test of the method for adding goal")
     @Test
     void addGoalTest() {
-        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
-
-        categoryEntity.setName("t");
-        categoryEntity.setNeededSum(BigDecimal.valueOf(10.0));
+        TransactionCategoryEntity categoryEntity = new TransactionCategoryEntity.TransactionCategoryBuilder("t")
+                .neededSum(BigDecimal.valueOf(10.0)).userId(CurrentUser.currentUser.getId()).build();
 
         categoryEntity = categoryRepository.save(categoryEntity);
 
@@ -99,10 +93,8 @@ class TransactionCategoryRepositoryTest {
         Assertions.assertNotEquals(0, savedCategoryEntity.getId());
         Assertions.assertEquals(categoryEntity, savedCategoryEntity);
 
-        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity(0, CurrentUser.currentUser.getId());
-
-        categoryEntity2.setName("t3");
-        categoryEntity2.setNeededSum(BigDecimal.valueOf(30.3));
+        TransactionCategoryEntity categoryEntity2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t3")
+                .neededSum(BigDecimal.valueOf(30.3)).userId(CurrentUser.currentUser.getId()).build();
 
         categoryEntity2 = categoryRepository.save(categoryEntity2);
 

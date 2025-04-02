@@ -64,18 +64,16 @@ class MonthlyBudgetRepositoryTest {
     @Test
     void addTest() {
         Date date = new Date(System.currentTimeMillis());
-        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
-
-        monthlyBudgetEntity.setSum(BigDecimal.valueOf(10.10));
+        MonthlyBudgetEntity monthlyBudgetEntity = new MonthlyBudgetEntity.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), BigDecimal.valueOf(10.10))
+                .date(date).build();
 
         MonthlyBudgetEntity savedMonthlyBudgetEntity = monthlyBudgetRepository.save(monthlyBudgetEntity);
 
         Assertions.assertNotEquals(0, savedMonthlyBudgetEntity.getId());
         Assertions.assertEquals(monthlyBudgetEntity, savedMonthlyBudgetEntity);
 
-        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity(CurrentUser.currentUser.getId(), date);
-
-        monthlyBudgetEntity2.setSum(BigDecimal.valueOf(10.0));
+        MonthlyBudgetEntity monthlyBudgetEntity2 = new MonthlyBudgetEntity.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), BigDecimal.valueOf(10.0))
+                .date(date).build();
 
         monthlyBudgetEntity2 = monthlyBudgetRepository.save(monthlyBudgetEntity2);
 
@@ -143,7 +141,6 @@ class MonthlyBudgetRepositoryTest {
         monthlyBudgetEntity3.setSum(BigDecimal.valueOf(30.3));
 
         List<MonthlyBudgetEntity> transactionEntities = List.of(monthlyBudgetEntity, monthlyBudgetEntity2, monthlyBudgetEntity3);
-
 
         List<MonthlyBudgetEntity> transactionEntitiesReturned;
 

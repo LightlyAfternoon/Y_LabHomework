@@ -272,6 +272,8 @@ class CommandClassTest {
 
         Mockito.when(transactionService.add(transactionDTO)).thenReturn(transactionDTO);
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(12.2), 0, null, " ")).thenReturn(transactionDTO);
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(List.of(transactionDTO));
+        Mockito.when(httpRequestsClass.getBudget()).thenReturn(new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), BigDecimal.valueOf(100)).build());
 
         transactionDTO = commandClass.addTransaction();
 
@@ -290,6 +292,8 @@ class CommandClassTest {
 
         Mockito.when(transactionService.add(transactionDTO)).thenReturn(transactionDTO);
         Mockito.when(httpRequestsClass.addTransaction(BigDecimal.valueOf(10.2), categoryDTO.getId(), date, "s")).thenReturn(transactionDTO);
+        Mockito.when(httpRequestsClass.getTransactions()).thenReturn(List.of(transactionDTO));
+        Mockito.when(httpRequestsClass.getBudget()).thenReturn(new MonthlyBudgetDTO.MonthlyBudgetBuilder(CurrentUser.currentUser.getId(), BigDecimal.valueOf(5)).build());
 
         transactionDTO = commandClass.addTransaction();
         int id2 = transactionDTO.getId();

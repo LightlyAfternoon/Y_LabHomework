@@ -42,26 +42,14 @@ class UserRepositoryTest {
     @DisplayName("Test of the method for adding user")
     @Test
     void addTest() {
-        UserEntity userEntity = new UserEntity();
-
-        userEntity.setEmail("t");
-        userEntity.setPassword("t");
-        userEntity.setName("t");
-        userEntity.setRole(UserRole.USER);
-        userEntity.setBlocked(false);
+        UserEntity userEntity = new UserEntity.UserBuilder("t", "t", "t").build();
 
         UserEntity savedUserEntity = userRepository.save(userEntity);
 
         Assertions.assertNotEquals(0, savedUserEntity.getId());
         Assertions.assertEquals(userEntity, savedUserEntity);
 
-        userEntity = new UserEntity();
-
-        userEntity.setEmail("t2");
-        userEntity.setPassword("t2");
-        userEntity.setName("t2");
-        userEntity.setRole(UserRole.ADMIN);
-        userEntity.setBlocked(true);
+        userEntity = new UserEntity.UserBuilder("t2", "t2", "t2").role(UserRole.ADMIN).isBlocked(true).build();
 
         savedUserEntity = userRepository.save(userEntity);
 

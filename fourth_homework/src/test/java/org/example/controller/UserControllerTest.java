@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,6 +66,10 @@ class UserControllerTest {
         Mockito.when(userService.add(user)).thenReturn(user);
 
         Assertions.assertEquals(objectMapper.writeValueAsString(user), objectMapper.writeValueAsString(userController.createUser(user).getBody()));
+
+        user = new UserDTO.UserBuilder("t", "t", null).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, userController.createUser(user).getStatusCode());
     }
 
     @DisplayName("Test of the method for updating user")
@@ -83,6 +88,10 @@ class UserControllerTest {
         Mockito.when(userService.findById(50)).thenReturn(null);
 
         Assertions.assertEquals("null", objectMapper.writeValueAsString(userController.updateUser(50, user2).getBody()));
+
+        user2 = new UserDTO.UserBuilder("t", "t", null).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, userController.updateUser(2 ,user2).getStatusCode());
     }
 
     @DisplayName("Test of the method for deleting user")

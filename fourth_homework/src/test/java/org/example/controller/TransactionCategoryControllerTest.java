@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -131,6 +132,11 @@ class TransactionCategoryControllerTest {
 
         Assertions.assertEquals(objectMapper.writeValueAsString(transactionCategory),
                 objectMapper.writeValueAsString(transactionCategoryController.createTransactionCategory(transactionCategory).getBody()));
+
+        transactionCategory = new TransactionCategoryDTO.TransactionCategoryBuilder("t").
+                id(1).neededSum(BigDecimal.valueOf(10.10)).userId(null).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, transactionCategoryController.createTransactionCategory(transactionCategory).getStatusCode());
     }
 
     @DisplayName("Test of the method for updating category")
@@ -152,6 +158,11 @@ class TransactionCategoryControllerTest {
         Mockito.when(transactionCategoryService.findById(50)).thenReturn(null);
 
         Assertions.assertEquals("null", objectMapper.writeValueAsString(transactionCategoryController.updateTransactionCategory(50, transactionCategory).getBody()));
+
+        transactionCategory = new TransactionCategoryDTO.TransactionCategoryBuilder("t").
+                id(1).neededSum(BigDecimal.valueOf(10.10)).userId(null).build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, transactionCategoryController.updateTransactionCategory(1, transactionCategory).getStatusCode());
     }
 
     @DisplayName("Test of the method for deleting category")

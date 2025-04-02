@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -136,6 +137,11 @@ class TransactionControllerTest {
         Mockito.when(transactionService.add(transaction)).thenReturn(transaction);
 
         Assertions.assertEquals(objectMapper.writeValueAsString(transaction), objectMapper.writeValueAsString(transactionController.createTransaction(transaction).getBody()));
+
+        transaction = new TransactionDTO.TransactionBuilder(BigDecimal.valueOf(0), 1).
+                date(new Date(System.currentTimeMillis())).description("t").build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, transactionController.createTransaction(transaction).getStatusCode());
     }
 
     @DisplayName("Test of the method for updating transaction")
@@ -157,6 +163,11 @@ class TransactionControllerTest {
         Mockito.when(transactionService.findById(50)).thenReturn(null);
 
         Assertions.assertEquals("null", objectMapper.writeValueAsString(transactionController.updateTransaction(50, transaction).getBody()));
+
+        transaction2 = new TransactionDTO.TransactionBuilder(BigDecimal.valueOf(0), 1).
+                date(new Date(System.currentTimeMillis())).description("t").build();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, transactionController.updateTransaction(2, transaction2).getStatusCode());
     }
 
     @DisplayName("Test of the method for deleting transaction")

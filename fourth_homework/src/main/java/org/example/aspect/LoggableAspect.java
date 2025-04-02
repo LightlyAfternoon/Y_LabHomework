@@ -5,6 +5,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
+/**
+ * This aspect is used for logging methods with {@link org.example.annotation.Loggable @Loggable} annotation
+ */
 @Aspect
 public class LoggableAspect {
     @Pointcut("within(@org.example.annotation.Loggable *) && execution(* * (..))")

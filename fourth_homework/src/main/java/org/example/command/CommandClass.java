@@ -14,6 +14,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
+/**
+ * This class contains methods for user input in console commands.
+ */
 public class CommandClass {
     private Scanner scanner;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
