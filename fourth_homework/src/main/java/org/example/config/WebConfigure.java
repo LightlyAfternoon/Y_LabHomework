@@ -1,5 +1,7 @@
 package org.example.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import jakarta.persistence.EntityManagerFactory;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -14,6 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -37,7 +40,7 @@ import java.util.Properties;
 @PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @EnableWebMvc
 @EnableJpaRepositories(basePackages = "org.example.repository")
-@ComponentScan({"org.example.service.impl", "org.example.controller"})
+@ComponentScan({"org.example.service.impl", "org.example.controller", "org.springdoc"})
 public class WebConfigure implements WebMvcConfigurer {
     @Value("${spring.datasource.url}")
     private String url;
@@ -52,6 +55,7 @@ public class WebConfigure implements WebMvcConfigurer {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(new ByteArrayHttpMessageConverter());
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder().indentOutput(true);
         converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
     }
@@ -100,9 +104,16 @@ public class WebConfigure implements WebMvcConfigurer {
 
     @Bean
     public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-
         JpaTransactionManager txManager = new JpaTransactionManager();
         txManager.setEntityManagerFactory(entityManagerFactory);
         return txManager;
+    }
+
+    @Bean
+    public OpenAPI customOpenApi(@Value("${application.description}")String appDescription,
+                                 @Value("${application.version}")String appVersion) {
+        return new OpenAPI().info(new Info().title("Application API")
+                        .version(appVersion)
+                        .description(appDescription));
     }
 }

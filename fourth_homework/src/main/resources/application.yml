@@ -10,3 +10,6 @@ spring:
 liquibase:
   changelog:
     path: db/changelog/changelog.xml
+application:
+  description: Finance tracker application
+  version: 4

@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.annotation.Loggable;
 import org.example.service.UserService;
 import org.example.controller.dto.UserDTO;
@@ -13,6 +14,7 @@ import java.util.List;
 @Loggable
 @RestController
 @RequestMapping("/user")
+@Tag(name = "User Controller")
 public class UserController {
     private final UserService userService;
 
