@@ -13,7 +13,7 @@ public class LoggableAspect {
     long start;
     long end;
 
-    @Pointcut("@annotation(AspectAnnotation)within(@org.example.annotation.Loggable *) && execution(* * (..))")
+    @Pointcut("within(@org.example.annotation.Loggable *) && execution(* * (..))")
     public void annotatedByLoggable() {}
 
     @Before("annotatedByLoggable()")

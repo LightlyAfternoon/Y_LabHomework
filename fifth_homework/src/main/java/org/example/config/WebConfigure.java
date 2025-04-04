@@ -5,13 +5,10 @@ import io.swagger.v3.oas.models.info.Info;
 import org.example.aspect.LoggableAspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableAspectJAutoProxy
 public class WebConfigure implements WebMvcConfigurer {
     @Bean
     public OpenAPI customOpenApi(@Value("${application.description}")String appDescription,
@@ -22,7 +19,7 @@ public class WebConfigure implements WebMvcConfigurer {
     }
 
     @Bean
-    public LoggableAspect messageAspect() {
+    public LoggableAspect loginAspect() {
         return new LoggableAspect();
     }
 }
