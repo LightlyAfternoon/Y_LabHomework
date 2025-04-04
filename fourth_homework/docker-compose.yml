@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:17.4
+    environment:
+      POSTGRES_USER: postuser
+      POSTGRES_PASSWORD: passuser
+      POSTGRES_DB: finance_tracker
+      PGDATA: /data/postgres
+    ports:
+      - "1234:5432"
+    volumes:
+      - db:/data/postgres
+    networks:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
