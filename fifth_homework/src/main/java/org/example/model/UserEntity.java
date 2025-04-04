@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.annotation.Default;
+import org.hibernate.type.NumericBooleanConverter;
 
 @Getter
 @Entity
@@ -24,6 +25,7 @@ public class UserEntity {
     private UserRole role;
     @Setter
     @Column(name = "is_blocked")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean isBlocked;
 
     private UserEntity(UserBuilder builder) {

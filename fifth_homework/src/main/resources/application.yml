@@ -1,15 +1,16 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:1234/finance_tracker
-    user: postuser
+    username: postuser
     password: passuser
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
-liquibase:
-  changelog:
-    path: db/changelog/changelog.xml
+    show-sql: true
+  liquibase:
+    change-log: classpath:/db/changelog/changelog.xml
+
 application:
   description: Finance tracker application
   version: 5
