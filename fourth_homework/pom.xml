@@ -22,8 +22,6 @@
     <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
     <org.mapstruct.version>1.6.3</org.mapstruct.version>
     <jackson.version>2.18.3</jackson.version>
-    <aspectj.version>1.9.22.1</aspectj.version>
-    <aspectj.maven.plugin.version>1.15.0</aspectj.maven.plugin.version>
     <spring.version>7.0.0-M1</spring.version>
     <spring.data.version>4.0.0-M1</spring.data.version>
     <lombok.version>1.18.36</lombok.version>
@@ -97,12 +95,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-      <version>${aspectj.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
@@ -168,28 +160,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>${aspectj.maven.plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>${aspectj.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <complianceLevel>${java.version}</complianceLevel>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <showWeaveInfo>true</showWeaveInfo>
-          <verbose>true</verbose>
-          <Xlint>ignore</Xlint>
-          <encoding>UTF-8</encoding>
-        </configuration>
       </plugin>
 
       <plugin>

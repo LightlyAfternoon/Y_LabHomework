@@ -9,12 +9,10 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.example.aspect.LoggableAspect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -40,6 +38,7 @@ import java.util.Properties;
 @PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @EnableWebMvc
 @EnableJpaRepositories(basePackages = "org.example.repository")
+@EnableAspectJAutoProxy
 @ComponentScan({"org.example.service.impl", "org.example.controller", "org.springdoc"})
 public class WebConfigure implements WebMvcConfigurer {
     @Value("${spring.datasource.url}")
@@ -115,5 +114,10 @@ public class WebConfigure implements WebMvcConfigurer {
         return new OpenAPI().info(new Info().title("Application API")
                         .version(appVersion)
                         .description(appDescription));
+    }
+
+    @Bean
+    public LoggableAspect messageAspect() {
+        return new LoggableAspect();
     }
 }

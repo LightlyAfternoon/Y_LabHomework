@@ -1,8 +1,9 @@
 package org.example.aspect;
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 
 /**
@@ -10,16 +11,23 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 @Aspect
 public class LoggableAspect {
+    long start;
+    long end;
+
     @Pointcut("within(@org.example.annotation.Loggable *) && execution(* * (..))")
     public void annotatedByLoggable() {}
 
-    @Around("annotatedByLoggable()")
-    public Object logging(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        System.out.println("Вызов метода " + proceedingJoinPoint.getSignature());
-        long start = System.currentTimeMillis();
-        Object result = proceedingJoinPoint.proceed();
-        long end = System.currentTimeMillis() - start;
-        System.out.println("Выполнение метода " + proceedingJoinPoint.getSignature() + " завершено. Время выполнения составило " + end + " ms");
-        return result;
+    @Before("annotatedByLoggable()")
+    public void beforeCallAtMethod(JoinPoint joinPoint) {
+        System.out.println("Вызов метода " + joinPoint.getSignature());
+
+        start = System.currentTimeMillis();
+    }
+
+    @After("annotatedByLoggable()")
+    public void afterCallAtMethod(JoinPoint joinPoint) {
+        end = System.currentTimeMillis() - start;
+
+        System.out.println("Выполнение метода " + joinPoint.getSignature() + " завершено. Время выполнения составило " + end + " ms");
     }
 }
