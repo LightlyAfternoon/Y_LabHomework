@@ -5,7 +5,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 
 /**
- * This aspect is used for logging methods with {@link org.example.annotation.Loggable @Loggable} annotation
+ * This aspect is used for logging methods with @Loggable annotation
  */
 @Aspect
 @Log4j2
