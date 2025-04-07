@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 @Getter
 @Entity
 @Table(name = "monthly_budget", schema = "not_public")
-public class MonthlyBudgetEntity {
+public class MonthlyBudgetEntity extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_monthly_budget_id")
     @SequenceGenerator(name = "seq_monthly_budget_id", allocationSize = 1)

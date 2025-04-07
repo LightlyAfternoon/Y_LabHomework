@@ -5,6 +5,7 @@ import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
 import org.example.model.*;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -13,6 +14,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of monthly budget repository methods")
 class MonthlyBudgetRepositoryTest {
     UserEntity userEntity;

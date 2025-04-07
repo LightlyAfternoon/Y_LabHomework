@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @Entity
 @Table(name = "transaction_category", schema = "not_public")
-public class TransactionCategoryEntity {
+public class TransactionCategoryEntity extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transaction_category_id")
     @SequenceGenerator(name = "seq_transaction_category_id", allocationSize = 1)

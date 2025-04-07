@@ -9,6 +9,7 @@ import org.example.model.UserEntity;
 import org.example.model.UserRole;
 import org.example.service.specification.TransactionSpecification;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.jpa.domain.Specification;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -20,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of transaction repository methods")
 class TransactionRepositoryTest {
     UserEntity userEntity;

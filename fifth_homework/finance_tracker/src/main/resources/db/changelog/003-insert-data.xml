@@ -25,12 +25,16 @@
             <column name="password" value="p"/>
             <column name="is_blocked" value="0"/>
             <column name="role_id" value="0"/>
+            <column name="created_at" value="2025-04-01 15:00:00"/>
+            <column name="updated_at" value="2025-04-01 15:00:00"/>
         </insert>
     </changeSet>
 
     <changeSet id="insert-transaction_category" author="Afternoon">
         <insert tableName="transaction_category" schemaName="not_public">
             <column name="name" value="Test"/>
+            <column name="created_at" value="2025-04-01 15:00:00"/>
+            <column name="updated_at" value="2025-04-01 15:00:00"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

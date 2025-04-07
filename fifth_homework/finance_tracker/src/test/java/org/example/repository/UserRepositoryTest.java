@@ -5,12 +5,14 @@ import org.example.config.MyTestConfig;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.sql.SQLException;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of user repository methods")
 class UserRepositoryTest {
     UserRepository userRepository;

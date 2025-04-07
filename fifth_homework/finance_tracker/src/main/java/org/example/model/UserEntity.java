@@ -9,7 +9,7 @@ import org.hibernate.type.NumericBooleanConverter;
 @Getter
 @Entity
 @Table(name = "user", schema = "service")
-public class UserEntity {
+public class UserEntity extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_id")
     @SequenceGenerator(name = "seq_user_id", allocationSize = 1)

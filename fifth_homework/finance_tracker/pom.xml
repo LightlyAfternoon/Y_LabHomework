@@ -25,9 +25,6 @@
     <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
     <org.mapstruct.version>1.6.3</org.mapstruct.version>
     <jackson.version>2.18.3</jackson.version>
-    <aspectj.version>1.9.22.1</aspectj.version>
-    <aspectj.maven.plugin.version>1.15.0</aspectj.maven.plugin.version>
-    <spring.data.version>4.0.0-M1</spring.data.version>
     <lombok.version>1.18.36</lombok.version>
     <jakarta.persictence.version>3.2.0</jakarta.persictence.version>
     <hibernate.version>7.0.0.Beta5</hibernate.version>

@@ -7,6 +7,7 @@ import org.example.model.TransactionCategoryEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of transaction category repository methods")
 class TransactionCategoryRepositoryTest {
     UserEntity userEntity;

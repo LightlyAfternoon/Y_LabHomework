@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 @Getter
 @Entity
 @Table(name = "transaction", schema = "not_public")
-public class TransactionEntity {
+public class TransactionEntity extends AuditedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transaction_id")
     @SequenceGenerator(name = "seq_transaction_id", allocationSize = 1)

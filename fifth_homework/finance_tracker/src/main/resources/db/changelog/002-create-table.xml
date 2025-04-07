@@ -44,6 +44,10 @@
             <column name="role_id" type="integer">
                 <constraints foreignKeyName="user_role_id_fkey" references="service.role(id)" nullable="false"/>
             </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -59,6 +63,10 @@
             <column name="user_id" type="integer">
                 <constraints foreignKeyName="transaction_category_user_id_fkey" references="service.user(id)"/>
             </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -80,6 +88,10 @@
             <column name="user_id" type="integer">
                 <constraints foreignKeyName="transaction_user_id_fkey" references="service.user(id)" nullable="false"/>
             </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -97,6 +109,10 @@
             <column name="user_id" type="integer">
                 <constraints foreignKeyName="monthly_budget_user_id_fkey" references="service.user(id)" nullable="false"/>
             </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
