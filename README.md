@@ -5,3 +5,5 @@
 [ДЗ №3](https://github.com/LightlyAfternoon/Y_LabHomework/pull/3)
 
 [ДЗ №4](https://github.com/LightlyAfternoon/Y_LabHomework/pull/4)
+
+[ДЗ №5](https://github.com/LightlyAfternoon/Y_LabHomework/pull/5)
