@@ -27,7 +27,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public TransactionDTO add(TransactionDTO transactionDTO) {
-        return transactionDTOMapper.mapToDTO(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO)));
+        TransactionDTO dto = new TransactionDTO.TransactionBuilder(transactionDTO.getSum(), transactionDTO.getUserId()).
+                date(transactionDTO.getDate()).description(transactionDTO.getDescription()).categoryId(transactionDTO.getCategoryId()).build();
+
+        return transactionDTOMapper.mapToDTO(transactionRepository.save(transactionDTOMapper.mapToEntity(dto)));
     }
 
     public TransactionDTO findById(int id) {
@@ -41,9 +44,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionDTO update(TransactionDTO transactionDTO, int id) {
         TransactionDTO dto = new TransactionDTO.TransactionBuilder(transactionDTO.getSum(), transactionDTO.getUserId()).
                 id(id).date(transactionDTO.getDate()).description(transactionDTO.getDescription()).categoryId(transactionDTO.getCategoryId()).build();
-        transactionRepository.save(transactionDTOMapper.mapToEntity(dto));
 
-        return transactionDTOMapper.mapToDTO(transactionRepository.findById(id));
+        return transactionDTOMapper.mapToDTO(transactionRepository.save(transactionDTOMapper.mapToEntity(dto)));
     }
 
     public boolean delete(int id) {
@@ -59,7 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, Integer categoryId, String type, int userId) {
-        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(categoryId)).and(TransactionSpecification.sumType(type)).and(TransactionSpecification.userIdIs(userId));
+        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(categoryId)).and(TransactionSpecification.sumTypeIs(type)).and(TransactionSpecification.userIdIs(userId));
 
         return transactionRepository.findAll(filters).stream().map(transactionDTOMapper::mapToDTO).toList();
     }

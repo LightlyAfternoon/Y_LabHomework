@@ -24,7 +24,10 @@ public class TransactionCategoryServiceImpl implements TransactionCategoryServic
     }
 
     public TransactionCategoryDTO add(TransactionCategoryDTO transactionCategoryDTO) {
-        return transactionCategoryDTOMapper.mapToDTO(transactionCategoryRepository.save(transactionCategoryDTOMapper.mapToEntity(transactionCategoryDTO)));
+        TransactionCategoryDTO dto = new TransactionCategoryDTO.TransactionCategoryBuilder(transactionCategoryDTO.getName()).
+                neededSum(transactionCategoryDTO.getNeededSum()).userId(transactionCategoryDTO.getUserId()).build();
+
+        return transactionCategoryDTOMapper.mapToDTO(transactionCategoryRepository.save(transactionCategoryDTOMapper.mapToEntity(dto)));
     }
 
     public TransactionCategoryDTO findById(int id) {
@@ -38,9 +41,8 @@ public class TransactionCategoryServiceImpl implements TransactionCategoryServic
     public TransactionCategoryDTO update(TransactionCategoryDTO transactionCategoryDTO, int id) {
         TransactionCategoryDTO dto = new TransactionCategoryDTO.TransactionCategoryBuilder(transactionCategoryDTO.getName()).
                 id(id).neededSum(transactionCategoryDTO.getNeededSum()).userId(transactionCategoryDTO.getUserId()).build();
-        transactionCategoryRepository.save(transactionCategoryDTOMapper.mapToEntity(dto));
 
-        return transactionCategoryDTOMapper.mapToDTO(transactionCategoryRepository.findById(id));
+        return transactionCategoryDTOMapper.mapToDTO(transactionCategoryRepository.save(transactionCategoryDTOMapper.mapToEntity(dto)));
     }
 
     public boolean delete(int id) {

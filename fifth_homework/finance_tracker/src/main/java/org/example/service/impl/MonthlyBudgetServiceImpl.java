@@ -26,8 +26,11 @@ public class MonthlyBudgetServiceImpl implements MonthlyBudgetService {
     }
 
     public MonthlyBudgetDTO add(MonthlyBudgetDTO monthlyBudgetDTO) {
+        MonthlyBudgetDTO dto = new MonthlyBudgetDTO.MonthlyBudgetBuilder(monthlyBudgetDTO.getUserId(), monthlyBudgetDTO.getSum()).
+                date(monthlyBudgetDTO.getDate()).build();
+
         if (monthlyBudgetRepository.findByDateAndUserId(monthlyBudgetDTO.getDate(), monthlyBudgetDTO.getUserId()) == null) {
-            return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(monthlyBudgetDTO)));
+            return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(dto)));
         } else {
             return null;
         }
@@ -51,9 +54,8 @@ public class MonthlyBudgetServiceImpl implements MonthlyBudgetService {
     public MonthlyBudgetDTO update(MonthlyBudgetDTO monthlyBudgetDTO, int id) {
         MonthlyBudgetDTO dto = new MonthlyBudgetDTO.MonthlyBudgetBuilder(monthlyBudgetDTO.getUserId(), monthlyBudgetDTO.getSum()).
                 id(id).date(monthlyBudgetDTO.getDate()).build();
-        monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(dto));
 
-        return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.findById(id));
+        return monthlyBudgetDTOMapper.mapToDTO(monthlyBudgetRepository.save(monthlyBudgetDTOMapper.mapToEntity(dto)));
     }
 
     public boolean delete(int id) {

@@ -1,61 +1,49 @@
 package org.example.service;
 
-import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
 import org.example.controller.dto.TransactionCategoryDTO;
+import org.example.controller.mapper.TransactionCategoryDTOMapper;
+import org.example.model.TransactionCategoryEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
-import org.example.repository.UserRepository;
+import org.example.repository.TransactionCategoryRepository;
+import org.example.service.impl.TransactionCategoryServiceImpl;
 import org.junit.jupiter.api.*;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of transaction category service methods")
 class TransactionCategoryServiceTest {
-    TransactionCategoryService categoryService;
-    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
-    AnnotationConfigApplicationContext context;
+    @InjectMocks
+    TransactionCategoryServiceImpl categoryService;
+    @Mock
+    TransactionCategoryRepository categoryRepository;
+    @Spy
+    TransactionCategoryDTOMapper categoryDTOMapper = Mappers.getMapper(TransactionCategoryDTOMapper.class);
 
     @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
-        container.start();
-
-        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
-    }
-
-    @AfterAll
-    static void afterAll() {
-        container.stop();
+    static void beforeAll() {
+        MyTestConfig.setConfig();
     }
 
     @BeforeEach
     void setUp() {
-        context = new AnnotationConfigApplicationContext(MyTestConfig.class);
-        UserRepository userRepository = context.getBean(UserRepository.class);
-        categoryService = context.getBean(TransactionCategoryService.class);
-
-        for (TransactionCategoryDTO category : categoryService.findAll()) {
-            categoryService.delete(category.getId());
-        }
-
-        for (UserEntity user : userRepository.findAll()) {
-            userRepository.delete(user);
-        }
-
-        UserEntity user = new UserEntity();
+        UserEntity user = new UserEntity(1);
 
         user.setEmail("t");
         user.setPassword("t");
         user.setName("t");
         user.setRole(UserRole.USER);
         user.setBlocked(false);
-
-        user = userRepository.save(user);
 
         CurrentUser.currentUser = user;
     }
@@ -67,20 +55,26 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
-        categoryDTO = categoryService.add(categoryDTO);
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
 
         TransactionCategoryDTO savedCategoryDTO = categoryService.add(categoryDTO);
 
         Assertions.assertNotEquals(0, savedCategoryDTO.getId());
         Assertions.assertEquals(categoryDTO, savedCategoryDTO);
 
-        TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO();
+        TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO();
 
-        categoryDTO3.setName("t3");
+        categoryDTO2.setName("t2");
 
-        categoryDTO3 = categoryService.add(categoryDTO3);
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").id(2).build();
 
-        Assertions.assertNotEquals(categoryDTO, categoryDTO3);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+
+        categoryDTO2 = categoryService.add(categoryDTO2);
+
+        Assertions.assertNotEquals(categoryDTO, categoryDTO2);
     }
 
     @DisplayName("Test of the method for adding goal")
@@ -91,18 +85,27 @@ class TransactionCategoryServiceTest {
         categoryDTO.setName("t");
         categoryDTO.setNeededSum(BigDecimal.valueOf(10.0));
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").
+                id(1).neededSum(BigDecimal.valueOf(10.0)).userId(CurrentUser.currentUser.getId()).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+
         TransactionCategoryDTO savedCategoryDTO = categoryService.add(categoryDTO);
 
         Assertions.assertNotEquals(0, savedCategoryDTO.getId());
         Assertions.assertEquals(categoryDTO, savedCategoryDTO);
 
-        TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
+        TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
 
-        categoryDTO3.setName("t3");
+        categoryDTO2.setName("t2");
 
-        categoryDTO3 = categoryService.add(categoryDTO3);
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").id(2).build();
 
-        Assertions.assertNotEquals(categoryDTO, categoryDTO3);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+
+        categoryDTO2 = categoryService.add(categoryDTO2);
+
+        Assertions.assertNotEquals(categoryDTO, categoryDTO2);
     }
 
     @DisplayName("Test of the method for finding category by id")
@@ -112,13 +115,21 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+
         categoryDTO = categoryService.add(categoryDTO);
+
+        Mockito.when(categoryRepository.findById(categoryDTO.getId())).thenReturn(category);
 
         Assertions.assertEquals(categoryService.findById(categoryDTO.getId()), categoryDTO);
 
         categoryDTO.setName("t0");
 
         Assertions.assertNotEquals(categoryService.findById(categoryDTO.getId()), categoryDTO);
+
+        Mockito.when(categoryRepository.findById(10)).thenReturn(null);
 
         Assertions.assertNull(categoryService.findById(10));
     }
@@ -130,15 +141,28 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
-        categoryService.add(categoryDTO);
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
 
-        Assertions.assertEquals(categoryService.findByName("t"), categoryDTO);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+
+        categoryDTO = categoryService.add(categoryDTO);
+
+        Mockito.when(categoryRepository.findByName("t")).thenReturn(category);
+
+        Assertions.assertEquals(categoryDTO, categoryService.findByName("t"));
 
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO();
 
         categoryDTO2.setName("t0");
 
-        categoryService.add(categoryDTO2);
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t0").id(1).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+
+        categoryDTO2 = categoryService.add(categoryDTO2);
+
+        Mockito.when(categoryRepository.findByName("t0")).thenReturn(category2);
+        Mockito.when(categoryRepository.findByName("t2")).thenReturn(null);
 
         Assertions.assertNotEquals(categoryService.findByName("t"), categoryDTO2);
         Assertions.assertEquals(categoryService.findByName("t0"), categoryDTO2);
@@ -152,21 +176,33 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO();
 
         categoryDTO2.setName("t2");
+
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").id(2).build();
 
         TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO();
 
         categoryDTO3.setName("t3");
 
+        TransactionCategoryEntity category3 = new TransactionCategoryEntity.TransactionCategoryBuilder("t3").id(3).build();
+
         List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO, categoryDTO2, categoryDTO3);
 
         List<TransactionCategoryDTO> transactionCategoryEntitiesReturned;
 
-        categoryService.add(categoryDTO);
-        categoryService.add(categoryDTO2);
-        categoryService.add(categoryDTO3);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO3))).thenReturn(category3);
+
+        categoryDTO = categoryService.add(categoryDTO);
+        categoryDTO2 = categoryService.add(categoryDTO2);
+        categoryDTO3 = categoryService.add(categoryDTO3);
+
+        Mockito.when(categoryRepository.findAll()).thenReturn(List.of(category, category2, category3));
 
         transactionCategoryEntitiesReturned = categoryService.findAll();
 
@@ -176,9 +212,15 @@ class TransactionCategoryServiceTest {
 
         categoryDTO4.setName("t4");
 
+        TransactionCategoryEntity category4 = new TransactionCategoryEntity.TransactionCategoryBuilder("t4").id(4).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO4))).thenReturn(category4);
+
+        categoryDTO4 = categoryService.add(categoryDTO4);
+
         categoryEntities = List.of(categoryDTO, categoryDTO2, categoryDTO3, categoryDTO4);
 
-        categoryService.add(categoryDTO4);
+        Mockito.when(categoryRepository.findAll()).thenReturn(List.of(category, category2, category3, category4));
 
         transactionCategoryEntitiesReturned = categoryService.findAll();
 
@@ -196,28 +238,45 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
 
         categoryDTO2.setName("t2");
         categoryDTO2.setNeededSum(BigDecimal.valueOf(20.0));
 
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").
+                id(2).neededSum(BigDecimal.valueOf(20.0)).userId(CurrentUser.currentUser.getId()).build();
+
         TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO();
 
         categoryDTO3.setName("t3");
+
+        TransactionCategoryEntity category3 = new TransactionCategoryEntity.TransactionCategoryBuilder("t3").id(3).build();
 
         TransactionCategoryDTO categoryDTO4 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
 
         categoryDTO4.setName("t4");
         categoryDTO4.setNeededSum(BigDecimal.valueOf(40.4));
 
+        TransactionCategoryEntity category4 = new TransactionCategoryEntity.TransactionCategoryBuilder("t4").
+                id(4).neededSum(BigDecimal.valueOf(40.4)).userId(CurrentUser.currentUser.getId()).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO3))).thenReturn(category3);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO4))).thenReturn(category4);
+
+        categoryDTO = categoryService.add(categoryDTO);
+        categoryDTO2 = categoryService.add(categoryDTO2);
+        categoryDTO3 = categoryService.add(categoryDTO3);
+        categoryDTO4 = categoryService.add(categoryDTO4);
+
         List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO2, categoryDTO4);
 
         List<TransactionCategoryDTO> transactionCategoryEntitiesReturned;
 
-        categoryService.add(categoryDTO);
-        categoryService.add(categoryDTO2);
-        categoryService.add(categoryDTO3);
-        categoryService.add(categoryDTO4);
+        Mockito.when(categoryRepository.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category2, category4));
 
         transactionCategoryEntitiesReturned = categoryService.findCommonCategoriesOrGoalsByUserId(CurrentUser.currentUser.getId());
 
@@ -231,29 +290,45 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
 
         categoryDTO2.setName("t2");
         categoryDTO2.setNeededSum(BigDecimal.valueOf(20.0));
 
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").
+                id(2).neededSum(BigDecimal.valueOf(20.0)).userId(CurrentUser.currentUser.getId()).build();
+
         TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO();
 
         categoryDTO3.setName("t3");
+
+        TransactionCategoryEntity category3 = new TransactionCategoryEntity.TransactionCategoryBuilder("t3").id(3).build();
 
         TransactionCategoryDTO categoryDTO4 = new TransactionCategoryDTO(0, CurrentUser.currentUser.getId());
 
         categoryDTO4.setName("t4");
         categoryDTO4.setNeededSum(BigDecimal.valueOf(40.4));
 
-        List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO2, categoryDTO4);
+        TransactionCategoryEntity category4 = new TransactionCategoryEntity.TransactionCategoryBuilder("t4").
+                id(4).neededSum(BigDecimal.valueOf(40.4)).userId(CurrentUser.currentUser.getId()).build();
 
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO3))).thenReturn(category3);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO4))).thenReturn(category4);
+
+        categoryDTO = categoryService.add(categoryDTO);
+        categoryDTO2 = categoryService.add(categoryDTO2);
+        categoryDTO3 = categoryService.add(categoryDTO3);
+        categoryDTO4 = categoryService.add(categoryDTO4);
+
+        List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO2, categoryDTO4);
 
         List<TransactionCategoryDTO> transactionCategoryEntitiesReturned;
 
-        categoryService.add(categoryDTO);
-        categoryService.add(categoryDTO2);
-        categoryService.add(categoryDTO3);
-        categoryService.add(categoryDTO4);
+        Mockito.when(categoryRepository.findAllGoalsByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(category2, category4));
 
         transactionCategoryEntitiesReturned = categoryService.findAllGoalsByUserId(CurrentUser.currentUser.getId());
 
@@ -267,19 +342,29 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+
         categoryDTO = categoryService.add(categoryDTO);
 
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO(categoryDTO.getId(), null);
 
         categoryDTO2.setName("t2");
 
-        categoryService.update(categoryDTO2, categoryDTO.getId());
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").id(categoryDTO.getId()).build();
 
-        Assertions.assertEquals(categoryService.findById(categoryDTO.getId()), categoryDTO2);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+
+        categoryDTO2 = categoryService.update(categoryDTO2, categoryDTO.getId());
+
+        Mockito.when(categoryRepository.findById(categoryDTO.getId())).thenReturn(category2);
+
+        Assertions.assertEquals(categoryDTO2, categoryService.findById(categoryDTO.getId()));
 
         categoryDTO2.setName("t0");
 
-        Assertions.assertNotEquals(categoryService.findById(categoryDTO.getId()), categoryDTO2);
+        Assertions.assertNotEquals(categoryDTO2, categoryService.findById(categoryDTO.getId()));
     }
 
     @DisplayName("Test of the method for deleting category")
@@ -289,25 +374,44 @@ class TransactionCategoryServiceTest {
 
         categoryDTO.setName("t");
 
+        TransactionCategoryEntity category = new TransactionCategoryEntity.TransactionCategoryBuilder("t").id(1).build();
+
         TransactionCategoryDTO categoryDTO2 = new TransactionCategoryDTO();
 
         categoryDTO2.setName("t2");
+
+        TransactionCategoryEntity category2 = new TransactionCategoryEntity.TransactionCategoryBuilder("t2").id(2).build();
 
         TransactionCategoryDTO categoryDTO3 = new TransactionCategoryDTO();
 
         categoryDTO3.setName("t3");
 
-        List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO, categoryDTO2, categoryDTO3);
+        TransactionCategoryEntity category3 = new TransactionCategoryEntity.TransactionCategoryBuilder("t3").id(3).build();
+
+
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO))).thenReturn(category);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO2))).thenReturn(category2);
+        Mockito.when(categoryRepository.save(categoryDTOMapper.mapToEntity(categoryDTO3))).thenReturn(category3);
 
         categoryDTO = categoryService.add(categoryDTO);
-        categoryService.add(categoryDTO2);
-        categoryService.add(categoryDTO3);
+        categoryDTO2 = categoryService.add(categoryDTO2);
+        categoryDTO3 = categoryService.add(categoryDTO3);
+
+        List<TransactionCategoryDTO> categoryEntities = List.of(categoryDTO, categoryDTO2, categoryDTO3);
+
+        Mockito.when(categoryRepository.findAll()).thenReturn(List.of(category, category2, category3));
 
         List<TransactionCategoryDTO> transactionCategoryEntitiesReturned = categoryService.findAll();
 
         Assertions.assertEquals(categoryEntities, transactionCategoryEntitiesReturned);
 
-        categoryService.delete(categoryDTO.getId());
+        Mockito.when(categoryRepository.findById(categoryDTO.getId())).thenReturn(null);
+        Mockito.doNothing().when(categoryRepository).delete(null);
+
+        Assertions.assertTrue(categoryService.delete(categoryDTO.getId()));
+
+        Mockito.when(categoryRepository.findAll()).thenReturn(List.of(category2, category3));
+
         transactionCategoryEntitiesReturned = categoryService.findAll();
 
         Assertions.assertNotEquals(categoryEntities, transactionCategoryEntitiesReturned);

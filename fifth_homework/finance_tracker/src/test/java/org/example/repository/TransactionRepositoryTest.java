@@ -383,7 +383,7 @@ class TransactionRepositoryTest {
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        filters = TransactionSpecification.dateIs(null).and(TransactionSpecification.categoryIdIs(0)).and(TransactionSpecification.sumType("Pos")).and(TransactionSpecification.userIdIs(user.getId()));
+        filters = TransactionSpecification.dateIs(null).and(TransactionSpecification.categoryIdIs(0)).and(TransactionSpecification.sumTypeIs("Pos")).and(TransactionSpecification.userIdIs(user.getId()));
         transactionEntitiesReturned = transactionRepository.findAll(filters);
         transactionEntities = List.of(transactionEntity3);
 

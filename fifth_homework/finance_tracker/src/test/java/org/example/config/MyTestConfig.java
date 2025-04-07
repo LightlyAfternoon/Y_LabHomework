@@ -8,6 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -34,7 +35,20 @@ import java.util.Properties;
 @ComponentScan({"org.example.service.impl", "org.example.controller"})
 @WebAppConfiguration
 public class MyTestConfig implements WebMvcConfigurer {
+    static String url = "jdbc:h2:mem:test;MODE=PostgreSQL;IGNORECASE=TRUE";
+    static String username = "sa";
+    static String password = "";
     static DataSource dataSourceTest;
+
+    public static void setConfig() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+
+        dataSourceTest = dataSource;
+    }
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -59,10 +73,7 @@ public class MyTestConfig implements WebMvcConfigurer {
 
     Properties additionalProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "validate");
-        properties.setProperty("hibernate.type.preferred_boolean_jdbc_type", "smallint");
-        properties.setProperty("hibernate.dialect", PostgreSQLDialect.class.getCanonicalName());
-        properties.setProperty("hibernate.show_sql", "true");
+        properties.setProperty("hibernate.hbm2ddl.auto", "none");
 
         return properties;
     }
@@ -78,7 +89,6 @@ public class MyTestConfig implements WebMvcConfigurer {
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
-        em.setJpaProperties(additionalProperties());
 
         return em;
     }

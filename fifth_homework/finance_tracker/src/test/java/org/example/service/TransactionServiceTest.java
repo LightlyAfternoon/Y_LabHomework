@@ -1,69 +1,56 @@
 package org.example.service;
 
-import liquibase.exception.LiquibaseException;
 import org.example.CurrentUser;
 import org.example.config.MyTestConfig;
-import org.example.controller.dto.TransactionCategoryDTO;
 import org.example.controller.dto.TransactionDTO;
 import org.example.controller.dto.UserDTO;
+import org.example.controller.mapper.TransactionDTOMapper;
+import org.example.controller.mapper.UserDTOMapper;
 import org.example.model.TransactionCategoryEntity;
+import org.example.model.TransactionEntity;
 import org.example.model.UserEntity;
 import org.example.model.UserRole;
-import org.example.repository.TransactionCategoryRepository;
+import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.service.impl.TransactionServiceImpl;
+import org.example.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.*;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of transaction service methods")
 class TransactionServiceTest {
-    UserService userService;
     TransactionCategoryEntity category;
-    TransactionService transactionService;
-    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
-    AnnotationConfigApplicationContext context;
+    @InjectMocks
+    UserServiceImpl userService;
+    @Mock
+    UserRepository userRepository;
+    @InjectMocks
+    TransactionServiceImpl transactionService;
+    @Mock
+    TransactionRepository transactionRepository;
+    @Spy
+    TransactionDTOMapper transactionDTOMapper = Mappers.getMapper(TransactionDTOMapper.class);
+    @Spy
+    UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
     @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
-        container.start();
-
-        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
-    }
-
-    @AfterAll
-    static void afterAll() {
-        container.stop();
+    static void beforeAll() {
+        MyTestConfig.setConfig();
     }
 
     @BeforeEach
     void setUp() {
-        context = new AnnotationConfigApplicationContext(MyTestConfig.class);
-        UserRepository userRepository = context.getBean(UserRepository.class);
-        TransactionCategoryRepository categoryRepository = context.getBean(TransactionCategoryRepository.class);
-        userService = context.getBean(UserService.class);
-        transactionService = context.getBean(TransactionService.class);
-        TransactionCategoryService categoryService = context.getBean(TransactionCategoryService.class);
-
-        for (TransactionDTO transactionDTO : transactionService.findAll()) {
-            transactionService.delete(transactionDTO.getId());
-        }
-
-        for (UserDTO userDTO : userService.findAll()) {
-            userService.delete(userDTO.getId());
-        }
-
-        for (TransactionCategoryDTO categoryDTO : categoryService.findAll()) {
-            categoryService.delete(categoryDTO.getId());
-        }
-
-        UserEntity user = new UserEntity();
+        UserEntity user = new UserEntity(1);
 
         user.setEmail("t");
         user.setPassword("t");
@@ -71,67 +58,70 @@ class TransactionServiceTest {
         user.setRole(UserRole.USER);
         user.setBlocked(false);
 
-        user = userRepository.save(user);
-
         CurrentUser.currentUser = user;
 
-        category = new TransactionCategoryEntity();
+        category = new TransactionCategoryEntity(1, null);
 
         category.setName("t");
-
-        category = categoryRepository.save(category);
     }
 
     @DisplayName("Test of the method for adding transaction")
     @Test
-    void addTest() throws ParseException {
+    void addTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
 
-        transactionDTO = transactionService.add(transactionDTO);
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
 
-        TransactionDTO transactionDTO2 = new TransactionDTO(CurrentUser.currentUser.getId());
-        transactionDTO2.setSum(BigDecimal.valueOf(10.10));
-        transactionDTO2.setCategoryId(category.getId());
-        transactionDTO2.setDate(date);
-        transactionDTO2.setDescription("t");
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
 
         TransactionDTO savedTransactionDTO = transactionService.add(transactionDTO);
 
         Assertions.assertNotEquals(0, savedTransactionDTO.getId());
         Assertions.assertEquals(transactionDTO, savedTransactionDTO);
 
-        TransactionDTO transactionDTO3 = new TransactionDTO(CurrentUser.currentUser.getId());
+        TransactionDTO transactionDTO2 = new TransactionDTO(CurrentUser.currentUser.getId());
 
-        transactionDTO3.setSum(BigDecimal.valueOf(10.0));
-        transactionDTO3.setCategoryId(category.getId());
-        transactionDTO3.setDate(date);
-        transactionDTO3.setDescription("t2");
+        transactionDTO2.setSum(BigDecimal.valueOf(10.0));
+        transactionDTO2.setCategoryId(category.getId());
+        transactionDTO2.setDate(date);
+        transactionDTO2.setDescription("t2");
 
-        transactionDTO3 = transactionService.add(transactionDTO3);
+        TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.0), CurrentUser.currentUser.getId()).
+                id(2).categoryId(category.getId()).date(date).description("t2").build();
 
-        Assertions.assertNotEquals(transactionDTO, transactionDTO3);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO2))).thenReturn(transaction2);
+
+        transactionDTO2 = transactionService.add(transactionDTO2);
+
+        Assertions.assertNotEquals(transactionDTO, transactionDTO2);
     }
 
     @DisplayName("Test of the method for finding transaction by id")
     @Test
-    void findByIdTest() throws ParseException {
+    void findByIdTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
 
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
+
         transactionDTO = transactionService.add(transactionDTO);
+
+        Mockito.when(transactionRepository.findById(1)).thenReturn(transaction);
 
         Assertions.assertEquals(transactionService.findById(transactionDTO.getId()), transactionDTO);
 
@@ -139,20 +129,24 @@ class TransactionServiceTest {
 
         Assertions.assertNotEquals(transactionService.findById(transactionDTO.getId()), transactionDTO);
 
+        Mockito.when(transactionRepository.findById(1)).thenReturn(null);
+
         Assertions.assertNull(transactionService.findById(10));
     }
 
     @DisplayName("Test of the method for finding all transactions")
     @Test
-    void findAllTest() throws ParseException {
+    void findAllTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
+
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
 
         TransactionDTO transactionDTO2 = new TransactionDTO(CurrentUser.currentUser.getId());
 
@@ -161,6 +155,9 @@ class TransactionServiceTest {
         transactionDTO2.setDate(date);
         transactionDTO2.setDescription("t2");
 
+        TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(20.0), CurrentUser.currentUser.getId()).
+                id(2).categoryId(category.getId()).date(date).description("t2").build();
+
         TransactionDTO transactionDTO3 = new TransactionDTO(CurrentUser.currentUser.getId());
 
         transactionDTO3.setSum(BigDecimal.valueOf(30.3));
@@ -168,13 +165,22 @@ class TransactionServiceTest {
         transactionDTO3.setDate(date);
         transactionDTO3.setDescription("t3");
 
+        TransactionEntity transaction3 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(30.3), CurrentUser.currentUser.getId()).
+                id(3).categoryId(category.getId()).date(date).description("t3").build();
+
         List<TransactionDTO> transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3);
 
         List<TransactionDTO> transactionEntitiesReturned;
 
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO2))).thenReturn(transaction2);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO3))).thenReturn(transaction3);
+
         transactionService.add(transactionDTO);
         transactionService.add(transactionDTO2);
         transactionService.add(transactionDTO3);
+
+        Mockito.when(transactionRepository.findAll()).thenReturn(List.of(transaction, transaction2, transaction3));
 
         transactionEntitiesReturned = transactionService.findAll();
 
@@ -182,16 +188,24 @@ class TransactionServiceTest {
 
         TransactionDTO transactionDTO4 = new TransactionDTO(CurrentUser.currentUser.getId());
 
-        date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
+        date = new Date(System.currentTimeMillis());
 
         transactionDTO4.setSum(BigDecimal.valueOf(10.10));
         transactionDTO4.setCategoryId(category.getId());
         transactionDTO4.setDate(date);
         transactionDTO4.setDescription("t4");
 
+        TransactionEntity transaction4 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(4).categoryId(category.getId()).date(date).description("t4").build();
+
         transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3, transactionDTO4);
 
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO4))).thenReturn(transaction4);
+
         transactionService.add(transactionDTO4);
+
+        Mockito.when(transactionRepository.findAll()).thenReturn(List.of(transaction, transaction2, transaction3, transaction4));
+
         transactionEntitiesReturned = transactionService.findAll();
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
@@ -205,18 +219,15 @@ class TransactionServiceTest {
     @Test
     void findAllByUserIdTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date;
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
+
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
 
         TransactionDTO transactionDTO2 = new TransactionDTO(CurrentUser.currentUser.getId());
 
@@ -225,6 +236,9 @@ class TransactionServiceTest {
         transactionDTO2.setDate(date);
         transactionDTO2.setDescription("t2");
 
+        TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(20.0), CurrentUser.currentUser.getId()).
+                id(2).categoryId(category.getId()).date(date).description("t2").build();
+
         TransactionDTO transactionDTO3 = new TransactionDTO(CurrentUser.currentUser.getId());
 
         transactionDTO3.setSum(BigDecimal.valueOf(30.3));
@@ -232,13 +246,22 @@ class TransactionServiceTest {
         transactionDTO3.setDate(date);
         transactionDTO3.setDescription("t3");
 
+        TransactionEntity transaction3 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(30.3), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t3").build();
+
         List<TransactionDTO> transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3);
 
         List<TransactionDTO> transactionEntitiesReturned;
 
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO2))).thenReturn(transaction2);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO3))).thenReturn(transaction3);
+
         transactionService.add(transactionDTO);
         transactionService.add(transactionDTO2);
         transactionService.add(transactionDTO3);
+
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(transaction, transaction2, transaction3));
 
         transactionEntitiesReturned = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
 
@@ -246,19 +269,24 @@ class TransactionServiceTest {
 
         TransactionDTO transactionDTO4 = new TransactionDTO(CurrentUser.currentUser.getId());
 
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        date = new Date(System.currentTimeMillis());
+
         transactionDTO4.setSum(BigDecimal.valueOf(10.10));
         transactionDTO4.setCategoryId(category.getId());
         transactionDTO4.setDate(date);
         transactionDTO4.setDescription("t4");
 
+        TransactionEntity transaction4 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t4").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO4))).thenReturn(transaction4);
+
+        transactionDTO4 = transactionService.add(transactionDTO4);
+
         transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3, transactionDTO4);
 
-        transactionService.add(transactionDTO4);
+        Mockito.when(transactionRepository.findAllByUserId(CurrentUser.currentUser.getId())).thenReturn(List.of(transaction, transaction2, transaction3, transaction4));
+
         transactionEntitiesReturned = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
@@ -268,7 +296,10 @@ class TransactionServiceTest {
         userDTO.setEmail("t2");
         userDTO.setPassword("t2");
         userDTO.setName("t2");
-        userDTO.setBlocked(false);
+
+        UserEntity user = new UserEntity.UserBuilder("t2", "t2", "t2").id(2).build();
+
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
 
         userDTO = userService.add(userDTO);
 
@@ -279,7 +310,20 @@ class TransactionServiceTest {
         transactionDTO5.setDate(date);
         transactionDTO5.setDescription("t5");
 
-        transactionService.add(transactionDTO5);
+        TransactionEntity transaction5 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), userDTO.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t5").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO5))).thenReturn(transaction5);
+
+        transactionDTO5 = transactionService.add(transactionDTO5);
+
+        Mockito.when(transactionRepository.findAllByUserId(userDTO.getId())).thenReturn(List.of(transaction5));
+
+        List<TransactionDTO> transactionEntities2 = List.of(transactionDTO5);
+
+        List<TransactionDTO> transactionEntitiesReturned2 = transactionService.findAllByUserId(userDTO.getId());
+
+        Assertions.assertEquals(transactionEntities2, transactionEntitiesReturned2);
 
         transactionEntitiesReturned = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
 
@@ -292,130 +336,55 @@ class TransactionServiceTest {
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
 
-        transactionService.add(transactionDTO);
+        transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(21.30), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
+
+        transactionDTO = transactionService.add(transactionDTO);
+
+        transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3, transactionDTO4);
 
         transactionEntitiesReturned = transactionService.findAllByUserId(CurrentUser.currentUser.getId());
 
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
     }
 
-    @DisplayName("Test of the method for finding all transactions by user id")
-    @Test
-    void findAllByDateAndCategoryIdAndTypeAndUserIdTest() {
-        TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date;
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        transactionDTO.setSum(BigDecimal.valueOf(10.10));
-        transactionDTO.setCategoryId(category.getId());
-        transactionDTO.setDate(date);
-        transactionDTO.setDescription("t");
-
-        TransactionDTO transactionDTO2 = new TransactionDTO(CurrentUser.currentUser.getId());
-        Date date2;
-        try {
-            date2 = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis() + 86_400_000).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        transactionDTO2.setSum(BigDecimal.valueOf(20.0));
-        transactionDTO2.setCategoryId(category.getId());
-        transactionDTO2.setDate(date2);
-        transactionDTO2.setDescription("t2");
-
-        UserDTO user = new UserDTO();
-
-        user.setEmail("t2");
-        user.setPassword("t2");
-        user.setName("t2");
-        user.setBlocked(false);
-
-        user = userService.add(user);
-
-        TransactionDTO transactionDTO3 = new TransactionDTO(user.getId());
-
-        transactionDTO3.setSum(BigDecimal.valueOf(30.3));
-        transactionDTO3.setCategoryId(category.getId());
-        transactionDTO3.setDate(date);
-        transactionDTO3.setDescription("t3");
-
-        TransactionDTO transactionDTO4 = new TransactionDTO(CurrentUser.currentUser.getId());
-
-        transactionDTO4.setSum(BigDecimal.valueOf(-10.10));
-        transactionDTO4.setDate(date2);
-        transactionDTO4.setDescription(null);
-
-        List<TransactionDTO> transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO4);
-        List<TransactionDTO> transactionEntitiesReturned;
-
-        transactionService.add(transactionDTO);
-        transactionService.add(transactionDTO2);
-        transactionService.add(transactionDTO3);
-        transactionService.add(transactionDTO4);
-
-        transactionEntitiesReturned = transactionService.findAllByDateAndCategoryIdAndTypeAndUserId(null, null, null, CurrentUser.currentUser.getId());
-
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-
-        transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3, transactionDTO4);
-
-        Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);
-
-        transactionEntitiesReturned = transactionService.findAllByDateAndCategoryIdAndTypeAndUserId(date, 0, null, CurrentUser.currentUser.getId());
-
-        transactionEntities = List.of(transactionDTO);
-
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-
-        transactionEntitiesReturned = transactionService.findAllByDateAndCategoryIdAndTypeAndUserId(null, category.getId(), null, CurrentUser.currentUser.getId());
-        transactionEntities = List.of(transactionDTO, transactionDTO2);
-
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-
-        transactionEntitiesReturned = transactionService.findAllByDateAndCategoryIdAndTypeAndUserId(null, 0, "Pos", user.getId());
-        transactionEntities = List.of(transactionDTO3);
-
-        Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
-    }
-
     @DisplayName("Test of the method for updating transaction")
     @Test
     void updateTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date;
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
+
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
 
         transactionDTO = transactionService.add(transactionDTO);
 
         TransactionDTO transactionDTO2 = new TransactionDTO(transactionDTO.getId(), CurrentUser.currentUser.getId());
 
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        date = new Date(System.currentTimeMillis());
+
         transactionDTO2.setSum(BigDecimal.valueOf(1.23));
         transactionDTO2.setCategoryId(category.getId());
         transactionDTO2.setDate(date);
         transactionDTO2.setDescription("t2");
 
-        transactionService.update(transactionDTO2, transactionDTO2.getId());
+        TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(1.23), CurrentUser.currentUser.getId()).
+                id(transactionDTO.getId()).categoryId(category.getId()).date(date).description("t2").build();
+
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO2))).thenReturn(transaction2);
+
+        transactionDTO2 = transactionService.update(transactionDTO2, transactionDTO2.getId());
+
+        Mockito.when(transactionRepository.findById(transactionDTO.getId())).thenReturn(transaction2);
 
         Assertions.assertEquals(transactionService.findById(transactionDTO.getId()), transactionDTO2);
 
@@ -428,30 +397,27 @@ class TransactionServiceTest {
     @Test
     void deleteTest() {
         TransactionDTO transactionDTO = new TransactionDTO(CurrentUser.currentUser.getId());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date;
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        Date date = new Date(System.currentTimeMillis());
 
         transactionDTO.setSum(BigDecimal.valueOf(10.10));
         transactionDTO.setCategoryId(category.getId());
         transactionDTO.setDate(date);
         transactionDTO.setDescription("t");
 
+        TransactionEntity transaction = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(10.10), CurrentUser.currentUser.getId()).
+                id(1).categoryId(category.getId()).date(date).description("t").build();
+
         TransactionDTO transactionDTO2 = new TransactionDTO(transactionDTO.getId(), CurrentUser.currentUser.getId());
 
-        try {
-            date = new Date(simpleDateFormat.parse(new Date(System.currentTimeMillis()).toString()).getTime());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        date = new Date(System.currentTimeMillis());
+
         transactionDTO2.setSum(BigDecimal.valueOf(1.23));
         transactionDTO2.setCategoryId(category.getId());
         transactionDTO2.setDate(date);
         transactionDTO2.setDescription("t2");
+
+        TransactionEntity transaction2 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(1.23), CurrentUser.currentUser.getId()).
+                id(transactionDTO.getId()).categoryId(category.getId()).date(date).description("t2").build();
 
         TransactionDTO transactionDTO3 = new TransactionDTO(CurrentUser.currentUser.getId());
 
@@ -460,17 +426,32 @@ class TransactionServiceTest {
         transactionDTO3.setDate(date);
         transactionDTO3.setDescription("t3");
 
+        TransactionEntity transaction3 = new TransactionEntity.TransactionBuilder(BigDecimal.valueOf(30.3), CurrentUser.currentUser.getId()).
+                id(transactionDTO.getId()).categoryId(category.getId()).date(date).description("t3").build();
+
         List<TransactionDTO> transactionEntities = List.of(transactionDTO, transactionDTO2, transactionDTO3);
 
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO))).thenReturn(transaction);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO2))).thenReturn(transaction2);
+        Mockito.when(transactionRepository.save(transactionDTOMapper.mapToEntity(transactionDTO3))).thenReturn(transaction3);
+
         transactionDTO = transactionService.add(transactionDTO);
-        transactionService.add(transactionDTO2);
-        transactionService.add(transactionDTO3);
+        transactionDTO2 = transactionService.add(transactionDTO2);
+        transactionDTO3 = transactionService.add(transactionDTO3);
+
+        Mockito.when(transactionRepository.findAll()).thenReturn(List.of(transaction, transaction2, transaction3));
 
         List<TransactionDTO> transactionEntitiesReturned = transactionService.findAll();
 
         Assertions.assertEquals(transactionEntities, transactionEntitiesReturned);
 
-        transactionService.delete(transactionDTO.getId());
+        Mockito.doNothing().when(transactionRepository).delete((TransactionEntity) null);
+        Mockito.when(transactionRepository.findById(transactionDTO.getId())).thenReturn(null);
+
+        Assertions.assertTrue(transactionService.delete(transactionDTO.getId()));
+
+        Mockito.when(transactionRepository.findAll()).thenReturn(List.of(transaction2, transaction3));
+
         transactionEntitiesReturned = transactionService.findAll();
 
         Assertions.assertNotEquals(transactionEntities, transactionEntitiesReturned);

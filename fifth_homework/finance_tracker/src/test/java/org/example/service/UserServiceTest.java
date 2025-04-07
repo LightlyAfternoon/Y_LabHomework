@@ -1,42 +1,35 @@
 package org.example.service;
 
-import liquibase.exception.LiquibaseException;
 import org.example.config.MyTestConfig;
 import org.example.controller.dto.UserDTO;
+import org.example.controller.mapper.UserDTOMapper;
+import org.example.model.UserEntity;
 import org.example.model.UserRole;
+import org.example.repository.UserRepository;
+import org.example.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.*;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.sql.SQLException;
 import java.util.List;
 
+@SpringBootTest
 @DisplayName("Tests of user service methods")
 class UserServiceTest {
-    UserService userService;
-    static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:17.4");
-    AnnotationConfigApplicationContext context;
+    @InjectMocks
+    UserServiceImpl userService;
+    @Mock
+    UserRepository userRepository;
+    @Spy
+    UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
     @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
-        container.start();
-
-        MyTestConfig.setConfig(container.getJdbcUrl(), container.getUsername(), container.getPassword());
-    }
-
-    @AfterAll
-    static void afterAll() {
-        container.stop();
-    }
-
-    @BeforeEach
-    void setUp() {
-        context = new AnnotationConfigApplicationContext(MyTestConfig.class);
-        userService = context.getBean(UserService.class);
-
-        for (UserDTO userDTO : userService.findAll()) {
-            userService.delete(userDTO.getId());
-        }
+    static void beforeAll() {
+        MyTestConfig.setConfig();
     }
 
     @DisplayName("Test of the method for adding user")
@@ -50,6 +43,11 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
+        UserEntity user = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
+
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
         userDTO = userService.add(userDTO);
 
         Assertions.assertNotEquals(0, userDTO.getId());
@@ -62,6 +60,8 @@ class UserServiceTest {
         userDTO2.setRole(UserRole.USER);
         userDTO2.setBlocked(false);
 
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(user);
+
         userDTO2 = userService.add(userDTO2);
 
         Assertions.assertNull(userDTO2);
@@ -73,6 +73,8 @@ class UserServiceTest {
         userDTO3.setName("t2");
         userDTO3.setRole(UserRole.USER);
         userDTO3.setBlocked(true);
+
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(user);
 
         userDTO3 = userService.add(userDTO3);
 
@@ -90,8 +92,14 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
+        UserEntity user = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
+
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
         userDTO = userService.add(userDTO);
 
+        Mockito.when(userRepository.findById(1)).thenReturn(user);
         Assertions.assertEquals(userService.findById(userDTO.getId()), userDTO);
 
         userDTO.setRole(UserRole.ADMIN);
@@ -112,6 +120,8 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
+        UserEntity user = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
+
         UserDTO userDTO2 = new UserDTO();
 
         userDTO2.setEmail("t2");
@@ -119,6 +129,8 @@ class UserServiceTest {
         userDTO2.setName("t2");
         userDTO2.setRole(UserRole.USER);
         userDTO2.setBlocked(true);
+
+        UserEntity user2 = new UserEntity.UserBuilder("t2", "t2", "t2").id(2).isBlocked(true).build();
 
         UserDTO userDTO3 = new UserDTO();
 
@@ -128,13 +140,26 @@ class UserServiceTest {
         userDTO3.setRole(UserRole.ADMIN);
         userDTO3.setBlocked(false);
 
+        UserEntity user3 = new UserEntity.UserBuilder("t3", "t2", "t3").id(3).role(UserRole.ADMIN).build();
+
         List<UserDTO> userEntities = List.of(userDTO, userDTO2, userDTO3);
 
         List<UserDTO> userEntitiesReturned;
 
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
+        Mockito.when(userRepository.findByEmail("t2")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO2))).thenReturn(user2);
+
+        Mockito.when(userRepository.findByEmail("t3")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO3))).thenReturn(user3);
+
         userService.add(userDTO);
         userService.add(userDTO2);
         userService.add(userDTO3);
+
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user, user2, user3));
 
         userEntitiesReturned = userService.findAll();
 
@@ -148,9 +173,16 @@ class UserServiceTest {
         userDTO4.setRole(UserRole.ADMIN);
         userDTO4.setBlocked(false);
 
+        UserEntity user4 = new UserEntity.UserBuilder("t4", "t2", "t4").id(4).role(UserRole.ADMIN).build();
+
         userEntities = List.of(userDTO, userDTO2, userDTO3, userDTO4);
 
+        Mockito.when(userRepository.findByEmail("t4")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO4))).thenReturn(user4);
+
         userService.add(userDTO4);
+
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user, user2, user3, user4));
 
         userEntitiesReturned = userService.findAll();
 
@@ -172,6 +204,11 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
+        UserEntity user = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
+
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
         userDTO = userService.add(userDTO);
 
         UserDTO userDTO2 = new UserDTO(userDTO.getId());
@@ -182,13 +219,20 @@ class UserServiceTest {
         userDTO2.setRole(UserRole.USER);
         userDTO2.setBlocked(false);
 
-        userService.update(userDTO2, userDTO2.getId());
+        UserEntity user2 = new UserEntity.UserBuilder("t2", "t2", "t2").id(userDTO.getId()).build();
 
-        Assertions.assertEquals(userService.findById(userDTO.getId()), userDTO2);
+        Mockito.when(userRepository.findByEmail("t2")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO2))).thenReturn(user2);
+
+        userDTO2 = userService.update(userDTO2, userDTO2.getId());
+
+        Mockito.when(userRepository.findById(userDTO.getId())).thenReturn(user2);
+
+        Assertions.assertEquals(userDTO2, userService.findById(userDTO.getId()));
 
         userDTO2.setRole(UserRole.ADMIN);
 
-        Assertions.assertNotEquals(userService.findById(userDTO.getId()), userDTO2);
+        Assertions.assertNotEquals(userDTO2, userService.findById(userDTO.getId()));
     }
 
     @DisplayName("Test of the method for deleting user")
@@ -202,6 +246,8 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
+        UserEntity user = new UserEntity.UserBuilder("t", "t", "t").id(1).build();
+
         UserDTO userDTO2 = new UserDTO();
 
         userDTO2.setEmail("t2");
@@ -209,6 +255,8 @@ class UserServiceTest {
         userDTO2.setName("t2");
         userDTO2.setRole(UserRole.USER);
         userDTO2.setBlocked(true);
+
+        UserEntity user2 = new UserEntity.UserBuilder("t2", "t2", "t2").id(2).isBlocked(true).build();
 
         UserDTO userDTO3 = new UserDTO();
 
@@ -218,19 +266,38 @@ class UserServiceTest {
         userDTO3.setRole(UserRole.ADMIN);
         userDTO3.setBlocked(false);
 
+        UserEntity user3 = new UserEntity.UserBuilder("t3", "t2", "t3").id(3).role(UserRole.ADMIN).build();
+
         List<UserDTO> userEntities = List.of(userDTO, userDTO2, userDTO3);
 
+        Mockito.when(userRepository.findByEmail("t")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
+        Mockito.when(userRepository.findByEmail("t2")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO2))).thenReturn(user2);
+
+        Mockito.when(userRepository.findByEmail("t3")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO3))).thenReturn(user3);
+
         userDTO = userService.add(userDTO);
-        userService.add(userDTO2);
-        userService.add(userDTO3);
+        userDTO2 = userService.add(userDTO2);
+        userDTO3 = userService.add(userDTO3);
 
         List<UserDTO> userEntitiesReturned;
+
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user, user2, user3));
 
         userEntitiesReturned = userService.findAll();
 
         Assertions.assertEquals(userEntities, userEntitiesReturned);
 
-        userService.delete(userDTO.getId());
+        Mockito.doNothing().when(userRepository).delete(null);
+        Mockito.when(userRepository.findById(userDTO.getId())).thenReturn(null);
+
+        Assertions.assertTrue(userService.delete(userDTO.getId()));
+
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user2, user3));
+
         userEntitiesReturned = userService.findAll();
 
         Assertions.assertNotEquals(userEntities, userEntitiesReturned);
@@ -251,7 +318,14 @@ class UserServiceTest {
         userDTO.setRole(UserRole.USER);
         userDTO.setBlocked(false);
 
-        userService.add(userDTO);
+        UserEntity user = new UserEntity.UserBuilder("te", "tp", "t").id(1).build();
+
+        Mockito.when(userRepository.findByEmail("te")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO))).thenReturn(user);
+
+        userDTO = userService.add(userDTO);
+
+        Mockito.when(userRepository.findByEmailAndPassword("te", "tp")).thenReturn(user);
 
         Assertions.assertEquals(userService.findUserByEmailAndPassword("te", "tp"), userDTO);
 
@@ -263,7 +337,18 @@ class UserServiceTest {
         userDTO2.setRole(UserRole.USER);
         userDTO2.setBlocked(false);
 
-        userService.add(userDTO2);
+        UserEntity user2 = new UserEntity.UserBuilder("te2", "tp2", "t2").id(2).isBlocked(true).build();
+
+        Mockito.when(userRepository.findByEmail("te2")).thenReturn(null);
+        Mockito.when(userRepository.save(userDTOMapper.mapToEntity(userDTO2))).thenReturn(user2);
+
+        userDTO2 = userService.add(userDTO2);
+
+        Mockito.when(userRepository.findByEmailAndPassword("te2", "tp2")).thenReturn(user2);
+        Mockito.when(userRepository.findByEmailAndPassword("te", "tp2")).thenReturn(null);
+        Mockito.when(userRepository.findByEmailAndPassword("te2", "tp")).thenReturn(null);
+        Mockito.when(userRepository.findByEmailAndPassword("tE2", "tp2")).thenReturn(null);
+        Mockito.when(userRepository.findByEmailAndPassword("tE2", "tP2")).thenReturn(null);
 
         Assertions.assertEquals(userService.findUserByEmailAndPassword("te2", "tp2"), userDTO2);
         Assertions.assertNotEquals(userService.findUserByEmailAndPassword("te", "tp2"), userDTO2);

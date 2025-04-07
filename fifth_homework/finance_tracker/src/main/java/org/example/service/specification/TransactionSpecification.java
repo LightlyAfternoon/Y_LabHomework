@@ -4,7 +4,7 @@ import org.example.model.TransactionEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
 
 /**
  * This class is used to construct transactions filters
@@ -28,7 +28,7 @@ public class TransactionSpecification {
         }
     }
 
-    public static Specification<TransactionEntity> sumType(String type) {
+    public static Specification<TransactionEntity> sumTypeIs(String type) {
         if (type != null && type.equals("Pos")) {
             return (root, query, criteriaBuilder) ->
                     criteriaBuilder.greaterThan(root.get("sum"), BigDecimal.valueOf(0));

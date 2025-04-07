@@ -24,8 +24,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDTO add(UserDTO userDTO) {
+        UserDTO dto = new UserDTO.UserBuilder(userDTO.getEmail(), userDTO.getPassword(), userDTO.getName()).
+                role(userDTO.getRole()).isBlocked(userDTO.isBlocked()).build();
+
         if (userRepository.findByEmail(userDTO.getEmail()) == null) {
-            return userDTOMapper.mapToDTO(userRepository.save(userDTOMapper.mapToEntity(userDTO)));
+            return userDTOMapper.mapToDTO(userRepository.save(userDTOMapper.mapToEntity(dto)));
         } else {
             return null;
         }
@@ -47,9 +50,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userWithEmail = userRepository.findByEmail(userDTO.getEmail());
 
         if (userWithEmail == null || userWithEmail.getId() == id) {
-            userRepository.save(userDTOMapper.mapToEntity(dto));
-
-            return userDTOMapper.mapToDTO(userRepository.findById(id));
+            return userDTOMapper.mapToDTO(userRepository.save(userDTOMapper.mapToEntity(dto)));
         } else {
             return null;
         }
