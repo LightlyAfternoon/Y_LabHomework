@@ -25,7 +25,7 @@ import java.util.List;
  * BufferedReaders represent a response body.
  */
 public class HttpRequestsClass {
-    UserDTO getLoggedInUser(String email, String password) {
+    public UserDTO getLoggedInUser(String email, String password) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -50,7 +50,7 @@ public class HttpRequestsClass {
 
             UserDTO userDTO = null;
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -70,7 +70,7 @@ public class HttpRequestsClass {
         }
     }
 
-    List<UserDTO> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -87,7 +87,7 @@ public class HttpRequestsClass {
 
             List<UserDTO> userDTOS = new ArrayList<>();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -107,7 +107,7 @@ public class HttpRequestsClass {
         }
     }
 
-    UserDTO getRegisteredUser(String email, String password, String name) {
+    public UserDTO getRegisteredUser(String email, String password, String name) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -132,7 +132,7 @@ public class HttpRequestsClass {
 
             UserDTO userDTO = null;
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -152,7 +152,7 @@ public class HttpRequestsClass {
         }
     }
 
-    MonthlyBudgetDTO addBudget(BigDecimal budget) {
+    public MonthlyBudgetDTO addBudget(BigDecimal budget) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -184,7 +184,7 @@ public class HttpRequestsClass {
 
             httpURLConnection.connect();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -204,7 +204,7 @@ public class HttpRequestsClass {
         }
     }
 
-    MonthlyBudgetDTO getBudget() {
+    public MonthlyBudgetDTO getBudget() {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -224,7 +224,7 @@ public class HttpRequestsClass {
 
             budgetDTO = null;
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -244,7 +244,7 @@ public class HttpRequestsClass {
         }
     }
 
-    TransactionCategoryDTO addGoal(String name, BigDecimal sum) {
+    public TransactionCategoryDTO addGoal(String name, BigDecimal sum) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -270,7 +270,7 @@ public class HttpRequestsClass {
 
             TransactionCategoryDTO goalDTO = null;
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -290,7 +290,7 @@ public class HttpRequestsClass {
         }
     }
 
-    TransactionDTO addTransaction(BigDecimal sum, int categoryId, Date date, String description) {
+    public TransactionDTO addTransaction(BigDecimal sum, int categoryId, Date date, String description) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -316,7 +316,7 @@ public class HttpRequestsClass {
 
             TransactionDTO transactionDTO = new TransactionDTO();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -336,7 +336,7 @@ public class HttpRequestsClass {
         }
     }
 
-    boolean deleteAccount(int id) {
+    public boolean deleteAccount(int id) {
         HttpURLConnection httpURLConnection;
 
         try {
@@ -355,7 +355,7 @@ public class HttpRequestsClass {
         }
     }
 
-    List<TransactionDTO> getTransactions() {
+    public List<TransactionDTO> getTransactions() {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -372,7 +372,7 @@ public class HttpRequestsClass {
 
             List<TransactionDTO> transactionDTOS = new ArrayList<>();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -392,7 +392,7 @@ public class HttpRequestsClass {
         }
     }
 
-    List<TransactionDTO> filterTransactions(Date date, int categoryId, String type, int userId) {
+    public List<TransactionDTO> filterTransactions(Date date, int categoryId, String type, int userId) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -409,7 +409,7 @@ public class HttpRequestsClass {
 
             List<TransactionDTO> transactionDTOS = new ArrayList<>();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -429,7 +429,7 @@ public class HttpRequestsClass {
         }
     }
 
-    boolean editTransaction(int id, BigDecimal sum, int categoryId, Date date, String description) {
+    public boolean editTransaction(int id, BigDecimal sum, int categoryId, Date date, String description) {
         HttpURLConnection httpURLConnection;
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -459,7 +459,7 @@ public class HttpRequestsClass {
         }
     }
 
-    boolean deleteTransaction(int id) {
+    public boolean deleteTransaction(int id) {
         HttpURLConnection httpURLConnection;
 
         try {
@@ -479,7 +479,7 @@ public class HttpRequestsClass {
         }
     }
 
-    List<TransactionCategoryDTO> getAllUserGoals(int userId) {
+    public List<TransactionCategoryDTO> getAllUserGoals(int userId) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -496,7 +496,7 @@ public class HttpRequestsClass {
 
             List<TransactionCategoryDTO> categoryDTOS = new ArrayList<>();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -516,7 +516,7 @@ public class HttpRequestsClass {
         }
     }
 
-    List<TransactionCategoryDTO> getAllCommonCategoriesOrGoalsWithCurrentUser() {
+    public List<TransactionCategoryDTO> getAllCommonCategoriesOrGoalsWithCurrentUser() {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -533,7 +533,7 @@ public class HttpRequestsClass {
 
             List<TransactionCategoryDTO> categoryDTOS = new ArrayList<>();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -553,7 +553,7 @@ public class HttpRequestsClass {
         }
     }
 
-    TransactionCategoryDTO getCategoryOrGoalWithName(String name) {
+    public TransactionCategoryDTO getCategoryOrGoalWithName(String name) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -570,7 +570,7 @@ public class HttpRequestsClass {
 
             TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 
@@ -590,7 +590,7 @@ public class HttpRequestsClass {
         }
     }
 
-    TransactionCategoryDTO getCategoryOrGoalWithId(int id) {
+    public TransactionCategoryDTO getCategoryOrGoalWithId(int id) {
         HttpURLConnection httpURLConnection;
         StringBuilder stringBuilder = new StringBuilder();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -607,7 +607,7 @@ public class HttpRequestsClass {
 
             TransactionCategoryDTO categoryDTO = new TransactionCategoryDTO();
 
-            if (httpURLConnection.getResponseCode() != 404) {
+            if (httpURLConnection.getResponseCode() != 404 && httpURLConnection.getResponseCode() != 400) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()))) {
                     String line;
 

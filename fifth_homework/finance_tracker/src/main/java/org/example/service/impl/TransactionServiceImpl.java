@@ -61,7 +61,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     public List<TransactionDTO> findAllByDateAndCategoryIdAndTypeAndUserId(Date date, Integer categoryId, String type, int userId) {
-        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(categoryId)).and(TransactionSpecification.sumTypeIs(type)).and(TransactionSpecification.userIdIs(userId));
+        Specification<TransactionEntity> filters = TransactionSpecification.dateIs(date).and(TransactionSpecification.categoryIdIs(categoryId))
+                .and(TransactionSpecification.sumTypeIs(type)).and(TransactionSpecification.userIdIs(userId));
 
         return transactionRepository.findAll(filters).stream().map(transactionDTOMapper::mapToDTO).toList();
     }
