@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17.4
+    environment:
+      PGUSER: postuser
+      POSTGRES_USER: postuser
+      POSTGRES_PASSWORD: passuser
+      POSTGRES_DB: finance_tracker
+      PGDATA: /data/postgres
+    ports:
+      - "1234:5432"
+    volumes:
+      - db:/data/postgres
+    networks:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  web:
+    depends_on:
+      - db
+    image: openjdk:25-ea-17-jdk
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./finance_tracker/target/finance_tracker-1.0-SNAPSHOT.jar:/finance_tracker-1.0-SNAPSHOT.jar
+    entrypoint: ["java","-jar","/finance_tracker-1.0-SNAPSHOT.jar"]
+    networks:
+      - db
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
