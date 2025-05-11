@@ -23,7 +23,7 @@ This is a simple application for tracking financial transactions.
 For working with service you can:
 ### 1. Use such instrument as Postman - sending HTTP requests on URL <http://localhost:8083/>;
 ### 2. Use special console application:
-- Execute command on the new command line in Y_LabHomework\finance_tracker\target folder:
+- Execute command on the new command line in Y_LabHomework folder:
 
    ```bash
    java -jar console_app\target\console_app-1.0-SNAPSHOT-jar-with-dependencies.jar
