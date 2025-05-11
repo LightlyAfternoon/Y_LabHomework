@@ -24,5 +24,6 @@
   <modules>
     <module>logging_aspect</module>
     <module>finance_tracker</module>
+    <module>console_app</module>
   </modules>
 </project>

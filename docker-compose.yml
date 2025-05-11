@@ -26,8 +26,8 @@ services:
     ports:
       - "8083:8080"
     volumes:
-      - ./finance_tracker/target/finance_tracker-1.0-SNAPSHOT.jar:/finance_tracker-1.0-SNAPSHOT.jar
-    entrypoint: ["java","-jar","/finance_tracker-1.0-SNAPSHOT.jar"]
+      - ./finance_tracker/target/finance_tracker-1.0-SNAPSHOT-exec.jar:/finance_tracker-1.0-SNAPSHOT-exec.jar
+    entrypoint: ["java","-jar","/finance_tracker-1.0-SNAPSHOT-exec.jar"]
     networks:
       - db
 networks:
