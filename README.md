@@ -2,9 +2,9 @@
 This is a simple application for tracking financial transactions.
 ## Launching
 ### Requirements
-- Git (to dowload the repository using the console)
-- Docker Desktop
-- JDK 17 or newer
+- Git (to dowload the repository using the console).
+- Docker Desktop.
+- JDK 17 or newer.
 ### Steps
 1. Download repository from site and unzip in some place on disk or clone repository by command on the command line:
    
